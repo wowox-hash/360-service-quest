@@ -164,7 +164,7 @@ const SHOP=[
 
 // ── ENCOUNTERS ──
 const ENC=[
-  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:42,my:28,
+  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:22,my:42,bld:'GARAGE',
     intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
     dia:{q:`Marc is losing €8,000/month to returns. You have one discovery question before the pitch — make it count.`,opts:[
       {t:`When your counter staff get a vehicle they're not sure about, walk me through exactly what happens today.`,buff:'reduceHp',correct:true,fb:`Marc: "They check the printed guide. If it's not listed, they call the hotline or just pick the closest match." — That's the gap. The outdated guide is shipping wrong products.`},
@@ -176,7 +176,7 @@ const ENC=[
       {t:`"We already have TecDoc through our parts platform. How is yours different?"`,hp:34,w:['tecdoc'],r:['marketing_portal','promo_calendar'],p:'CONNECT'},
       {t:`"How do I know this actually reduces returns? I need proof, not promises."`,hp:26,w:['tecdoc','reco_tool'],r:['co_visits','design_studio'],p:'CONNECT'},
     ],rw:{xp:120,gold:50}},
-  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:52,my:18,
+  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:50,my:14,bld:'HALL',
     intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
     dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
       {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
@@ -188,7 +188,7 @@ const ENC=[
       {t:`"We've been burned before. Two days in a classroom, forgotten in a month."`,hp:40,w:['co_visits'],r:['marketing_portal','custom_label'],p:'ENABLE'},
       {t:`"Fleet managers want lab data — not a sales rep reading from a product sheet."`,hp:36,w:['oil_analysis','co_visits'],r:['promo_calendar','retail_kits'],p:'ENABLE'},
     ],rw:{xp:180,gold:75}},
-  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:26,my:40,
+  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:22,my:68,bld:'SHOP',
     intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
     dia:{q:`Alejandra says garages see every supplier as interchangeable. She has no designer, no marketing budget, and zero campaigns. What do you probe?`,opts:[
       {t:`Have you ever tried running your own promotion to stand out — and what happened?`,buff:'reduceHp',correct:true,fb:`Alejandra: "I made a flyer in PowerPoint once. It looked terrible. Zero response." — Her instinct is right; the tools are missing. That's your opening.`},
@@ -199,7 +199,7 @@ const ENC=[
       {t:`"I don't have a single person who can create marketing materials."`,hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
       {t:`"Zero budget. Every euro goes to inventory and logistics."`,hp:30,w:['promo_templates','content_kits'],r:['oil_analysis','connectivity'],p:'GROW'},
     ],rw:{xp:100,gold:45}},
-  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:54,my:26,
+  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:78,my:22,bld:'DEPOT',
     intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
     dia:{q:`Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?`,opts:[
       {t:`When a product turns out to be backordered, what's the downstream impact on your workshops?`,buff:'reduceHp',correct:true,fb:`Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.`},
@@ -211,7 +211,7 @@ const ENC=[
       {t:`"How can I plan if I can't see Wolf stock before ordering?"`,hp:35,w:['stock_visibility','e_ordering'],r:['promo_templates','co_visits'],p:'DELIVER'},
       {t:`"My workshops want to know exactly when. So do I."`,hp:32,w:['order_tracker','lead_time'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
     ],rw:{xp:180,gold:75}},
-  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:68,my:48,
+  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:78,my:58,bld:'SHOP',
     intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
     dia:{q:`Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?`,opts:[
       {t:`If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?`,buff:'reduceHp',correct:true,fb:`Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.`},
@@ -223,7 +223,7 @@ const ENC=[
       {t:`"Even with equipment — what stops them filling it with competitor oil?"`,hp:36,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'GROW'},
       {t:`"Big investment. Show me the ROI numbers."`,hp:32,w:['lubricant_mgmt','oil_monitoring'],r:['push_a_button','goods_loading'],p:'GROW'},
     ],rw:{xp:200,gold:90}},
-  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:34,my:32,
+  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:40,my:42,bld:'OFFICE',
     intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
     dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
       {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
@@ -234,7 +234,7 @@ const ENC=[
       {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
       {t:`"No IT department. We're a distribution company, not a tech company."`,hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
     ],rw:{xp:100,gold:45}},
-  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:32,my:24,
+  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:22,my:22,bld:'HALL',
     intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
     dia:{q:`James lost a 200-truck account because competitors brought oil analysis data and he had nothing. What question cracks this open?`,opts:[
       {t:`What specifically made your competitors' oil analysis data compelling to that fleet manager?`,buff:'reduceHp',correct:true,fb:`James: "Lab reports with real wear trends and drain recommendations tailored to that fleet." — That's your capability gap in exact detail. Now you can propose it.`},
@@ -246,7 +246,7 @@ const ENC=[
       {t:`"Even with data, my reps can't present it to a fleet engineering manager."`,hp:36,w:['co_visits'],r:['marketing_portal','palletization'],p:'ENABLE'},
       {t:`"We're 12 months behind competitors. How do we catch up?"`,hp:32,w:['oil_analysis','co_visits'],r:['promo_calendar','goods_loading'],p:'ENABLE'},
     ],rw:{xp:200,gold:90}},
-  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:44,my:30,
+  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:60,my:42,bld:'SHOP',
     intro:`Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.`,
     dia:{q:`Klaus rejected Shell's partnership and won't settle for basic services. He's testing whether you're a strategic peer. What do you ask?`,opts:[
       {t:`When Shell's execution fell short, what specifically disappointed you about the way they showed up?`,buff:'reduceHp',correct:true,fb:`Klaus: "Generic materials with a logo swap. It felt like a template, not a partnership." — He just told you exactly what bespoke looks like. Now you can position Partnership Activation.`},
@@ -261,7 +261,7 @@ const ENC=[
 ];
 
 // ── BOSS ──
-const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:44,my:82,isBoss:true,
+const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:50,my:84,bld:'CONV',isBoss:true,
   intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
   dia:{q:`The Board has already heard Shell, Castrol, Fuchs and Motul this week. They're cynical. You have ONE question to prove you understand partnership differently.`,opts:[
     {t:`What would a true 360° partnership need to do DIFFERENTLY from your current suppliers to be worth switching volume?`,buff:'reduceHp',correct:true,fb:`Board: "Wrap data, knowledge, and operational tools around OUR business — not bolt your logo on top of ours." — You led with THEIR business. They're leaning in. This is your opening.`},
@@ -279,19 +279,43 @@ const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global 
 
 const ALL=[...ENC,BOSS];
 
-// ── WORLD MAP ──
-const WorldMap=({children,style:st})=>h('div',{className:'ff7',style:{position:'relative',overflow:'hidden',...st}},
-  h('div',{style:{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 30%,#1a3880 0%,#050a30 55%,#000 100%)',opacity:.95}}),
-  h('div',{style:{position:'absolute',inset:0,background:'radial-gradient(1px 1px at 12% 22%,#fff,transparent 60%),radial-gradient(1px 1px at 68% 18%,#9cf,transparent 60%),radial-gradient(1px 1px at 84% 72%,#fff,transparent 60%),radial-gradient(1px 1px at 22% 82%,#fc9,transparent 60%)',backgroundSize:'300px 300px,400px 400px,350px 350px,450px 450px',opacity:.6}}),
-  h('svg',{viewBox:'0 0 400 200',style:{position:'absolute',inset:0,width:'100%',height:'100%',opacity:.2}},
-    h('path',{d:'M180,40 Q200,30 220,35 L230,50 Q225,65 215,70 L200,75 Q185,70 180,60Z',fill:'#2a4a3a'}),
-    h('path',{d:'M185,80 Q200,75 215,80 L220,110 Q215,135 200,140 L190,135 Q180,120 180,100Z',fill:'#2a4a3a'}),
-    h('path',{d:'M230,30 Q260,20 300,30 L320,50 Q330,70 320,85 L290,90 Q260,80 240,65 L230,50Z',fill:'#2a4a3a'}),
-    h('path',{d:'M225,60 Q240,55 250,65 L245,80 Q235,85 225,75Z',fill:'#2a4a3a'}),
-    h('path',{d:'M50,30 Q80,20 120,30 L130,50 Q125,65 110,70 L80,68 Q55,60 50,45Z',fill:'#2a4a3a'}),
-    h('path',{d:'M300,80 Q320,75 340,80 L345,95 Q335,105 320,100Z',fill:'#2a4a3a'}),
-    ...[40,80,120,160].map(y=>h('line',{key:'h'+y,x1:0,y1:y,x2:400,y2:y,stroke:'#1a2a4e',strokeWidth:.3})),
-    ...[80,160,240,320].map(x=>h('line',{key:'v'+x,x1:x,y1:0,x2:x,y2:200,stroke:'#1a2a4e',strokeWidth:.3}))),
+// ── OVERWORLD: trees, buildings, world map ──
+const TREES=[[6,12],[14,30],[8,52],[12,78],[18,92],[32,10],[44,6],[64,16],[68,8],[94,14],[34,56],[48,50],[66,66],[88,48],[4,62],[14,84],[88,78],[92,92],[90,30],[28,92],[72,36],[38,78],[10,38],[34,34],[54,68],[46,62]];
+const ROCKS=[[10,90],[90,86],[92,42],[8,32],[58,92],[30,66],[86,66]];
+const FLWRS=[[6,20],[92,64],[12,58],[64,12],[38,90],[72,78],[18,66],[56,22]];
+const SHP={
+ GARAGE:[h('polygon',{key:'r',points:'-6,-1 -5,-4 5,-4 6,-1',fill:'#9c2820',stroke:'#4a0f0f',strokeWidth:.3}),h('rect',{key:'w',x:-6,y:-1,width:12,height:6,fill:'#a8a8a8',stroke:'#444',strokeWidth:.3}),h('rect',{key:'d',x:-2.5,y:0,width:5,height:5,fill:'#2a2a2a',stroke:'#000',strokeWidth:.3}),h('line',{key:'l1',x1:-2.5,y1:1.5,x2:2.5,y2:1.5,stroke:'#555',strokeWidth:.2}),h('line',{key:'l2',x1:-2.5,y1:3,x2:2.5,y2:3,stroke:'#555',strokeWidth:.2}),h('rect',{key:'w1',x:-5.5,y:-.3,width:1.5,height:1.3,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('rect',{key:'w2',x:4,y:-.3,width:1.5,height:1.3,fill:'#87ceeb',stroke:'#111',strokeWidth:.1})],
+ HALL:[h('polygon',{key:'r',points:'-5.5,-1 -4.5,-2 0,-5.5 4.5,-2 5.5,-1',fill:'#d27a20',stroke:'#6a3a0a',strokeWidth:.3}),h('rect',{key:'w',x:-5,y:-1,width:10,height:6,fill:'#e4c48a',stroke:'#8b5a2b',strokeWidth:.3}),h('rect',{key:'d',x:-1.5,y:1,width:3,height:4,fill:'#4a2a10',stroke:'#000',strokeWidth:.2}),h('rect',{key:'w1',x:-4,y:0,width:2,height:1.8,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('rect',{key:'w2',x:2,y:0,width:2,height:1.8,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('circle',{key:'dk',cx:0,cy:3,r:.18,fill:'#FFD700'})],
+ SHOP:[h('rect',{key:'aw',x:-5.5,y:-4,width:11,height:1.2,fill:'#2a2a2a'}),...[0,1,2,3,4,5,6].map(i=>h('rect',{key:'st'+i,x:-5.5+i*1.57,y:-3,width:1.57,height:.8,fill:i%2?'#f0f0f0':'#d83030'})),h('rect',{key:'w',x:-5,y:-2,width:10,height:7,fill:'#f2e4c0',stroke:'#8b5a2b',strokeWidth:.3}),h('rect',{key:'dw',x:-4.5,y:-1.5,width:6,height:3.5,fill:'#6b9fd5',stroke:'#2a3a5a',strokeWidth:.2}),h('line',{key:'mw',x1:-1.5,y1:-1.5,x2:-1.5,y2:2,stroke:'#2a3a5a',strokeWidth:.15}),h('rect',{key:'d',x:2.5,y:0,width:2.3,height:5,fill:'#4a2a10',stroke:'#000',strokeWidth:.2}),h('circle',{key:'dk',cx:3.65,cy:2.5,r:.12,fill:'#FFD700'})],
+ DEPOT:[h('rect',{key:'r',x:-7,y:-3,width:14,height:1.5,fill:'#404040',stroke:'#1a1a1a',strokeWidth:.3}),h('rect',{key:'w',x:-7,y:-1.5,width:14,height:6.5,fill:'#7a7a7a',stroke:'#2a2a2a',strokeWidth:.3}),...[-6,-5,-4,-3,3,4,5,6].map(x=>h('line',{key:'cl'+x,x1:x,y1:-1.5,x2:x,y2:5,stroke:'#5a5a5a',strokeWidth:.15})),h('rect',{key:'d',x:-2.5,y:0,width:5,height:5,fill:'#2a2a2a',stroke:'#000',strokeWidth:.3}),...[0,1,2,3].map(i=>h('line',{key:'ld'+i,x1:-2.5,y1:1+i,x2:2.5,y2:1+i,stroke:'#555',strokeWidth:.15}))],
+ OFFICE:[h('rect',{key:'r',x:-5,y:-3.5,width:10,height:1.2,fill:'#1a2a50',stroke:'#000',strokeWidth:.3}),h('rect',{key:'w',x:-5,y:-2.5,width:10,height:7.5,fill:'#2a3a6a',stroke:'#000',strokeWidth:.3}),...[0,1,2].flatMap(r=>[0,1,2].map(c=>h('rect',{key:'wd'+r+c,x:-4+c*3,y:-1.8+r*1.8,width:2,height:1.2,fill:'#5a9ddb',stroke:'#000',strokeWidth:.1}))),h('rect',{key:'d',x:-1,y:3.5,width:2,height:1.5,fill:'#FFD700',stroke:'#000',strokeWidth:.2})],
+ CONV:[h('polygon',{key:'sp',points:'0,-7.5 .4,-6 -.4,-6',fill:'#FFD700',stroke:'#8b4513',strokeWidth:.15}),h('ellipse',{key:'dm',cx:0,cy:-4,rx:4,ry:2,fill:'#e8b400',stroke:'#8b4513',strokeWidth:.3}),h('rect',{key:'b',x:-7,y:-2,width:14,height:7,fill:'#d4c8a8',stroke:'#5a3a10',strokeWidth:.3}),...[-5.5,-3,3,5.5].map(x=>h('rect',{key:'co'+x,x:x-.3,y:-2,width:.8,height:6,fill:'#fff2d8',stroke:'#5a3a10',strokeWidth:.2})),h('rect',{key:'d',x:-1.5,y:1,width:3,height:4,fill:'#FFD700',stroke:'#5a3a10',strokeWidth:.3}),h('line',{key:'dl',x1:0,y1:1,x2:0,y2:5,stroke:'#5a3a10',strokeWidth:.15})],
+};
+const Building=(type,cx,cy,lk,d,near,id)=>h('g',{key:'b'+id,transform:`translate(${cx} ${cy})`,opacity:lk?.35:1,style:{filter:near?'drop-shadow(0 0 1.5px #FFD700) drop-shadow(0 0 3px #FFD700)':d?'drop-shadow(0 0 .8px #FFD700)':''}},h('ellipse',{cx:0,cy:5.5,rx:7,ry:.8,fill:'rgba(0,0,0,.45)'}),...(SHP[type]||SHP.GARAGE));
+
+const WorldMap=({scene,children,style:st})=>h('div',{className:'ff7',style:{position:'relative',overflow:'hidden',...st}},
+  h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},
+    h('defs',null,
+      h('linearGradient',{id:'grs',x1:'0',y1:'0',x2:'0',y2:'1'},h('stop',{offset:'0',stopColor:'#5a9c40'}),h('stop',{offset:'1',stopColor:'#2a5a1f'})),
+      h('radialGradient',{id:'vig',cx:'.5',cy:'.5',r:'.7'},h('stop',{offset:'.6',stopColor:'#000',stopOpacity:'0'}),h('stop',{offset:'1',stopColor:'#000',stopOpacity:'.55'}))),
+    h('rect',{x:0,y:0,width:100,height:100,fill:'url(#grs)'}),
+    // Dirt path network (dark base + lighter overlay for 2-tone road)
+    ...[['M50,94 Q45,82 42,68 T40,42',5],['M10,42 Q25,40 40,42 T60,42 T90,42',5],['M22,22 Q26,32 40,42',4],['M50,14 Q45,28 40,42',4],['M78,22 Q70,30 60,42',4],['M22,42 Q20,56 22,68',4],['M60,42 Q70,50 78,58',4],['M22,68 Q35,78 50,84',4],['M78,58 Q65,72 50,84',4]].flatMap(([d,sw],i)=>[h('path',{key:'pa'+i,d,stroke:'#6a4824',strokeWidth:sw,fill:'none',strokeLinecap:'round'}),h('path',{key:'pb'+i,d,stroke:'#a07a48',strokeWidth:sw-1.5,fill:'none',strokeLinecap:'round'})]),
+    // Decorative flowers and rocks
+    ...ROCKS.map(([x,y],i)=>h('ellipse',{key:'rk'+i,cx:x,cy:y,rx:1,ry:.6,fill:'#7a7a7a',stroke:'#3a3a3a',strokeWidth:.15})),
+    ...FLWRS.map(([x,y],i)=>h('g',{key:'fl'+i,transform:`translate(${x} ${y})`},h('circle',{cx:0,cy:0,r:.4,fill:'#ff6eb0'}),h('circle',{cx:.6,cy:-.3,r:.35,fill:'#ffd700'}),h('circle',{cx:-.6,cy:.2,r:.35,fill:'#ff6eb0'}))),
+    // Buildings
+    ...(scene||[]),
+    // Trees (rendered after buildings so canopy overlaps)
+    ...TREES.map(([tx,ty],i)=>h('g',{key:'t'+i,transform:`translate(${tx} ${ty})`},
+      h('ellipse',{cx:0,cy:1,rx:1.8,ry:.4,fill:'rgba(0,0,0,.35)'}),
+      h('rect',{x:-.35,y:-1,width:.7,height:1.8,fill:'#3a2510'}),
+      h('circle',{cx:0,cy:-2.3,r:2.2,fill:'#1a4a1a'}),
+      h('circle',{cx:-.7,cy:-2.8,r:1.3,fill:'#2d6a2a'}),
+      h('circle',{cx:.6,cy:-1.9,r:.9,fill:'#2d6a2a'}))),
+    // Vignette + wooden fence border
+    h('rect',{x:0,y:0,width:100,height:100,fill:'url(#vig)'}),
+    h('rect',{x:.8,y:.8,width:98.4,height:98.4,fill:'none',stroke:'#3a2510',strokeWidth:.6,strokeDasharray:'2.5 1'})),
   children);
 
 // ── Shared UI components (hoisted so they don't remount every render) ──
@@ -341,6 +365,7 @@ function App(){
   const [flying,setFlying]=useState(null);
   const [pos,setPos]=useState({x:50,y:92});
   const [dir,setDir]=useState({x:0,y:0});
+  const [npcs,setNpcs]=useState(()=>{const o={};ENC.forEach(e=>{o[e.id]={x:e.mx,y:e.my,t:0}});o[99]={x:BOSS.mx,y:BOSS.my,t:0};return o});
   const logRef=useRef(null);
 
   useEffect(()=>{const iv=setInterval(()=>setHf(f=>(f+1)%4),400);return()=>clearInterval(iv)},[]);
@@ -350,8 +375,10 @@ function App(){
   useEffect(()=>{if(dir.x===0&&dir.y===0)return;const iv=setInterval(()=>{setPos(p=>{const n={x:p.x+dir.x*1.3,y:p.y+dir.y*1.3};const mag=Math.hypot(dir.x,dir.y);if(mag>1){n.x=p.x+dir.x/mag*1.3;n.y=p.y+dir.y/mag*1.3}return{x:Math.max(6,Math.min(94,n.x)),y:Math.max(8,Math.min(94,n.y))}})},50);return()=>clearInterval(iv)},[dir]);
   // ── WALK: keyboard input (only on overworld) ──
   useEffect(()=>{if(ph!=='map'||tab!=='map')return;const m={ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},a:{x:-1,y:0},A:{x:-1,y:0},d:{x:1,y:0},D:{x:1,y:0},w:{x:0,y:-1},W:{x:0,y:-1},s:{x:0,y:1},S:{x:0,y:1}};const kd=ev=>{const v=m[ev.key];if(v){ev.preventDefault();setDir(v)}};const ku=ev=>{if(m[ev.key])setDir({x:0,y:0})};window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);return()=>{window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);setDir({x:0,y:0})}},[ph,tab]);
-  // ── WALK: collision with encounters ──
-  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const hit=(m)=>Math.hypot(pos.x-m.mx,pos.y-m.my)<5;for(const e of ENC){if(done.includes(e.id))continue;if((e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6))continue;if(hit(e)){go(e);return}}if(done.length>=6&&!done.includes(99)&&hit(BOSS))go(BOSS)},[pos,ph,tab,done,lv]);
+  // ── WALK: NPC wander loop (distributors roam near their building) ──
+  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const iv=setInterval(()=>{setNpcs(prev=>{const n={...prev};for(const e of ENC){const h={x:e.mx,y:e.my};const cur=prev[e.id];const t=cur.t+1;let ang=cur.ang;if(!ang||t%8===0)ang=Math.random()*Math.PI*2;let nx=cur.x+Math.cos(ang)*.5,ny=cur.y+Math.sin(ang)*.5;const dist=Math.hypot(nx-h.x,ny-h.y);if(dist>4){const pull=.85;nx=h.x+(nx-h.x)*pull;ny=h.y+(ny-h.y)*pull;ang+=Math.PI}n[e.id]={x:nx,y:ny,t,ang}}const b={x:BOSS.mx,y:BOSS.my};const bc=prev[99];const bt=bc.t+1;let ba=bc.ang;if(!ba||bt%8===0)ba=Math.random()*Math.PI*2;let bnx=bc.x+Math.cos(ba)*.35,bny=bc.y+Math.sin(ba)*.35;const bd=Math.hypot(bnx-b.x,bny-b.y);if(bd>2.5){bnx=b.x+(bnx-b.x)*.85;bny=b.y+(bny-b.y)*.85;ba+=Math.PI}n[99]={x:bnx,y:bny,t:bt,ang:ba};return n})},350);return()=>clearInterval(iv)},[ph,tab]);
+  // ── WALK: collision with roaming NPCs ──
+  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const hit=(id,m)=>{const np=npcs[id]||{x:m.mx,y:m.my};return Math.hypot(pos.x-np.x,pos.y-np.y)<4};for(const e of ENC){if(done.includes(e.id))continue;if((e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6))continue;if(hit(e.id,e)){go(e);return}}if(done.length>=6&&!done.includes(99)&&hit(99,BOSS))go(BOSS)},[pos,npcs,ph,tab,done,lv]);
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
   const cLv=Math.floor(txp/200)+1;
@@ -558,23 +585,26 @@ function App(){
 
     // WORLD MAP (walkable overworld)
     tab==='map'&&h(React.Fragment,null,
-      h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Use arrow keys / WASD · or the D-pad · walk into a customer to engage'),
-      h(WorldMap,{style:{height:420,marginTop:8}},
-        ENC.map((l,i)=>{const lk=l.seg==='B'&&lv<3||l.seg==='A'&&lv<6;const d=done.includes(l.id);const near=!lk&&!d&&Math.hypot(pos.x-l.mx,pos.y-l.my)<9;
-          return h('div',{key:l.id,style:{position:'absolute',left:l.mx+'%',top:l.my+'%',transform:'translate(-50%,-100%)',opacity:lk?.25:d?.55:1,animation:!lk&&!d?'bob 2s ease infinite':'none',zIndex:2,pointerEvents:'none'}},
-            h('div',{style:{width:22,height:22,borderRadius:'50%',background:d?'radial-gradient(circle at 35% 30%,#fbbf24,#92400E)':lk?C.mu:'radial-gradient(circle at 35% 30%,#fff 0%,'+PC[l.objs[0]?.p]+' 50%,#000 100%)',border:'2px solid '+(d?C.gold:'#fff'),margin:'0 auto',boxShadow:near?'0 0 24px #FFD700,0 0 40px #FFD700':!d&&!lk?'0 0 12px '+PC[l.objs[0]?.p]+',0 0 20px '+PC[l.objs[0]?.p]:d?'0 0 8px #FFD700':'',transition:'box-shadow .2s'}}),
-            h('div',{className:'fs-xs',style:{textAlign:'center',marginTop:3,color:d?C.mu:C.tx,fontWeight:600,whiteSpace:'nowrap',textShadow:'1px 1px 0 #000'}},l.loc),
-            h('div',{className:'fs-xs',style:{textAlign:'center',color:lk?C.no:d?C.gold:PC[l.objs[0]?.p]}},lk?'🔒':d?'✓':l.seg),
-            near&&h('div',{className:'pf',style:{position:'absolute',top:-20,left:'50%',transform:'translateX(-50%)',color:'#FFD700',fontSize:14,animation:'blink 1s ease infinite'}},'!'))}),
-        // Boss
-        (()=>{const nearB=bossReady&&!done.includes(99)&&Math.hypot(pos.x-BOSS.mx,pos.y-BOSS.my)<9;return h('div',{style:{position:'absolute',left:BOSS.mx+'%',top:BOSS.my+'%',transform:'translate(-50%,-100%)',opacity:bossReady?done.includes(99)?.4:1:.15,animation:bossReady&&!done.includes(99)?'float 2s ease infinite':'none',zIndex:3,pointerEvents:'none'}},
-          h('div',{style:{width:32,height:32,borderRadius:'50%',background:done.includes(99)?'radial-gradient(circle at 35% 30%,#fbbf24,#92400E)':'radial-gradient(circle at 35% 30%,#fff 0%,'+C.no+' 40%,#3a0000 100%)',border:'2px solid '+C.gold,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,boxShadow:nearB?'0 0 28px #FFD700,0 0 48px #FFD700':bossReady?'0 0 16px '+C.no+',0 0 28px '+C.no:'',transition:'box-shadow .2s'}},'👑'),
-          h('div',{className:'fs-xs',style:{textAlign:'center',marginTop:3,fontWeight:700,color:done.includes(99)?C.gold:bossReady?C.no:C.mu,textShadow:'1px 1px 0 #000'}},done.includes(99)?'CHAMPION':bossReady?'BOSS':'🔒 Clear 6'),
-          nearB&&h('div',{className:'pf',style:{position:'absolute',top:-22,left:'50%',transform:'translateX(-50%)',color:'#FFD700',fontSize:16,animation:'blink 1s ease infinite'}},'!'))})(),
+      h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
+      h(WorldMap,{
+        style:{height:460,marginTop:8},
+        scene:[
+          ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);const np=npcs[e.id]||{x:e.mx,y:e.my};const near=!lk&&!d&&Math.hypot(pos.x-np.x,pos.y-np.y)<8;return Building(e.bld,e.mx,e.my,lk,d,near,e.id)}),
+          (()=>{const d=done.includes(99);const lk=!bossReady;const np=npcs[99]||{x:BOSS.mx,y:BOSS.my};const near=bossReady&&!d&&Math.hypot(pos.x-np.x,pos.y-np.y)<8;return Building(BOSS.bld,BOSS.mx,BOSS.my,lk,d,near,99)})()
+        ]
+      },
+        // Location labels
+        ...ENC.map(e=>{const d=done.includes(e.id);const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;return h('div',{key:'lb'+e.id,className:'pf',style:{position:'absolute',left:e.mx+'%',top:(e.my+7)+'%',transform:'translate(-50%,0)',fontSize:7,color:d?'#FFD700':lk?C.no:'#fff',textShadow:'1px 1px 0 #000, -1px -1px 0 #000',whiteSpace:'nowrap',pointerEvents:'none',zIndex:3}},lk?'🔒 '+e.loc:d?'✓ '+e.loc:e.loc)}),
+        h('div',{className:'pf',style:{position:'absolute',left:BOSS.mx+'%',top:(BOSS.my+8)+'%',transform:'translate(-50%,0)',fontSize:9,color:done.includes(99)?'#FFD700':bossReady?C.no:C.mu,textShadow:'1px 1px 0 #000, -1px -1px 0 #000',whiteSpace:'nowrap',pointerEvents:'none',zIndex:3}},done.includes(99)?'👑 CHAMPION':bossReady?'👑 AUTOMECHANIKA':'🔒 Clear 6'),
+        // Roaming distributors (NPCs)
+        ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);if(lk||d)return null;const np=npcs[e.id]||{x:e.mx,y:e.my};return h('div',{key:'n'+e.id,style:{position:'absolute',left:np.x+'%',top:np.y+'%',transform:'translate(-50%,-70%)',width:20,height:30,transition:'left .35s linear,top .35s linear',filter:'drop-shadow(0 2px 3px rgba(0,0,0,.65))',pointerEvents:'none',zIndex:4},dangerouslySetInnerHTML:{__html:SP.npc(e.v)}})}),
+        bossReady&&!done.includes(99)&&(()=>{const np=npcs[99]||{x:BOSS.mx,y:BOSS.my};return h('div',{key:'nb',style:{position:'absolute',left:np.x+'%',top:np.y+'%',transform:'translate(-50%,-70%)',width:26,height:38,transition:'left .35s linear,top .35s linear',filter:'drop-shadow(0 3px 4px rgba(0,0,0,.65)) drop-shadow(0 0 5px '+C.no+')',pointerEvents:'none',zIndex:4},dangerouslySetInnerHTML:{__html:SP.mon('GROW',true)}})})(),
         // Hero (walks via pos state)
-        h('div',{style:{position:'absolute',left:pos.x+'%',top:pos.y+'%',transform:'translate(-50%,-85%)',width:28,height:42,transition:'left .05s linear,top .05s linear',filter:'drop-shadow(0 4px 6px rgba(0,0,0,.7))',zIndex:6,pointerEvents:'none'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
+        h('div',{style:{position:'absolute',left:pos.x+'%',top:pos.y+'%',transform:'translate(-50%,-85%)',width:30,height:45,transition:'left .05s linear,top .05s linear',filter:'drop-shadow(0 4px 6px rgba(0,0,0,.75))',zIndex:6,pointerEvents:'none'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
+        // "!" prompt over near NPC
+        ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);if(lk||d)return null;const np=npcs[e.id]||{x:e.mx,y:e.my};const near=Math.hypot(pos.x-np.x,pos.y-np.y)<8;if(!near)return null;return h('div',{key:'p'+e.id,className:'pf',style:{position:'absolute',left:np.x+'%',top:(np.y-10)+'%',transform:'translate(-50%,0)',color:'#FFD700',fontSize:14,animation:'blink 1s ease infinite',textShadow:'2px 2px 0 #000',pointerEvents:'none',zIndex:7}},'!')}),
         // D-pad (touch overlay)
-        (()=>{const btn={width:42,height:42,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.7)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:18,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();setDir(v)};const rel=e=>{e.preventDefault();setDir({x:0,y:0})};return h('div',{style:{position:'absolute',right:10,bottom:10,display:'grid',gridTemplateColumns:'42px 42px 42px',gridTemplateRows:'42px 42px 42px',gap:3,zIndex:20}},
+        (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();setDir(v)};const rel=e=>{e.preventDefault();setDir({x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:-1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▲'),h('div'),
           h('button',{style:btn,onPointerDown:press({x:-1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'◀'),h('div'),h('button',{style:btn,onPointerDown:press({x:1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▶'),
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▼'),h('div'))})()),
