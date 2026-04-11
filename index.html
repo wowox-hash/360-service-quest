@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>360° Service Quest</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>⚔️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:#0f0e17;color:#e0dff0;min-height:100dvh;overflow-x:hidden}
+#R{min-height:100dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.pf{font-family:'Press Start 2P','Courier New',monospace}
+/* Animations */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse{0%,100%{text-shadow:0 0 8px #F59E0B}50%{text-shadow:0 0 20px #F59E0B}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+@keyframes cpop{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-30px) scale(1.5);opacity:0}}
+@keyframes vb{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes lu{0%{transform:scale(.6);opacity:0}50%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* Touch-friendly buttons */
+button{font-family:'DM Sans',sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;min-height:44px;transition:transform .1s,opacity .1s}
+button:active:not(:disabled){transform:scale(.96)!important;opacity:.85}
+input{font-family:'DM Sans',sans-serif;min-height:44px}
+/* Scrollbar */
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:rgba(0,0,0,.2)}::-webkit-scrollbar-thumb{background:#2e2b5e;border-radius:3px}
+/* Responsive text */
+.fs-xs{font-size:11px;line-height:1.5}
+.fs-sm{font-size:13px;line-height:1.5}
+.fs-md{font-size:15px;line-height:1.6}
+.fs-lg{font-size:18px;line-height:1.4}
+.fs-xl{font-size:22px;line-height:1.3}
+.fs-2xl{font-size:28px;line-height:1.2}
+.fs-pixel-sm{font-family:'Press Start 2P',monospace;font-size:10px;line-height:1.6}
+.fs-pixel-md{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5}
+.fs-pixel-lg{font-family:'Press Start 2P',monospace;font-size:16px;line-height:1.4}
+.fs-pixel-xl{font-family:'Press Start 2P',monospace;font-size:20px;line-height:1.3}
+</style>
+</head>
+<body><div id="R"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback}=React;
+const h=React.createElement;
+
+/* ══════════════════════════════════════════════
+   360° SERVICE QUEST v5 — MOBILE OPTIMIZED
+   Readable fonts · Touch targets · Responsive
+   ══════════════════════════════════════════════ */
+
+// ── SUPABASE ──
+const SB='https://uacgjerqeglsstvqjtoh.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhY2dqZXJxZWdsc3N0dnFqdG9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDc1MjksImV4cCI6MjA4OTU4MzUyOX0.jMo9JG4dtzRH-_-UKZRGViRtGOmCm3mW8IVjNl4H49I';
+const sbF=async(p,o={})=>{try{const r=await fetch(`${SB}/rest/v1/${p}`,{headers:{'apikey':SK,'Content-Type':'application/json','Prefer':o.prefer||'return=representation',...(o.headers||{})},...o});return r.ok?await r.json():null}catch{return null}};
+const sbLoad=async()=>await sbF('quest_leaderboard?order=is_champion.desc,encounters_cleared.desc,total_time_seconds.asc&limit=20')||[];
+const sbPost=async(d)=>await sbF('quest_leaderboard',{method:'POST',body:JSON.stringify(d)});
+
+// ── AUDIO ──
+let aOn=false;
+const sy=new Tone.Synth({oscillator:{type:'square'},envelope:{attack:.01,decay:.1,sustain:.1,release:.1},volume:-14}).toDestination();
+const ns=new Tone.NoiseSynth({noise:{type:'white'},envelope:{attack:.01,decay:.08,sustain:0,release:.05},volume:-22}).toDestination();
+const bs=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:.01,decay:.2,sustain:.05,release:.15},volume:-12}).toDestination();
+const sfx={
+  atk:()=>{sy.triggerAttackRelease('C5','16n');setTimeout(()=>sy.triggerAttackRelease('E5','16n'),60)},
+  crit:()=>{sy.triggerAttackRelease('E5','16n');setTimeout(()=>sy.triggerAttackRelease('G5','16n'),80);setTimeout(()=>sy.triggerAttackRelease('C6','8n'),160)},
+  miss:()=>{bs.triggerAttackRelease('C3','8n')},
+  hurt:()=>{ns.triggerAttackRelease('16n');bs.triggerAttackRelease('E2','16n')},
+  win:()=>{['C5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'8n'),i*120))},
+  lose:()=>{['C4','B3','A3','G3'].forEach((n,i)=>setTimeout(()=>bs.triggerAttackRelease(n,'4n'),i*200))},
+  lvl:()=>{['C5','D5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*80))},
+  sel:()=>{sy.triggerAttackRelease('A4','32n')},
+  buy:()=>{sy.triggerAttackRelease('E5','16n');setTimeout(()=>sy.triggerAttackRelease('G5','16n'),80)},
+  blip:()=>{sy.triggerAttackRelease('C4','32n')},
+  boss:()=>{['C3','C3','G3','C3'].forEach((n,i)=>setTimeout(()=>bs.triggerAttackRelease(n,'8n'),i*200))},
+  good:()=>{sy.triggerAttackRelease('G5','16n');setTimeout(()=>sy.triggerAttackRelease('C6','16n'),100)},
+  bad:()=>{bs.triggerAttackRelease('D3','8n')},
+  fly:()=>{['E4','G4','A4','B4','D5'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'32n'),i*60))},
+  pil:()=>{sy.triggerAttackRelease('D5','32n')},
+};
+const snd=(k)=>{if(aOn&&sfx[k])try{sfx[k]()}catch{}};
+
+// ── SPRITES (pixel art SVGs) ──
+const SP={
+  hero:(f=0)=>{const l=f%2;return`<svg viewBox="0 0 16 24"><rect x="4" y="1" width="8" height="3" fill="#3B2507"/><rect x="4" y="4" width="8" height="4" fill="#F5C99A"/><rect x="6" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="9" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="7" y="7" width="2" height="1" fill="#D4956A"/><rect x="3" y="8" width="10" height="5" fill="#2563EB"/><rect x="7" y="8" width="2" height="4" fill="#F59E0B"/><rect x="3" y="13" width="10" height="1" fill="#1a1a2e"/><rect x="3" y="14" width="4" height="5" fill="#374151"/><rect x="9" y="14" width="4" height="5" fill="#374151"/><rect x="3" y="${19+l}" width="4" height="2" fill="#1a1a2e"/><rect x="9" y="${20-l}" width="4" height="2" fill="#1a1a2e"/><rect x="13" y="10" width="3" height="4" fill="#92400E" rx="1"/></svg>`},
+  npc:(v=0)=>{const s=['#DC2626','#059669','#7C3AED','#D97706','#0891B2','#BE185D','#4338CA','#0D9488','#B91C1C','#6D28D9','#047857','#CA8A04'];const hc=['#1a1a2e','#8B5E3C','#D4956A','#6B7280','#F59E0B','#374151','#92400E','#3B2507','#94A3B8','#1a1a2e','#D4956A','#8B5E3C'];return`<svg viewBox="0 0 16 24"><rect x="4" y="1" width="8" height="3" fill="${hc[v%12]}"/><rect x="4" y="4" width="8" height="4" fill="#F5C99A"/><rect x="6" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="9" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="3" y="8" width="10" height="6" fill="${s[v%12]}"/><rect x="3" y="14" width="10" height="1" fill="#1a1a2e"/><rect x="3" y="15" width="4" height="5" fill="#374151"/><rect x="9" y="15" width="4" height="5" fill="#374151"/><rect x="3" y="20" width="4" height="2" fill="#1a1a2e"/><rect x="9" y="20" width="4" height="2" fill="#1a1a2e"/></svg>`},
+  mon:(p,boss=false)=>{const c={CONNECT:'#3B82F6',ENABLE:'#F59E0B',GROW:'#10B981',DELIVER:'#8B5CF6'}[p]||'#EF4444';const z=boss?32:24;return`<svg viewBox="0 0 ${z} ${z}"><rect x="${z*.15}" y="${z*.17}" width="${z*.7}" height="${z*.52}" fill="${c}" rx="3"/>${boss?`<polygon points="${z/2},${z*.01} ${z*.4},${z*.16} ${z*.6},${z*.16}" fill="#F59E0B"/>`:''}<rect x="${z*.08}" y="${z*.3}" width="${z*.14}" height="${z*.18}" fill="${c}"/><rect x="${z*.78}" y="${z*.3}" width="${z*.14}" height="${z*.18}" fill="${c}"/><rect x="${z*.3}" y="${z*.25}" width="${z*.12}" height="${z*.12}" fill="#fff" rx="1"/><rect x="${z*.58}" y="${z*.25}" width="${z*.12}" height="${z*.12}" fill="#fff" rx="1"/><rect x="${z*.33}" y="${z*.29}" width="${z*.05}" height="${z*.05}" fill="#1a1a2e"/><rect x="${z*.62}" y="${z*.29}" width="${z*.05}" height="${z*.05}" fill="#1a1a2e"/><rect x="${z*.3}" y="${z*.48}" width="${z*.4}" height="${z*.1}" fill="#1a1a2e" rx="1"/><rect x="${z*.22}" y="${z*.7}" width="${z*.18}" height="${z*.16}" fill="${c}"/><rect x="${z*.6}" y="${z*.7}" width="${z*.18}" height="${z*.16}" fill="${c}"/></svg>`},
+  plane:`<svg viewBox="0 0 20 12"><polygon points="10,0 20,6 10,4 0,6" fill="#e0dff0"/><polygon points="10,4 20,6 10,12 0,6" fill="#a0a0c0"/><rect x="8" y="3" width="4" height="2" fill="#3B82F6" rx="1"/></svg>`,
+};
+
+// ── COLORS ──
+const C={gold:'#F59E0B',con:'#3B82F6',ena:'#F59E0B',gro:'#10B981',del:'#8B5CF6',ok:'#10B981',no:'#EF4444',bg:'#0f0e17',cd:'#1a1932',bd:'#2e2b5e',tx:'#e0dff0',mu:'#7a78a0'};
+const PC={CONNECT:'#3B82F6',ENABLE:'#F59E0B',GROW:'#10B981',DELIVER:'#8B5CF6'};
+const PCB={CONNECT:'rgba(59,130,246,.12)',ENABLE:'rgba(245,158,11,.12)',GROW:'rgba(16,185,129,.12)',DELIVER:'rgba(139,92,246,.12)'};
+const PI={CONNECT:'🔗',ENABLE:'🎓',GROW:'📈',DELIVER:'🚚'};
+const PN={CONNECT:'Connect',ENABLE:'Enable',GROW:'Grow',DELIVER:'Deliver'};
+const PS={CONNECT:'Right Product. Right Vehicle.',ENABLE:'Advise With Confidence.',GROW:'Grow Your Market.',DELIVER:'On Time. Complete.'};
+const fmtT=s=>{const m=Math.floor(s/60);return m+'m'+String(s%60).padStart(2,'0')+'s'};
+
+// ── SERVICES (33) ──
+const SVC=[
+  {id:'tecdoc',n:'TecDoc',p:'CONNECT',t:'C',pw:12,d:'Premier vehicle-to-product matching data'},
+  {id:'range_analyzer',n:'Range Analyzer',p:'CONNECT',t:'C',pw:10,d:'Cross-reference portfolio vs car parc'},
+  {id:'reco_tool',n:'Reco Tool',p:'CONNECT',t:'C',pw:11,d:'Digital lubricant finder for counters'},
+  {id:'edi',n:'EDI',p:'CONNECT',t:'C',pw:10,d:'System-to-system order automation'},
+  {id:'order_portal',n:'Order Portal',p:'CONNECT',t:'B',pw:14,d:'Dedicated B2B webshop'},
+  {id:'tech_inbox',n:'Tech Inbox',p:'ENABLE',t:'C',pw:10,d:'Expert email support — 48h response'},
+  {id:'physical_training',n:'Training',p:'ENABLE',t:'C',pw:11,d:'Hands-on workshops'},
+  {id:'academy',n:'Academy',p:'ENABLE',t:'C',pw:9,d:'24/7 online learning platform'},
+  {id:'push_a_button',n:'Push a Button',p:'ENABLE',t:'C',pw:8,d:'One-click catalogue PDF'},
+  {id:'oil_analysis',n:'Oil Analysis',p:'ENABLE',t:'B',pw:15,d:'Used oil lab testing for fleets'},
+  {id:'co_visits',n:'Co-visits',p:'ENABLE',t:'A',pw:18,d:'Joint specialist field visits'},
+  {id:'promo_calendar',n:'Promo Calendar',p:'GROW',t:'C',pw:10,d:'Year-round campaign plan'},
+  {id:'marketing_portal',n:'Mktg Portal',p:'GROW',t:'C',pw:9,d:'Brand asset cloud hub'},
+  {id:'content_kits',n:'Content Kits',p:'GROW',t:'C',pw:10,d:'Ready-to-deploy campaign packs'},
+  {id:'promo_templates',n:'Templates',p:'GROW',t:'C',pw:8,d:'Customizable promo designs'},
+  {id:'trade_fairs',n:'Trade Fairs',p:'GROW',t:'B',pw:14,d:'Joint event presence'},
+  {id:'lubricant_mgmt',n:'Lube Mgmt',p:'GROW',t:'B',pw:15,d:'Workshop oil cabinets & tanks'},
+  {id:'retail_kits',n:'Retail Kits',p:'GROW',t:'B',pw:13,d:'Shelf merchandising kits'},
+  {id:'partnership_activation',n:'Partnership',p:'GROW',t:'A',pw:20,d:'Motorsport brand alliance'},
+  {id:'design_studio',n:'Design Studio',p:'GROW',t:'A',pw:16,d:'In-house custom creative'},
+  {id:'oil_monitoring',n:'Oil Monitor',p:'GROW',t:'A',pw:17,d:'IoT tank level tracking'},
+  {id:'network_concept',n:'Network',p:'GROW',t:'A',pw:20,d:'Full garage network programme'},
+  {id:'custom_label',n:'Custom Label',p:'DELIVER',t:'C',pw:8,d:'Customer pallet labelling'},
+  {id:'regulatory_label',n:'Reg Label',p:'DELIVER',t:'C',pw:9,d:'Compliance labelling'},
+  {id:'palletization',n:'Palletize',p:'DELIVER',t:'C',pw:9,d:'Custom pallet configurations'},
+  {id:'lead_time',n:'Lead Time',p:'DELIVER',t:'C',pw:11,d:'Guaranteed delivery windows'},
+  {id:'stock_visibility',n:'Stock Vis',p:'DELIVER',t:'C',pw:10,d:'Real-time Wolf warehouse stock'},
+  {id:'order_tracker',n:'Order Track',p:'DELIVER',t:'C',pw:10,d:'End-to-end shipment tracking'},
+  {id:'e_ordering',n:'E-Order',p:'DELIVER',t:'C',pw:9,d:'Digital ordering with Wolf'},
+  {id:'goods_loading',n:'Loading',p:'DELIVER',t:'C',pw:8,d:'Optimized truck loading plans'},
+  {id:'product_reservation',n:'Reserve',p:'DELIVER',t:'B',pw:14,d:'Peak demand stock allocation'},
+  {id:'mini_bulk',n:'Mini Bulk',p:'DELIVER',t:'B',pw:12,d:'Intermediate bulk containers'},
+  {id:'connectivity',n:'Connectivity',p:'DELIVER',t:'B',pw:15,d:'API/ERP integration with Wolf'},
+];
+
+// ── SHOP ──
+const SHOP=[
+  {id:'intel',nm:'Market Intel',ds:'Reveals enemy weaknesses',cost:40,ic:'🔍'},
+  {id:'coffee',nm:'Coffee Boost',ds:'Restore 30 HP',cost:25,ic:'☕'},
+  {id:'playbook',nm:'Sales Playbook',ds:'+25% damage this battle',cost:60,ic:'📘'},
+  {id:'shield',nm:'Thick Skin',ds:'Block next counter-attack',cost:35,ic:'🛡️'},
+  {id:'combo_charm',nm:'Combo Charm',ds:'Double combo multiplier',cost:50,ic:'✨'},
+  {id:'mega_heal',nm:'Energy Drink',ds:'Full HP restore',cost:80,ic:'⚡'},
+];
+
+// ── ENCOUNTERS ──
+const ENC=[
+  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:42,my:28,
+    intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
+    dia:{q:'Marc, when a counter person gets a vehicle they're not sure about, what happens today?',opts:[
+      {t:'They check the printed guide. If the vehicle isn't listed, they call the hotline or just pick the closest match.',buff:'reduceHp',correct:true,fb:'That's the gap — between the outdated guide and the phone call, the wrong product ships.'},
+      {t:'They recommend a premium synthetic that covers most applications.',buff:'boostEnemy',correct:false,fb:'That might protect quality, but doesn't solve the identification problem.'},
+      {t:'They ask the garage what they used last time.',buff:null,correct:false,fb:'That perpetuates errors. Marc needs proactive product identification.'},
+    ]},
+    objs:[
+      {t:'"My counter staff don't have time for another tool. They handle 200+ calls daily."',hp:30,w:['reco_tool'],r:['oil_analysis','trade_fairs'],p:'CONNECT'},
+      {t:'"We already have TecDoc through our parts platform. How is yours different?"',hp:34,w:['tecdoc'],r:['marketing_portal','promo_calendar'],p:'CONNECT'},
+      {t:'"How do I know this actually reduces returns? I need proof, not promises."',hp:26,w:['tecdoc','reco_tool'],r:['co_visits','design_studio'],p:'CONNECT'},
+    ],rw:{xp:120,gold:50}},
+  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:52,my:18,
+    intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
+    dia:{q:'When your reps face a technical question in a fleet meeting, what happens?',opts:[
+      {t:'They say "I'll get back to you" — but by then the competitor has already answered live.',buff:'reduceHp',correct:true,fb:'The confidence gap in the room is the real problem. Co-visits close it.'},
+      {t:'They redirect to pricing where they're comfortable.',buff:'boostEnemy',correct:false,fb:'Deflecting signals weakness when the customer wants depth.'},
+      {t:'They share product brochures and TDS documents.',buff:null,correct:false,fb:'Docs don't replace live technical credibility.'},
+    ]},
+    objs:[
+      {t:'"Training takes my people off the road. We did a day last year — nothing changed."',hp:36,w:['physical_training','academy'],r:['promo_templates','edi'],p:'ENABLE'},
+      {t:'"We've been burned before. Two days in a classroom, forgotten in a month."',hp:40,w:['co_visits'],r:['marketing_portal','custom_label'],p:'ENABLE'},
+      {t:'"Fleet managers want lab data — not a sales rep reading from a product sheet."',hp:36,w:['oil_analysis','co_visits'],r:['promo_calendar','retail_kits'],p:'ENABLE'},
+    ],rw:{xp:180,gold:75}},
+  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:26,my:40,
+    intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
+    dia:{q:'Have you ever tried running a promotion to differentiate?',opts:[
+      {t:'I made a flyer in PowerPoint once. It looked terrible. Zero response from garages.',buff:'reduceHp',correct:true,fb:'The instinct is right, the tools are missing. GROW services fix that.'},
+      {t:'We compete on payment terms — that's our differentiation.',buff:'boostEnemy',correct:false,fb:'Terms aren't brand differentiation.'},
+      {t:'Our products speak for themselves.',buff:null,correct:false,fb:'Alejandra said garages see all suppliers as identical.'},
+    ]},
+    objs:[
+      {t:'"I don't have a single person who can create marketing materials."',hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
+      {t:'"Zero budget. Every euro goes to inventory and logistics."',hp:30,w:['promo_templates','content_kits'],r:['oil_analysis','connectivity'],p:'GROW'},
+    ],rw:{xp:100,gold:45}},
+  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:54,my:26,
+    intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
+    dia:{q:'When you discover a product is backordered after placing the order — what happens?',opts:[
+      {t:'We can't fulfil our own customers. Workshops order from competitors as backup.',buff:'reduceHp',correct:true,fb:'Wolf's opacity creates your opacity. DELIVER services fix the chain.'},
+      {t:'We order extra safety stock to compensate.',buff:null,correct:false,fb:'Expensive workaround, not a solution.'},
+      {t:'We escalate to our Wolf account manager.',buff:'boostEnemy',correct:false,fb:'Escalation is firefighting. Tomasz needs systems.'},
+    ]},
+    objs:[
+      {t:'"I just need orders to arrive when you say they will."',hp:35,w:['lead_time'],r:['content_kits','academy'],p:'DELIVER'},
+      {t:'"How can I plan if I can't see Wolf stock before ordering?"',hp:35,w:['stock_visibility','e_ordering'],r:['promo_templates','co_visits'],p:'DELIVER'},
+      {t:'"My workshops want to know exactly when. So do I."',hp:32,w:['order_tracker','lead_time'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
+    ],rw:{xp:180,gold:75}},
+  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:68,my:48,
+    intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
+    dia:{q:'If a competitor offered a lower price tomorrow, what keeps the garage with you?',opts:[
+      {t:'Honestly, nothing. We'd have to match or lose the account.',buff:'reduceHp',correct:true,fb:'That's the truth. Equipment creates structural barriers.'},
+      {t:'Our personal relationship — we've supplied them for years.',buff:null,correct:false,fb:'Relationships don't create switching costs at scale.'},
+      {t:'Our product quality is better.',buff:'boostEnemy',correct:false,fb:'Quality differences are invisible to most garages.'},
+    ]},
+    objs:[
+      {t:'"Garages say they don't want to invest. Just deliver drums."',hp:40,w:['lubricant_mgmt'],r:['promo_templates','edi'],p:'GROW'},
+      {t:'"Even with equipment — what stops them filling it with competitor oil?"',hp:36,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'GROW'},
+      {t:'"Big investment. Show me the ROI numbers."',hp:32,w:['lubricant_mgmt','oil_monitoring'],r:['push_a_button','goods_loading'],p:'GROW'},
+    ],rw:{xp:200,gold:90}},
+  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:34,my:32,
+    intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
+    dia:{q:'Where do most of the 8% errors occur?',opts:[
+      {t:'Manual re-keying between email and ERP — keystroke errors on references.',buff:'reduceHp',correct:true,fb:'EDI eliminates the manual chain entirely.'},
+      {t:'Wolf shipping wrong products.',buff:'boostEnemy',correct:false,fb:'Philippe clearly said errors are in his process.'},
+      {t:'Branches sending unclear requests.',buff:null,correct:false,fb:'Errors happen during consolidation and re-entry.'},
+    ]},
+    objs:[
+      {t:'"We've ordered by email for 15 years. Why change what works?"',hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
+      {t:'"No IT department. We're a distribution company, not a tech company."',hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
+    ],rw:{xp:100,gold:45}},
+  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:32,my:24,
+    intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
+    dia:{q:'What makes competitors' oil analysis data compelling to fleet managers?',opts:[
+      {t:'Lab reports with actual wear trends and drain recommendations specific to that fleet.',buff:'reduceHp',correct:true,fb:'Oil Analysis provides that data. Co-visits present it credibly.'},
+      {t:'The brand name behind the analysis.',buff:null,correct:false,fb:'Data persuades, not brand.'},
+      {t:'They offer it free as a promo.',buff:'boostEnemy',correct:false,fb:'James needs the capability, not a pricing strategy.'},
+    ]},
+    objs:[
+      {t:'"Oil testing sounds complex. My team are salespeople, not lab technicians."',hp:36,w:['oil_analysis'],r:['promo_templates','custom_label'],p:'ENABLE'},
+      {t:'"Even with data, my reps can't present it to a fleet engineering manager."',hp:36,w:['co_visits'],r:['marketing_portal','palletization'],p:'ENABLE'},
+      {t:'"We're 12 months behind competitors. How do we catch up?"',hp:32,w:['oil_analysis','co_visits'],r:['promo_calendar','goods_loading'],p:'ENABLE'},
+    ],rw:{xp:200,gold:90}},
+  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:44,my:30,
+    intro:`Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.`,
+    dia:{q:'When Shell's execution fell short — what specifically disappointed you?',opts:[
+      {t:'Generic materials with a logo swap. It felt like a template, not a partnership.',buff:'reduceHp',correct:true,fb:'Partnership Activation delivers bespoke. Design Studio creates custom.'},
+      {t:'Product quality didn't match premium positioning.',buff:null,correct:false,fb:'Klaus didn't mention product quality.'},
+      {t:'Pricing wasn't competitive enough.',buff:'boostEnemy',correct:false,fb:'Klaus wants execution, not price.'},
+    ]},
+    objs:[
+      {t:'"Show me what's exclusive to a Wolf strategic partner. Not basic stuff."',hp:45,w:['partnership_activation'],r:['tecdoc','e_ordering'],p:'GROW'},
+      {t:'"Shell promised co-branded events and sent generic banners. Can you actually deliver?"',hp:42,w:['partnership_activation','trade_fairs'],r:['push_a_button','palletization'],p:'GROW'},
+      {t:'"My top customers are CEOs. They expect motorsport hospitality, not a conference room."',hp:38,w:['partnership_activation','trade_fairs'],r:['stock_visibility','academy'],p:'GROW'},
+    ],rw:{xp:300,gold:150}},
+];
+
+// ── BOSS ──
+const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:44,my:82,isBoss:true,
+  intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
+  dia:{q:'In one sentence — what makes Wolf's 360° fundamentally different?',opts:[
+    {t:'We wrap data, knowledge, and operational tools around YOUR business — not just our logo.',buff:'reduceHp',correct:true,fb:'The perfect positioning. You led with their business.'},
+    {t:'Wolf has the highest quality lubricants and most advanced R&D.',buff:'boostEnemy',correct:false,fb:'Every competitor makes quality claims.'},
+    {t:'Most competitive pricing and flexible terms.',buff:null,correct:false,fb:'Pricing doesn't differentiate at this level.'},
+  ]},
+  objs:[
+    {t:'"Shell already partners with us across 6 countries. Why switch any volume to Wolf?"',hp:55,w:['partnership_activation','trade_fairs','network_concept'],r:['push_a_button','custom_label','e_ordering'],p:'GROW'},
+    {t:'"33 services is a slide. Show me 3 we can test next month."',hp:55,w:['tecdoc','reco_tool','marketing_portal'],r:['palletization','goods_loading','mini_bulk'],p:'CONNECT'},
+    {t:'"Your 10-day lead time vs competitor 48 hours. How do we stock Wolf?"',hp:55,w:['lead_time','stock_visibility','product_reservation'],r:['content_kits','academy','promo_templates'],p:'DELIVER'},
+    {t:'"47% of workshops can't do ADAS. We need 3,000 technicians upskilled."',hp:55,w:['co_visits','physical_training','oil_analysis'],r:['custom_label','regulatory_label','promo_calendar'],p:'ENABLE'},
+    {t:'"Show me the mechanism that makes this partnership irreversible."',hp:65,w:['partnership_activation','network_concept','oil_monitoring','lubricant_mgmt'],r:['push_a_button','goods_loading'],p:'GROW'},
+  ],rw:{xp:600,gold:400}
+};
+
+const ALL=[...ENC,BOSS];
+
+// ── WORLD MAP ──
+const WorldMap=({children,style:st})=>h('div',{style:{position:'relative',background:'#0a1628',borderRadius:12,border:'2px solid #1a2a4e',overflow:'hidden',...st}},
+  h('div',{style:{position:'absolute',inset:0,background:'radial-gradient(ellipse at 40% 40%,#0f2a4a,#0a1628 70%)',opacity:.8}}),
+  h('svg',{viewBox:'0 0 400 200',style:{position:'absolute',inset:0,width:'100%',height:'100%',opacity:.2}},
+    h('path',{d:'M180,40 Q200,30 220,35 L230,50 Q225,65 215,70 L200,75 Q185,70 180,60Z',fill:'#2a4a3a'}),
+    h('path',{d:'M185,80 Q200,75 215,80 L220,110 Q215,135 200,140 L190,135 Q180,120 180,100Z',fill:'#2a4a3a'}),
+    h('path',{d:'M230,30 Q260,20 300,30 L320,50 Q330,70 320,85 L290,90 Q260,80 240,65 L230,50Z',fill:'#2a4a3a'}),
+    h('path',{d:'M225,60 Q240,55 250,65 L245,80 Q235,85 225,75Z',fill:'#2a4a3a'}),
+    h('path',{d:'M50,30 Q80,20 120,30 L130,50 Q125,65 110,70 L80,68 Q55,60 50,45Z',fill:'#2a4a3a'}),
+    h('path',{d:'M300,80 Q320,75 340,80 L345,95 Q335,105 320,100Z',fill:'#2a4a3a'}),
+    ...[40,80,120,160].map(y=>h('line',{key:'h'+y,x1:0,y1:y,x2:400,y2:y,stroke:'#1a2a4e',strokeWidth:.3})),
+    ...[80,160,240,320].map(x=>h('line',{key:'v'+x,x1:x,y1:0,x2:x,y2:200,stroke:'#1a2a4e',strokeWidth:.3}))),
+  children);
+
+// ═══════════════
+// MAIN APP
+// ═══════════════
+function App(){
+  const [ph,setPh]=useState('title');
+  const [nm,setNm]=useState('');
+  const [gold,setGold]=useState(0);
+  const [xp,setXp]=useState({CONNECT:0,ENABLE:0,GROW:0,DELIVER:0});
+  const [lv,setLv]=useState(1);
+  const [done,setDone]=useState([]);
+  const [enc,setEnc]=useState(null);
+  const [oi,setOi]=useState(0);
+  const [oHp,setOHp]=useState(0);
+  const [pHp,setPHp]=useState(100);
+  const MHP=100;
+  const [inv,setInv]=useState(SVC.filter(s=>s.t==='C').map(s=>s.id));
+  const [sel,setSel]=useState(null);
+  const [selP,setSelP]=useState(null);
+  const [log,setLog]=useState([]);
+  const [an,setAn]=useState(false);
+  const [sE,setSE]=useState(false);
+  const [sH,setSH]=useState(false);
+  const [fl,setFl]=useState(null);
+  const [hf,setHf]=useState(0);
+  const [items,setItems]=useState([]);
+  const [showW,setShowW]=useState(false);
+  const [dmgB,setDmgB]=useState(false);
+  const [shld,setShld]=useState(false);
+  const [comboB,setComboB]=useState(false);
+  const [combo,setCombo]=useState(0);
+  const [lastPil,setLastPil]=useState(null);
+  const [lvUp,setLvUp]=useState(false);
+  const [sndOn,setSndOn]=useState(true);
+  const [lb,setLb]=useState([]);
+  const [diaBuff,setDiaBuff]=useState(null);
+  const [diaAns,setDiaAns]=useState(false);
+  const [t0,setT0]=useState(null);
+  const [tab,setTab]=useState('map');
+  const [flying,setFlying]=useState(null);
+  const logRef=useRef(null);
+
+  useEffect(()=>{const iv=setInterval(()=>setHf(f=>(f+1)%4),400);return()=>clearInterval(iv)},[]);
+  useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight},[log]);
+  useEffect(()=>{sbLoad().then(d=>{if(d)setLb(d)})},[]);
+
+  const txp=Object.values(xp).reduce((a,b)=>a+b,0);
+  const cLv=Math.floor(txp/200)+1;
+  useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
+
+  const go=(e)=>{snd('fly');setFlying(e);setTimeout(()=>{setFlying(null);setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setPh(e.dia?'dialogue':'intro')},1200)};
+  const useI=(id)=>{const i=items.findIndex(x=>x.id===id&&x.u>0);if(i<0)return;const ni=[...items];ni[i]={...ni[i],u:ni[i].u-1};if(ni[i].u<=0)ni.splice(i,1);setItems(ni);snd('buy');
+    if(id==='intel'){setShowW(true);setLog(p=>[...p,{y:'i',t:'🔍 Weaknesses revealed!'}])}else if(id==='coffee'){setPHp(p=>Math.min(MHP,p+30));setLog(p=>[...p,{y:'i',t:'☕ +30 HP!'}])}else if(id==='playbook'){setDmgB(true);setLog(p=>[...p,{y:'i',t:'📘 +25% damage!'}])}else if(id==='shield'){setShld(true);setLog(p=>[...p,{y:'i',t:'🛡️ Shield active!'}])}else if(id==='combo_charm'){setComboB(true);setLog(p=>[...p,{y:'i',t:'✨ Combo 2x!'}])}else if(id==='mega_heal'){setPHp(MHP);setLog(p=>[...p,{y:'i',t:'⚡ Full HP!'}])}};
+
+  const atk=useCallback(()=>{
+    if(!sel||an||!enc)return;const sv=SVC.find(s=>s.id===sel);const ob=enc.objs[oi];setAn(true);snd('atk');
+    const isW=ob.w.includes(sel),isR=ob.r.includes(sel);
+    let cm=1,nc=combo;if(sv.p===lastPil){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
+    let d=sv.pw;
+    if(isW){d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1));snd('crit');setSE(true);setFl({y:'c',v:d})}
+    else if(isR){d=Math.round(sv.pw*.2);snd('miss');setFl({y:'m',v:d})}
+    else{d=Math.round(sv.pw*.7*cm*(dmgB?1.25:1));snd('atk');setSE(true);setFl({y:'n',v:d})}
+    setLog(p=>[...p,{y:'p',t:`${isW?'⚔️ SUPER EFFECTIVE! ':''}${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`}]);
+    const nH=Math.max(0,oHp-d);setOHp(nH);
+    setTimeout(()=>{setSE(false);setFl(null);
+      if(nH<=0){setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
+        setTimeout(()=>{if(oi+1>=enc.objs.length){setGold(g=>g+enc.rw.gold);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+enc.rw.gold+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
+            if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+enc.rw.gold,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
+          }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(nx.hp+(diaBuff==='boostEnemy'?10:0));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
+      else{setTimeout(()=>{const cd=isW?5:isR?(diaBuff==='boostEnemy'?25:20):10;
+        if(shld){setShld(false);setLog(p=>[...p,{y:'i',t:'🛡️ Blocked!'}]);snd('sel');setAn(false);return}
+        setSH(true);snd('hurt');setPHp(p=>{const nh=Math.max(0,p-cd);if(nh<=0){setLog(p2=>[...p2,{y:'e',t:'💥 -'+cd+'HP! Defeated...'}]);snd('lose');setTimeout(()=>setPh('defeat'),600)}else setLog(p2=>[...p2,{y:'e',t:'💢 Pushback! -'+cd+'HP'}]);return nh});
+        setTimeout(()=>{setSH(false);setAn(false)},300)},400)}
+    },600);setSel(null);setSelP(null)
+  },[sel,an,enc,oi,oHp,combo,lastPil,comboB,dmgB,shld,diaBuff,sndOn,xp]);
+
+  // ── Shared UI components ──
+  const HpBar=({v,m,w='100%'})=>h('div',{style:{width:w,height:10,background:'#2a1a2a',borderRadius:5,border:'1px solid #3a2a3a',overflow:'hidden'}},h('div',{style:{height:'100%',background:v/m>.5?C.ok:v/m>.25?C.gold:C.no,borderRadius:5,width:(v/m*100)+'%',transition:'width .3s'}}));
+  const Tier=({t})=>h('span',{style:{fontSize:11,padding:'2px 8px',borderRadius:4,fontWeight:600,background:t==='C'?'rgba(100,116,139,.2)':t==='B'?'rgba(245,158,11,.15)':'rgba(239,68,68,.15)',color:t==='C'?'#94A3B8':t==='B'?C.gold:C.no}},'Seg '+t);
+  const LvlUp=()=>lvUp?h('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.8)',zIndex:999}},h('div',{style:{textAlign:'center',animation:'lu .5s ease'}},h('div',{className:'fs-pixel-xl',style:{color:C.gold}},'⬆️ LEVEL '+lv+'!'),lv===3&&h('div',{className:'fs-sm',style:{color:C.ok,marginTop:10}},'🔓 Segment B services unlocked!'),lv===6&&h('div',{className:'fs-sm',style:{color:C.no,marginTop:10}},'🔓 Segment A services unlocked!'))):null;
+  const Pad=({children})=>h('div',{style:{maxWidth:480,margin:'0 auto',padding:'12px 16px'}},children);
+
+  // ═══ TITLE ═══
+  if(ph==='title')return h(Pad,null,
+    h(LvlUp),
+    h('div',{style:{textAlign:'center',paddingTop:40}},
+      h('div',{style:{width:64,height:96,margin:'0 auto',animation:'float 3s ease-in-out infinite'},dangerouslySetInnerHTML:{__html:SP.hero(0)}}),
+      h('div',{className:'pf fs-pixel-xl',style:{color:C.gold,marginTop:16,animation:'pulse 2s ease infinite'}},'360°'),
+      h('div',{className:'pf fs-pixel-lg',style:{marginTop:4}},'SERVICE QUEST'),
+      h('p',{className:'fs-sm',style:{color:C.mu,marginTop:12}},'Battle distributor objections with the right 360° services'),
+      h('input',{value:nm,onChange:e=>setNm(e.target.value),placeholder:'Enter your name',maxLength:20,style:{width:'100%',maxWidth:300,margin:'20px auto',display:'block',padding:'12px 16px',background:C.cd,border:'2px solid '+C.bd,borderRadius:10,color:C.tx,fontSize:16,textAlign:'center',outline:'none'}}),
+      h('div',{style:{display:'flex',gap:8,justifyContent:'center',marginBottom:20}},
+        h('button',{onClick:()=>setSndOn(!sndOn),style:{background:'none',border:'1px solid '+C.bd,color:sndOn?C.gold:C.mu,padding:'10px 16px',fontSize:14,borderRadius:8,cursor:'pointer'}},sndOn?'🔊 Sound ON':'🔇 Sound OFF')),
+      h('button',{onClick:async()=>{if(!nm.trim())return alert('Enter your name!');if(!aOn){await Tone.start();aOn=true}setT0(Date.now());setPh('map');snd('sel')},style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 36px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer',animation:'blink 2s ease infinite'}},'▶ START QUEST'),
+      // Leaderboard
+      lb.length>0&&h('div',{style:{marginTop:28,textAlign:'left'}},
+        h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10}},'🏆 GLOBAL LEADERBOARD'),
+        lb.slice(0,6).map((e,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 12px',background:'rgba(0,0,0,.3)',borderRadius:8,marginBottom:4,animation:'fadeIn .3s ease '+i*.05+'s both'}},
+          h('span',{className:'fs-sm',style:{color:i<3?[C.gold,'#94A3B8','#D97706'][i]:C.tx,fontWeight:600}},(i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':(i+1)+'. ')+e.player_name),
+          h('span',{className:'fs-xs',style:{color:C.mu}},'LV'+e.level+' · '+e.encounters_cleared+'⚔️'+(e.is_champion?' 👑':''))))),
+      h('p',{className:'fs-xs',style:{color:C.mu,marginTop:28}},'Wolf Oil Corporation · Sales Training')));
+
+  // ═══ DIALOGUE ═══
+  if(ph==='dialogue'&&enc)return h(Pad,null,
+    h(LvlUp),
+    enc.isBoss&&h('div',{className:'pf fs-pixel-sm',style:{color:C.no,textAlign:'center',marginTop:12,animation:'blink 1s ease infinite'}},'⚠️ FINAL BOSS ⚠️'),
+    h('div',{style:{textAlign:'center',marginTop:16}},
+      h('div',{style:{width:56,height:84,margin:'0 auto'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon('GROW',true):SP.npc(enc.v)}}),
+      h('div',{className:'fs-lg',style:{fontWeight:700,color:enc.isBoss?C.no:C.gold,marginTop:8}},enc.npc),
+      h('div',{className:'fs-sm',style:{color:C.mu}},enc.rl+' — '+enc.company),
+      h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},'📍 '+enc.loc+', '+enc.co+' · '+enc.ch)),
+    // NPC speech
+    h('div',{style:{background:C.cd,border:'2px solid '+C.bd,borderRadius:12,padding:16,marginTop:16,animation:'fadeIn .5s ease'}},
+      h('div',{className:'fs-sm',style:{color:'#c0bfe0',lineHeight:1.7}},enc.intro)),
+    // Discovery question
+    h('div',{style:{background:C.cd,border:'2px solid '+C.gold,borderRadius:12,padding:16,marginTop:12,animation:'fadeIn .5s ease .2s both'}},
+      h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:700,marginBottom:8}},'💬 YOUR DISCOVERY QUESTION'),
+      h('div',{className:'fs-sm',style:{marginBottom:12,lineHeight:1.6}},enc.dia.q),
+      !diaAns?enc.dia.opts.map((o,i)=>h('button',{key:i,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)):
+      h('div',null,
+        enc.dia.opts.map((o,i)=>h('div',{key:i,style:{padding:'10px 12px',marginBottom:6,borderRadius:8,fontSize:13,lineHeight:1.6,background:o.correct?'rgba(16,185,129,.12)':diaBuff===o.buff&&!o.correct?'rgba(239,68,68,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.bd),color:o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.mu}},
+          String.fromCharCode(65+i)+'. '+o.t,
+          (o.correct||diaBuff===o.buff)&&h('div',{className:'fs-xs',style:{marginTop:6,color:o.correct?C.ok:C.no}},o.fb))),
+        h('div',{style:{marginTop:10,padding:'10px 12px',borderRadius:8,fontSize:13,background:diaBuff==='reduceHp'?'rgba(16,185,129,.08)':diaBuff==='boostEnemy'?'rgba(239,68,68,.08)':'rgba(255,255,255,.03)',color:diaBuff==='reduceHp'?C.ok:diaBuff==='boostEnemy'?C.no:C.mu}},
+          diaBuff==='reduceHp'?'✅ Battle buff: +15% damage!':diaBuff==='boostEnemy'?'⚠️ Enemy buff: stronger counters!':'➡️ Neutral start.'),
+        h('button',{onClick:()=>{setPh('battle');if(diaBuff==='boostEnemy')setOHp(hp=>hp+10);setLog([{y:'s',t:'⚔️ Battle start! '+enc.objs.length+' objections.'}]);enc.isBoss?snd('boss'):snd('blip')},style:{marginTop:12,width:'100%',background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'⚔️ ENTER BATTLE'))));
+
+  // ═══ BATTLE ═══
+  if((ph==='battle'||ph==='victory'||ph==='defeat')&&enc){
+    const ob=enc.objs[oi];
+    const av=inv.map(id=>SVC.find(s=>s.id===id)).filter(Boolean);
+    const ui=items.filter(x=>x.u>0);
+    const pSvcs=selP?av.filter(s=>s.p===selP):[];
+
+    return h(Pad,null,
+      h(LvlUp),
+      // Arena
+      h('div',{style:{background:'rgba(0,0,0,.4)',borderRadius:12,border:'2px solid '+(enc.isBoss?C.no:C.bd),padding:16,position:'relative',minHeight:160,marginTop:8}},
+        // Enemy (top right)
+        h('div',{style:{position:'absolute',right:16,top:12,textAlign:'center',animation:sE?'shake .3s ease':'none'}},
+          ob&&h(React.Fragment,null,
+            h('div',{style:{width:enc.isBoss?56:44,height:enc.isBoss?56:44,margin:'0 auto'},dangerouslySetInnerHTML:{__html:SP.mon(ob.p,enc.isBoss)}}),
+            h('div',{className:'fs-xs',style:{color:PC[ob.p],fontWeight:700,marginTop:4}},ob.p),
+            h(HpBar,{v:oHp,m:ob.hp,w:90}),
+            h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},oHp+'/'+ob.hp),
+            showW&&h('div',{className:'fs-xs',style:{color:C.ok,marginTop:2}},'⚡ '+ob.w.map(id=>SVC.find(s=>s.id===id)?.n).join(', '))),
+          fl&&h('div',{className:'pf',style:{position:'absolute',top:-10,right:8,fontSize:fl.y==='c'?18:14,fontWeight:'bold',color:fl.y==='c'?C.gold:fl.y==='m'?C.no:'#fff',animation:'cpop .7s ease forwards'}},(fl.y==='c'?'💥':'')+fl.v)),
+        // Hero (bottom left)
+        h('div',{style:{position:'absolute',left:16,bottom:12,textAlign:'center',animation:sH?'shake .3s ease':'none'}},
+          h('div',{style:{width:32,height:48},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
+          h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:600,marginTop:2}},nm),
+          h(HpBar,{v:pHp,m:MHP,w:70}),
+          combo>0&&h('div',{className:'fs-xs',style:{color:C.ok}},'🔥 '+combo+'x combo')),
+        // Overlays
+        ph==='victory'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.65)',borderRadius:12}},
+          h('div',{style:{textAlign:'center',animation:'vb 1s ease infinite'}},
+            h('div',{className:'pf fs-pixel-lg',style:{color:C.gold}},'🏆 VICTORY!'),
+            h('div',{className:'fs-md',style:{marginTop:8}},'+'+enc.rw.gold+'g · +'+enc.rw.xp+'XP'),
+            enc.isBoss&&h('div',{className:'pf fs-pixel-sm',style:{color:C.ok,marginTop:10}},'👑 360° SALES CHAMPION'))),
+        ph==='defeat'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.7)',borderRadius:12}},
+          h('div',{style:{textAlign:'center'}},
+            h('div',{className:'pf fs-pixel-md',style:{color:C.no}},'DEFEATED'),
+            h('div',{className:'fs-sm',style:{color:C.mu,marginTop:6}},'Buy items and try again!')))),
+
+      // Objection
+      ob&&ph==='battle'&&h('div',{style:{background:C.cd,border:'1px solid '+PC[ob.p]+'44',borderRadius:10,padding:12,marginTop:10}},
+        h('div',{className:'fs-xs',style:{color:PC[ob.p],fontWeight:700}},'OBJECTION '+String(oi+1)+'/'+enc.objs.length),
+        h('div',{className:'fs-sm',style:{marginTop:4,lineHeight:1.6}},ob.t)),
+
+      // Battle log
+      h('div',{ref:logRef,style:{background:'rgba(0,0,0,.4)',borderRadius:8,border:'1px solid '+C.bd,padding:8,height:60,overflowY:'auto',marginTop:8}},
+        log.map((l,i)=>h('div',{key:i,className:'fs-xs',style:{color:l.y==='p'?C.ok:l.y==='e'?C.no:l.y==='v'?C.gold:l.y==='i'?'#A78BFA':C.mu}},l.t))),
+
+      // Items
+      ph==='battle'&&ui.length>0&&h('div',{style:{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}},
+        ui.map((it,i)=>{const si=SHOP.find(x=>x.id===it.id);return h('button',{key:i,disabled:an,onClick:()=>useI(it.id),style:{background:C.cd,border:'1px solid '+C.bd,borderRadius:8,padding:'8px 12px',fontSize:13,color:C.tx,cursor:an?'default':'pointer'}},si?.ic+' '+si?.nm)})),
+
+      // ═══ PILLAR-FIRST MENU ═══
+      ph==='battle'&&!selP&&h('div',{style:{marginTop:12,animation:'fadeIn .3s ease'}},
+        h('div',{className:'fs-sm',style:{color:C.mu,fontWeight:600,marginBottom:8}},'⚔️ Choose your pillar:'),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+          ['CONNECT','ENABLE','GROW','DELIVER'].map(p=>{
+            const cnt=av.filter(s=>s.p===p).length;
+            return h('button',{key:p,disabled:an||cnt===0,onClick:()=>{setSelP(p);snd('pil')},style:{background:PCB[p],border:'2px solid '+PC[p],borderRadius:12,padding:'16px 12px',textAlign:'center',cursor:an||cnt===0?'default':'pointer',opacity:cnt===0?.3:1}},
+              h('div',{style:{fontSize:28}},PI[p]),
+              h('div',{className:'fs-md',style:{fontWeight:700,color:PC[p],marginTop:4}},PN[p]),
+              h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},PS[p]),
+              h('div',{className:'fs-xs',style:{color:PC[p],marginTop:6,fontWeight:600}},cnt+' service'+(cnt>1?'s':'')))}))),
+
+      // ═══ SERVICE LIST (after pillar selected) ═══
+      ph==='battle'&&selP&&h('div',{style:{marginTop:12,animation:'fadeIn .2s ease'}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}},
+          h('button',{onClick:()=>{setSelP(null);setSel(null);snd('blip')},style:{background:'none',border:'1px solid '+C.bd,borderRadius:8,padding:'8px 14px',fontSize:13,color:C.mu,cursor:'pointer'}},'← Back'),
+          h('div',{className:'fs-md',style:{fontWeight:700,color:PC[selP]}},PI[selP]+' '+PN[selP])),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          pSvcs.map(s=>h('button',{key:s.id,disabled:an,onClick:()=>{setSel(s.id);snd('sel')},style:{display:'flex',alignItems:'center',gap:12,background:sel===s.id?PC[s.p]+'22':C.cd,border:'1px solid '+(sel===s.id?PC[s.p]:C.bd),borderRadius:10,padding:'14px 14px',textAlign:'left',cursor:an?'default':'pointer',opacity:an?.5:1}},
+            h('div',{style:{minWidth:36,textAlign:'center'}},
+              h('div',{className:'pf',style:{fontSize:14,fontWeight:'bold',color:PC[s.p]}},s.pw),
+              h('div',{className:'fs-xs',style:{color:C.mu}},'ATK')),
+            h('div',{style:{flex:1}},
+              h('div',{className:'fs-sm',style:{fontWeight:700,color:sel===s.id?PC[s.p]:C.tx}},s.n),
+              h('div',{className:'fs-xs',style:{color:C.mu}},s.d)),
+            h(Tier,{t:s.t})))),
+        sel&&h('button',{onClick:atk,disabled:an,style:{width:'100%',marginTop:12,background:PC[selP],border:0,borderRadius:10,padding:'14px',fontSize:16,fontWeight:700,color:'#fff',cursor:an?'default':'pointer',opacity:an?.5:1}},'⚔️ Deploy '+SVC.find(s=>s.id===sel)?.n)),
+
+      // Return
+      (ph==='victory'||ph==='defeat')&&h('div',{style:{textAlign:'center',marginTop:16}},
+        h('button',{onClick:()=>{setPh('map');setTab('map');snd('sel');sbLoad().then(d=>{if(d)setLb(d)})},style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 28px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'← World Map')));
+  }
+
+  // ═══ MAP / SHOP / INVENTORY ═══
+  const bossReady=done.length>=6;
+  return h(Pad,null,
+    h(LvlUp),
+    // HUD
+    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(0,0,0,.4)',borderRadius:10,padding:'10px 14px',marginTop:8,border:'1px solid '+C.bd}},
+      h('div',null,h('span',{className:'fs-xs',style:{color:C.mu}},'LV'),h('span',{className:'pf',style:{fontSize:16,color:C.gold,marginLeft:4}},lv)),
+      h('div',{className:'fs-sm',style:{fontWeight:600}},nm),
+      h('div',{className:'fs-sm',style:{color:C.gold,fontWeight:600}},'💰 '+gold),
+      h('button',{onClick:()=>setSndOn(!sndOn),style:{background:'none',border:'none',fontSize:18,cursor:'pointer',padding:4}},sndOn?'🔊':'🔇')),
+    // XP bars
+    h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginTop:8}},
+      ['CONNECT','ENABLE','GROW','DELIVER'].map(p=>h('div',{key:p,style:{background:'rgba(0,0,0,.3)',borderRadius:6,padding:'6px 8px',border:'1px solid '+C.bd}},
+        h('div',{className:'fs-xs',style:{color:PC[p],fontWeight:600}},PI[p]+' '+p.slice(0,3)),
+        h('div',{style:{height:5,background:'rgba(0,0,0,.5)',borderRadius:3,marginTop:3,overflow:'hidden'}},h('div',{style:{height:'100%',background:PC[p],width:Math.min(100,(xp[p]%200)/2)+'%',transition:'width .3s'}})),
+        h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},xp[p])))),
+    // Tabs
+    h('div',{style:{display:'flex',gap:4,marginTop:8}},
+      ['map','shop','bag'].map(t=>h('button',{key:t,onClick:()=>{setTab(t);snd('blip')},style:{flex:1,background:tab===t?'rgba(59,130,246,.12)':'rgba(0,0,0,.3)',border:'1px solid '+(tab===t?C.con:C.bd),borderRadius:8,padding:'10px 8px',fontSize:14,fontWeight:tab===t?700:500,color:tab===t?C.con:C.mu,cursor:'pointer'}},t==='map'?'🗺️ Map':t==='shop'?'🛒 Shop':'🎒 '+inv.length+'/33'))),
+
+    // SHOP
+    tab==='shop'&&h('div',{style:{marginTop:12}},
+      h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10}},'⭐ ITEM SHOP'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+        SHOP.map(it=>{const ow=items.filter(x=>x.id===it.id).reduce((a,x)=>a+x.u,0);
+          return h('button',{key:it.id,onClick:()=>{if(gold>=it.cost){setGold(g=>g-it.cost);setItems(p=>[...p,{id:it.id,u:1}]);snd('buy')}},disabled:gold<it.cost,style:{background:C.cd,border:'1px solid '+(gold>=it.cost?C.gold:C.bd),borderRadius:10,padding:12,textAlign:'center',cursor:gold>=it.cost?'pointer':'default',opacity:gold>=it.cost?1:.5}},
+            h('div',{style:{fontSize:28}},it.ic),
+            h('div',{className:'fs-sm',style:{fontWeight:600,marginTop:4}},it.nm),
+            h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},it.ds),
+            h('div',{className:'fs-md',style:{color:C.gold,fontWeight:700,marginTop:4}},it.cost+'g'),
+            ow>0&&h('div',{className:'fs-xs',style:{color:C.ok,marginTop:2}},'Owned: ×'+ow))}))),
+
+    // INVENTORY
+    tab==='bag'&&h('div',{style:{marginTop:12}},
+      h('div',{className:'fs-lg',style:{fontWeight:700,marginBottom:10}},'🎒 Service Inventory'),
+      ['CONNECT','ENABLE','GROW','DELIVER'].map(p=>h('div',{key:p,style:{marginBottom:14}},
+        h('div',{className:'fs-md',style:{color:PC[p],fontWeight:700,marginBottom:6}},PI[p]+' '+p),
+        h('div',{style:{display:'flex',flexDirection:'column',gap:4}},
+          SVC.filter(s=>s.p===p).map(s=>{const has=inv.includes(s.id);return h('div',{key:s.id,style:{display:'flex',alignItems:'center',gap:10,background:has?PCB[p]:'rgba(0,0,0,.2)',border:'1px solid '+(has?PC[p]+'55':C.bd),borderRadius:8,padding:'10px 12px',opacity:has?1:.35}},
+            h('span',{className:'pf',style:{fontSize:12,color:PC[p],fontWeight:'bold',minWidth:30}},has?'⚔️'+s.pw:'🔒'),
+            h('span',{className:'fs-sm',style:{flex:1,color:has?C.tx:C.mu}},s.n),
+            h(Tier,{t:s.t}))}))))),
+
+    // WORLD MAP
+    tab==='map'&&h(React.Fragment,null,
+      h(WorldMap,{style:{height:280,marginTop:12}},
+        ENC.map((l,i)=>{const lk=l.seg==='B'&&lv<3||l.seg==='A'&&lv<6;const d=done.includes(l.id);
+          return h('div',{key:l.id,onClick:()=>{if(!lk&&!d)go(l)},style:{position:'absolute',left:l.mx+'%',top:l.my+'%',transform:'translate(-50%,-100%)',cursor:lk||d?'default':'pointer',opacity:lk?.2:d?.5:1,animation:!lk&&!d?'bob 2s ease infinite':'none',zIndex:2}},
+            h('div',{style:{width:16,height:16,borderRadius:'50%',background:d?'#92400E':lk?C.mu:PC[l.objs[0]?.p],border:'2px solid '+(d?C.gold:'#fff'),margin:'0 auto',boxShadow:!d&&!lk?'0 0 8px '+PC[l.objs[0]?.p]:''}}),
+            h('div',{className:'fs-xs',style:{textAlign:'center',marginTop:3,color:d?C.mu:C.tx,fontWeight:600,whiteSpace:'nowrap'}},l.loc),
+            h('div',{className:'fs-xs',style:{textAlign:'center',color:lk?C.no:d?C.gold:PC[l.objs[0]?.p]}},lk?'🔒':d?'✓':l.seg))}),
+        // Boss
+        h('div',{onClick:()=>{if(bossReady&&!done.includes(99))go(BOSS)},style:{position:'absolute',left:BOSS.mx+'%',top:BOSS.my+'%',transform:'translate(-50%,-100%)',cursor:bossReady&&!done.includes(99)?'pointer':'default',opacity:bossReady?done.includes(99)?.4:1:.15,animation:bossReady&&!done.includes(99)?'float 2s ease infinite':'none',zIndex:3}},
+          h('div',{style:{width:24,height:24,borderRadius:'50%',background:done.includes(99)?'#92400E':C.no,border:'2px solid '+C.gold,margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,boxShadow:bossReady?'0 0 12px '+C.no:''}},'👑'),
+          h('div',{className:'fs-xs',style:{textAlign:'center',marginTop:3,fontWeight:700,color:done.includes(99)?C.gold:bossReady?C.no:C.mu}},done.includes(99)?'CHAMPION':bossReady?'BOSS':'🔒 Clear 6')),
+        // Plane
+        flying&&h('div',{style:{position:'absolute',left:flying.mx+'%',top:(flying.my-5)+'%',transform:'translate(-50%,-50%)',width:32,height:20,animation:'float .4s ease infinite',zIndex:10},dangerouslySetInnerHTML:{__html:SP.plane}}),
+        // Hero
+        h('div',{style:{position:'absolute',left:'50%',bottom:8,transform:'translateX(-50%)',width:20,height:30,animation:'bob 1.5s ease infinite'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}})),
+      // Stats
+      h('div',{className:'fs-xs',style:{display:'flex',justifyContent:'space-between',marginTop:8,padding:'8px 12px',background:'rgba(0,0,0,.3)',borderRadius:8,color:C.mu}},
+        h('span',null,'🏢 '+done.length+'/'+(ENC.length+1)),
+        h('span',null,'🎒 '+inv.length+'/33'),
+        h('span',null,'🛒 '+items.length+' items'))));
+}
+
+ReactDOM.createRoot(document.getElementById('R')).render(h(App));
+</script>
+</body>
+</html>
