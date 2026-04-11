@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>360° Service Quest</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>⚔️</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230f0e17'/><text x='16' y='14' font-size='9' font-weight='bold' fill='%23F59E0B' text-anchor='middle' font-family='monospace'>360°</text><text x='16' y='29' font-size='14' text-anchor='middle'>⚔️</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%230f0e17'/><text x='16' y='14' font-size='9' font-weight='bold' fill='%23F59E0B' text-anchor='middle' font-family='monospace'>360°</text><text x='16' y='29' font-size='14' text-anchor='middle'>⚔️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -155,10 +156,10 @@ const SHOP=[
 const ENC=[
   {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:42,my:28,
     intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
-    dia:{q:`Marc, when a counter person gets a vehicle they're not sure about, what happens today?`,opts:[
-      {t:`They check the printed guide. If the vehicle isn't listed, they call the hotline or just pick the closest match.`,buff:'reduceHp',correct:true,fb:`That's the gap — between the outdated guide and the phone call, the wrong product ships.`},
-      {t:`They recommend a premium synthetic that covers most applications.`,buff:'boostEnemy',correct:false,fb:`That might protect quality, but doesn't solve the identification problem.`},
-      {t:`They ask the garage what they used last time.`,buff:null,correct:false,fb:`That perpetuates errors. Marc needs proactive product identification.`},
+    dia:{q:`Marc is losing €8,000/month to returns. You have one discovery question before the pitch — make it count.`,opts:[
+      {t:`When your counter staff get a vehicle they're not sure about, walk me through exactly what happens today.`,buff:'reduceHp',correct:true,fb:`Marc: "They check the printed guide. If it's not listed, they call the hotline or just pick the closest match." — That's the gap. The outdated guide is shipping wrong products.`},
+      {t:`Would upselling every garage to a premium synthetic that covers most applications solve it?`,buff:'boostEnemy',correct:false,fb:`Marc: "That might protect quality, but it doesn't solve the identification problem." — You pitched product before discovery. He's now defensive.`},
+      {t:`Do your staff just ask the garage what they used last time?`,buff:null,correct:false,fb:`Marc: "Sometimes — but that just perpetuates old errors." — A shallow probe. You learned something, but not the root cause.`},
     ]},
     objs:[
       {t:`"My counter staff don't have time for another tool. They handle 200+ calls daily."`,hp:30,w:['reco_tool'],r:['oil_analysis','trade_fairs'],p:'CONNECT'},
@@ -167,10 +168,10 @@ const ENC=[
     ],rw:{xp:120,gold:50}},
   {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:52,my:18,
     intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
-    dia:{q:`When your reps face a technical question in a fleet meeting, what happens?`,opts:[
-      {t:`They say "I'll get back to you" — but by then the competitor has already answered live.`,buff:'reduceHp',correct:true,fb:`The confidence gap in the room is the real problem. Co-visits close it.`},
-      {t:`They redirect to pricing where they're comfortable.`,buff:'boostEnemy',correct:false,fb:`Deflecting signals weakness when the customer wants depth.`},
-      {t:`They share product brochures and TDS documents.`,buff:null,correct:false,fb:`Docs don't replace live technical credibility.`},
+    dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
+      {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
+      {t:`Could your reps win more tenders if you sharpened their pricing and negotiation?`,buff:'boostEnemy',correct:false,fb:`Erik: "Pricing? My reps are great negotiators. That's not the gap." — You framed his problem as commercial weakness. He's insulted.`},
+      {t:`Have you considered giving your reps more product brochures and TDS documents?`,buff:null,correct:false,fb:`Erik: "We have plenty of docs. They don't replace live technical credibility." — A surface-level probe. Missed the real issue.`},
     ]},
     objs:[
       {t:`"Training takes my people off the road. We did a day last year — nothing changed."`,hp:36,w:['physical_training','academy'],r:['promo_templates','edi'],p:'ENABLE'},
@@ -179,10 +180,10 @@ const ENC=[
     ],rw:{xp:180,gold:75}},
   {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:26,my:40,
     intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
-    dia:{q:`Have you ever tried running a promotion to differentiate?`,opts:[
-      {t:`I made a flyer in PowerPoint once. It looked terrible. Zero response from garages.`,buff:'reduceHp',correct:true,fb:`The instinct is right, the tools are missing. GROW services fix that.`},
-      {t:`We compete on payment terms — that's our differentiation.`,buff:'boostEnemy',correct:false,fb:`Terms aren't brand differentiation.`},
-      {t:`Our products speak for themselves.`,buff:null,correct:false,fb:`Alejandra said garages see all suppliers as identical.`},
+    dia:{q:`Alejandra says garages see every supplier as interchangeable. She has no designer, no marketing budget, and zero campaigns. What do you probe?`,opts:[
+      {t:`Have you ever tried running your own promotion to stand out — and what happened?`,buff:'reduceHp',correct:true,fb:`Alejandra: "I made a flyer in PowerPoint once. It looked terrible. Zero response." — Her instinct is right; the tools are missing. That's your opening.`},
+      {t:`Could you win on payment terms instead of marketing spend?`,buff:'boostEnemy',correct:false,fb:`Alejandra: "Payment terms are a race to the bottom. That's not a brand." — You pushed her toward commoditization, exactly what she's trying to escape.`},
+      {t:`Don't your products just speak for themselves?`,buff:null,correct:false,fb:`Alejandra: "Garages see every supplier as identical — product alone doesn't win." — A passive probe. You missed the emotional pain.`},
     ]},
     objs:[
       {t:`"I don't have a single person who can create marketing materials."`,hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
@@ -190,10 +191,10 @@ const ENC=[
     ],rw:{xp:100,gold:45}},
   {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:54,my:26,
     intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
-    dia:{q:`When you discover a product is backordered after placing the order — what happens?`,opts:[
-      {t:`We can't fulfil our own customers. Workshops order from competitors as backup.`,buff:'reduceHp',correct:true,fb:`Wolf's opacity creates your opacity. DELIVER services fix the chain.`},
-      {t:`We order extra safety stock to compensate.`,buff:null,correct:false,fb:`Expensive workaround, not a solution.`},
-      {t:`We escalate to our Wolf account manager.`,buff:'boostEnemy',correct:false,fb:`Escalation is firefighting. Tomasz needs systems.`},
+    dia:{q:`Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?`,opts:[
+      {t:`When a product turns out to be backordered, what's the downstream impact on your workshops?`,buff:'reduceHp',correct:true,fb:`Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.`},
+      {t:`Should we just escalate backorders faster through your Wolf account manager?`,buff:'boostEnemy',correct:false,fb:`Tomasz: "Escalation is firefighting. I need systems, not more phone calls." — You offered a band-aid before understanding the root cause.`},
+      {t:`Have you considered holding extra safety stock to absorb backorders?`,buff:null,correct:false,fb:`Tomasz: "That's expensive — and I'd still be blind to incoming shipments." — A workaround discussion, not a real discovery.`},
     ]},
     objs:[
       {t:`"I just need orders to arrive when you say they will."`,hp:35,w:['lead_time'],r:['content_kits','academy'],p:'DELIVER'},
@@ -202,10 +203,10 @@ const ENC=[
     ],rw:{xp:180,gold:75}},
   {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:68,my:48,
     intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
-    dia:{q:`If a competitor offered a lower price tomorrow, what keeps the garage with you?`,opts:[
-      {t:`Honestly, nothing. We'd have to match or lose the account.`,buff:'reduceHp',correct:true,fb:`That's the truth. Equipment creates structural barriers.`},
-      {t:`Our personal relationship — we've supplied them for years.`,buff:null,correct:false,fb:`Relationships don't create switching costs at scale.`},
-      {t:`Our product quality is better.`,buff:'boostEnemy',correct:false,fb:`Quality differences are invisible to most garages.`},
+    dia:{q:`Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?`,opts:[
+      {t:`If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?`,buff:'reduceHp',correct:true,fb:`Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.`},
+      {t:`Isn't your product quality enough to differentiate at this volume?`,buff:'boostEnemy',correct:false,fb:`Ahmed: "Quality differences are invisible to garages at my scale." — You pitched a feature when he needed a structural moat.`},
+      {t:`What about the long personal relationships you've built with these garages?`,buff:null,correct:false,fb:`Ahmed: "Relationships are nice — but they don't scale and they don't lock anyone in." — A soft probe without real leverage.`},
     ]},
     objs:[
       {t:`"Garages say they don't want to invest. Just deliver drums."`,hp:40,w:['lubricant_mgmt'],r:['promo_templates','edi'],p:'GROW'},
@@ -214,10 +215,10 @@ const ENC=[
     ],rw:{xp:200,gold:90}},
   {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:34,my:32,
     intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
-    dia:{q:`Where do most of the 8% errors occur?`,opts:[
-      {t:`Manual re-keying between email and ERP — keystroke errors on references.`,buff:'reduceHp',correct:true,fb:`EDI eliminates the manual chain entirely.`},
-      {t:`Wolf shipping wrong products.`,buff:'boostEnemy',correct:false,fb:`Philippe clearly said errors are in his process.`},
-      {t:`Branches sending unclear requests.`,buff:null,correct:false,fb:`Errors happen during consolidation and re-entry.`},
+    dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
+      {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
+      {t:`Is Wolf shipping the wrong products to your branches?`,buff:'boostEnemy',correct:false,fb:`Philippe: "No — the errors are in MY process, not yours." — You accused the supplier before listening. He's now defending his own ops.`},
+      {t:`Are your branches sending unclear requests that confuse your team?`,buff:null,correct:false,fb:`Philippe: "Branches are fine. Errors happen during consolidation and re-entry." — Partial signal. You missed the bottleneck.`},
     ]},
     objs:[
       {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
@@ -225,10 +226,10 @@ const ENC=[
     ],rw:{xp:100,gold:45}},
   {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:32,my:24,
     intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
-    dia:{q:`What makes competitors' oil analysis data compelling to fleet managers?`,opts:[
-      {t:`Lab reports with actual wear trends and drain recommendations specific to that fleet.`,buff:'reduceHp',correct:true,fb:`Oil Analysis provides that data. Co-visits present it credibly.`},
-      {t:`The brand name behind the analysis.`,buff:null,correct:false,fb:`Data persuades, not brand.`},
-      {t:`They offer it free as a promo.`,buff:'boostEnemy',correct:false,fb:`James needs the capability, not a pricing strategy.`},
+    dia:{q:`James lost a 200-truck account because competitors brought oil analysis data and he had nothing. What question cracks this open?`,opts:[
+      {t:`What specifically made your competitors' oil analysis data compelling to that fleet manager?`,buff:'reduceHp',correct:true,fb:`James: "Lab reports with real wear trends and drain recommendations tailored to that fleet." — That's your capability gap in exact detail. Now you can propose it.`},
+      {t:`Could we offer oil analysis free as a short-term promo to win it back?`,buff:'boostEnemy',correct:false,fb:`James: "I don't need a discount — I need the capability." — You pitched price instead of discovering the real need. He sees you as tactical, not strategic.`},
+      {t:`Is it the brand name of the lab doing the analysis that fleet managers trust?`,buff:null,correct:false,fb:`James: "No — the data persuades, not the brand." — A weak probe. You learned what doesn't matter, not what does.`},
     ]},
     objs:[
       {t:`"Oil testing sounds complex. My team are salespeople, not lab technicians."`,hp:36,w:['oil_analysis'],r:['promo_templates','custom_label'],p:'ENABLE'},
@@ -237,10 +238,10 @@ const ENC=[
     ],rw:{xp:200,gold:90}},
   {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:44,my:30,
     intro:`Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.`,
-    dia:{q:`When Shell's execution fell short — what specifically disappointed you?`,opts:[
-      {t:`Generic materials with a logo swap. It felt like a template, not a partnership.`,buff:'reduceHp',correct:true,fb:`Partnership Activation delivers bespoke. Design Studio creates custom.`},
-      {t:`Product quality didn't match premium positioning.`,buff:null,correct:false,fb:`Klaus didn't mention product quality.`},
-      {t:`Pricing wasn't competitive enough.`,buff:'boostEnemy',correct:false,fb:`Klaus wants execution, not price.`},
+    dia:{q:`Klaus rejected Shell's partnership and won't settle for basic services. He's testing whether you're a strategic peer. What do you ask?`,opts:[
+      {t:`When Shell's execution fell short, what specifically disappointed you about the way they showed up?`,buff:'reduceHp',correct:true,fb:`Klaus: "Generic materials with a logo swap. It felt like a template, not a partnership." — He just told you exactly what bespoke looks like. Now you can position Partnership Activation.`},
+      {t:`Was Shell's pricing the real issue — would better terms have saved the deal?`,buff:'boostEnemy',correct:false,fb:`Klaus: "Price? I'm offering significant volume. I care about execution." — You flagged yourself as a transactional vendor. He's disengaging.`},
+      {t:`Was it Shell's product quality that didn't match their premium positioning?`,buff:null,correct:false,fb:`Klaus: "Quality wasn't the problem — the partnership execution was." — You missed the real signal and burned a turn.`},
     ]},
     objs:[
       {t:`"Show me what's exclusive to a Wolf strategic partner. Not basic stuff."`,hp:45,w:['partnership_activation'],r:['tecdoc','e_ordering'],p:'GROW'},
@@ -252,10 +253,10 @@ const ENC=[
 // ── BOSS ──
 const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:44,my:82,isBoss:true,
   intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
-  dia:{q:`In one sentence — what makes Wolf's 360° fundamentally different?`,opts:[
-    {t:`We wrap data, knowledge, and operational tools around YOUR business — not just our logo.`,buff:'reduceHp',correct:true,fb:`The perfect positioning. You led with their business.`},
-    {t:`Wolf has the highest quality lubricants and most advanced R&D.`,buff:'boostEnemy',correct:false,fb:`Every competitor makes quality claims.`},
-    {t:`Most competitive pricing and flexible terms.`,buff:null,correct:false,fb:`Pricing doesn't differentiate at this level.`},
+  dia:{q:`The Board has already heard Shell, Castrol, Fuchs and Motul this week. They're cynical. You have ONE question to prove you understand partnership differently.`,opts:[
+    {t:`What would a true 360° partnership need to do DIFFERENTLY from your current suppliers to be worth switching volume?`,buff:'reduceHp',correct:true,fb:`Board: "Wrap data, knowledge, and operational tools around OUR business — not bolt your logo on top of ours." — You led with THEIR business. They're leaning in. This is your opening.`},
+    {t:`Can I walk you through Wolf's R&D pipeline and product quality advantages?`,buff:'boostEnemy',correct:false,fb:`Board: "Every competitor makes quality claims. We've heard four this week." — You pitched product to a partnership audience. They've seen this movie.`},
+    {t:`Would more competitive pricing and flexible payment terms win your business?`,buff:null,correct:false,fb:`Board: "Pricing doesn't differentiate at this level. We need strategic depth, not discounts." — You undersold yourselves before they even saw the capability.`},
   ]},
   objs:[
     {t:`"Shell already partners with us across 6 countries. Why switch any volume to Wolf?"`,hp:55,w:['partnership_activation','trade_fairs','network_concept'],r:['push_a_button','custom_label','e_ordering'],p:'GROW'},
@@ -281,6 +282,12 @@ const WorldMap=({children,style:st})=>h('div',{style:{position:'relative',backgr
     ...[40,80,120,160].map(y=>h('line',{key:'h'+y,x1:0,y1:y,x2:400,y2:y,stroke:'#1a2a4e',strokeWidth:.3})),
     ...[80,160,240,320].map(x=>h('line',{key:'v'+x,x1:x,y1:0,x2:x,y2:200,stroke:'#1a2a4e',strokeWidth:.3}))),
   children);
+
+// ── Shared UI components (hoisted so they don't remount every render) ──
+const HpBar=({v,m,w='100%'})=>h('div',{style:{width:w,height:10,background:'#2a1a2a',borderRadius:5,border:'1px solid #3a2a3a',overflow:'hidden'}},h('div',{style:{height:'100%',background:v/m>.5?C.ok:v/m>.25?C.gold:C.no,borderRadius:5,width:(v/m*100)+'%',transition:'width .3s'}}));
+const Tier=({t})=>h('span',{style:{fontSize:11,padding:'2px 8px',borderRadius:4,fontWeight:600,background:t==='C'?'rgba(100,116,139,.2)':t==='B'?'rgba(245,158,11,.15)':'rgba(239,68,68,.15)',color:t==='C'?'#94A3B8':t==='B'?C.gold:C.no}},'Seg '+t);
+const LvlUp=({lvUp,lv})=>lvUp?h('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.8)',zIndex:999}},h('div',{style:{textAlign:'center',animation:'lu .5s ease'}},h('div',{className:'fs-pixel-xl',style:{color:C.gold}},'⬆️ LEVEL '+lv+'!'),lv===3&&h('div',{className:'fs-sm',style:{color:C.ok,marginTop:10}},'🔓 Segment B services unlocked!'),lv===6&&h('div',{className:'fs-sm',style:{color:C.no,marginTop:10}},'🔓 Segment A services unlocked!'))):null;
+const Pad=({children})=>h('div',{style:{maxWidth:480,margin:'0 auto',padding:'12px 16px'}},children);
 
 // ═══════════════
 // MAIN APP
@@ -357,15 +364,9 @@ function App(){
     },600);setSel(null);setSelP(null)
   },[sel,an,enc,oi,oHp,combo,lastPil,comboB,dmgB,shld,diaBuff,sndOn,xp]);
 
-  // ── Shared UI components ──
-  const HpBar=({v,m,w='100%'})=>h('div',{style:{width:w,height:10,background:'#2a1a2a',borderRadius:5,border:'1px solid #3a2a3a',overflow:'hidden'}},h('div',{style:{height:'100%',background:v/m>.5?C.ok:v/m>.25?C.gold:C.no,borderRadius:5,width:(v/m*100)+'%',transition:'width .3s'}}));
-  const Tier=({t})=>h('span',{style:{fontSize:11,padding:'2px 8px',borderRadius:4,fontWeight:600,background:t==='C'?'rgba(100,116,139,.2)':t==='B'?'rgba(245,158,11,.15)':'rgba(239,68,68,.15)',color:t==='C'?'#94A3B8':t==='B'?C.gold:C.no}},'Seg '+t);
-  const LvlUp=()=>lvUp?h('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.8)',zIndex:999}},h('div',{style:{textAlign:'center',animation:'lu .5s ease'}},h('div',{className:'fs-pixel-xl',style:{color:C.gold}},'⬆️ LEVEL '+lv+'!'),lv===3&&h('div',{className:'fs-sm',style:{color:C.ok,marginTop:10}},'🔓 Segment B services unlocked!'),lv===6&&h('div',{className:'fs-sm',style:{color:C.no,marginTop:10}},'🔓 Segment A services unlocked!'))):null;
-  const Pad=({children})=>h('div',{style:{maxWidth:480,margin:'0 auto',padding:'12px 16px'}},children);
-
   // ═══ TITLE ═══
   if(ph==='title')return h(Pad,null,
-    h(LvlUp),
+    h(LvlUp,{lvUp,lv}),
     h('div',{style:{textAlign:'center',paddingTop:40}},
       h('div',{style:{width:64,height:96,margin:'0 auto',animation:'float 3s ease-in-out infinite'},dangerouslySetInnerHTML:{__html:SP.hero(0)}}),
       h('div',{className:'pf fs-pixel-xl',style:{color:C.gold,marginTop:16,animation:'pulse 2s ease infinite'}},'360°'),
@@ -385,7 +386,7 @@ function App(){
 
   // ═══ DIALOGUE ═══
   if(ph==='dialogue'&&enc)return h(Pad,null,
-    h(LvlUp),
+    h(LvlUp,{lvUp,lv}),
     enc.isBoss&&h('div',{className:'pf fs-pixel-sm',style:{color:C.no,textAlign:'center',marginTop:12,animation:'blink 1s ease infinite'}},'⚠️ FINAL BOSS ⚠️'),
     h('div',{style:{textAlign:'center',marginTop:16}},
       h('div',{style:{width:56,height:84,margin:'0 auto'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon('GROW',true):SP.npc(enc.v)}}),
@@ -397,8 +398,8 @@ function App(){
       h('div',{className:'fs-sm',style:{color:'#c0bfe0',lineHeight:1.7}},enc.intro)),
     // Discovery question
     h('div',{style:{background:C.cd,border:'2px solid '+C.gold,borderRadius:12,padding:16,marginTop:12,animation:'fadeIn .5s ease .2s both'}},
-      h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:700,marginBottom:8}},'💬 YOUR DISCOVERY QUESTION'),
-      h('div',{className:'fs-sm',style:{marginBottom:12,lineHeight:1.6}},enc.dia.q),
+      h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:700,marginBottom:8}},diaAns?'💡 DISCOVERY INSIGHT':'💬 CHOOSE YOUR DISCOVERY QUESTION'),
+      h('div',{className:'fs-sm',style:{marginBottom:12,lineHeight:1.6,color:C.mu,fontStyle:'italic'}},enc.dia.q),
       !diaAns?enc.dia.opts.map((o,i)=>h('button',{key:i,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)):
       h('div',null,
         enc.dia.opts.map((o,i)=>h('div',{key:i,style:{padding:'10px 12px',marginBottom:6,borderRadius:8,fontSize:13,lineHeight:1.6,background:o.correct?'rgba(16,185,129,.12)':diaBuff===o.buff&&!o.correct?'rgba(239,68,68,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.bd),color:o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.mu}},
@@ -416,7 +417,7 @@ function App(){
     const pSvcs=selP?av.filter(s=>s.p===selP):[];
 
     return h(Pad,null,
-      h(LvlUp),
+      h(LvlUp,{lvUp,lv}),
       // Arena
       h('div',{style:{background:'rgba(0,0,0,.4)',borderRadius:12,border:'2px solid '+(enc.isBoss?C.no:C.bd),padding:16,position:'relative',minHeight:160,marginTop:8}},
         // Enemy (top right)
@@ -494,7 +495,7 @@ function App(){
   // ═══ MAP / SHOP / INVENTORY ═══
   const bossReady=done.length>=6;
   return h(Pad,null,
-    h(LvlUp),
+    h(LvlUp,{lvUp,lv}),
     // HUD
     h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(0,0,0,.4)',borderRadius:10,padding:'10px 14px',marginTop:8,border:'1px solid '+C.bd}},
       h('div',null,h('span',{className:'fs-xs',style:{color:C.mu}},'LV'),h('span',{className:'pf',style:{fontSize:16,color:C.gold,marginLeft:4}},lv)),
