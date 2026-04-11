@@ -356,8 +356,8 @@ function App(){
       if(nH<=0){setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
         setTimeout(()=>{if(oi+1>=enc.objs.length){setGold(g=>g+enc.rw.gold);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+enc.rw.gold+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
             if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+enc.rw.gold,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
-          }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(nx.hp+(diaBuff==='boostEnemy'?10:0));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
-      else{setTimeout(()=>{const cd=isW?5:isR?(diaBuff==='boostEnemy'?25:20):10;
+          }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(Math.round(nx.hp*(diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1)));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
+      else{setTimeout(()=>{const cdBase=isW?5:isR?20:10;const cd=Math.round(cdBase*(diaBuff==='boostEnemy'?1.5:diaBuff==='reduceHp'?1:1.15));
         if(shld){setShld(false);setLog(p=>[...p,{y:'i',t:'🛡️ Blocked!'}]);snd('sel');setAn(false);return}
         setSH(true);snd('hurt');setPHp(p=>{const nh=Math.max(0,p-cd);if(nh<=0){setLog(p2=>[...p2,{y:'e',t:'💥 -'+cd+'HP! Defeated...'}]);snd('lose');setTimeout(()=>setPh('defeat'),600)}else setLog(p2=>[...p2,{y:'e',t:'💢 Pushback! -'+cd+'HP'}]);return nh});
         setTimeout(()=>{setSH(false);setAn(false)},300)},400)}
@@ -406,8 +406,8 @@ function App(){
           String.fromCharCode(65+i)+'. '+o.t,
           (o.correct||diaBuff===o.buff)&&h('div',{className:'fs-xs',style:{marginTop:6,color:o.correct?C.ok:C.no}},o.fb))),
         h('div',{style:{marginTop:10,padding:'10px 12px',borderRadius:8,fontSize:13,background:diaBuff==='reduceHp'?'rgba(16,185,129,.08)':diaBuff==='boostEnemy'?'rgba(239,68,68,.08)':'rgba(255,255,255,.03)',color:diaBuff==='reduceHp'?C.ok:diaBuff==='boostEnemy'?C.no:C.mu}},
-          diaBuff==='reduceHp'?'✅ Battle buff: +15% damage!':diaBuff==='boostEnemy'?'⚠️ Enemy buff: stronger counters!':'➡️ Neutral start.'),
-        h('button',{onClick:()=>{setPh('battle');if(diaBuff==='boostEnemy')setOHp(hp=>hp+10);setLog([{y:'s',t:'⚔️ Battle start! '+enc.objs.length+' objections.'}]);enc.isBoss?snd('boss'):snd('blip')},style:{marginTop:12,width:'100%',background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'⚔️ ENTER BATTLE'))));
+          diaBuff==='reduceHp'?'✅ Sharp discovery! +15% dmg · Enemy softened (-15% HP)':diaBuff==='boostEnemy'?'❌ Customer defensive! Start 60 HP · Enemy +25% HP · Counters +50%':'➖ Shallow probe. Start 80 HP · Counters +15%'),
+        h('button',{onClick:()=>{setPh('battle');const pStart=diaBuff==='boostEnemy'?60:diaBuff==='reduceHp'?100:80;const oMult=diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1;setPHp(pStart);setOHp(Math.round(enc.objs[0].hp*oMult));setLog([{y:'s',t:'⚔️ Battle start! '+enc.objs.length+' objections.'},diaBuff==='reduceHp'?{y:'v',t:'✅ Your discovery softened the customer.'}:diaBuff==='boostEnemy'?{y:'e',t:'❌ Your pitch put the customer on the defensive.'}:{y:'i',t:'➖ Your probe was shallow. Less momentum.'}]);enc.isBoss?snd('boss'):snd('blip')},style:{marginTop:12,width:'100%',background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'⚔️ ENTER BATTLE'))));
 
   // ═══ BATTLE ═══
   if((ph==='battle'||ph==='victory'||ph==='defeat')&&enc){
