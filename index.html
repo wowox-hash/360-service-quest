@@ -390,20 +390,21 @@ function App(){
 
   const atk=useCallback(()=>{
     if(!sel||an||!enc)return;const sv=SVC.find(s=>s.id===sel);const ob=enc.objs[oi];setAn(true);snd('atk');
-    const isW=ob.w.includes(sel),isR=ob.r.includes(sel);
-    let cm=1,nc=combo;if(sv.p===lastPil){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
-    let d=sv.pw;
+    const isW=ob.w.includes(sel);
+    const rp=ob.p===sv.p;
+    let cm=1,nc=combo;if(sv.p===lastPil&&rp){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
+    let d=0;
     if(isW){d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1));snd('crit');setSE(true);setFl({y:'c',v:d})}
-    else if(isR){d=Math.round(sv.pw*.2);snd('miss');setFl({y:'m',v:d})}
-    else{d=Math.round(sv.pw*.7*cm*(dmgB?1.25:1));snd('atk');setSE(true);setFl({y:'n',v:d})}
-    setLog(p=>[...p,{y:'p',t:`${isW?'⚔️ SUPER EFFECTIVE! ':''}${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`}]);
+    else if(rp){d=Math.round(sv.pw*.6*cm*(dmgB?1.25:1));snd('atk');setSE(true);setFl({y:'n',v:d})}
+    else{d=0;snd('miss');setFl({y:'m',v:'MISS'})}
+    setLog(p=>[...p,{y:isW?'v':rp?'p':'e',t:isW?`⚔️ SUPER EFFECTIVE! ${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`:rp?`${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`:`❌ ${sv.n} — wrong pillar, 0 dmg`}]);
     const nH=Math.max(0,oHp-d);setOHp(nH);
     setTimeout(()=>{setSE(false);setFl(null);
       if(nH<=0){setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
         setTimeout(()=>{if(oi+1>=enc.objs.length){setGold(g=>g+enc.rw.gold);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+enc.rw.gold+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
             if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+enc.rw.gold,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
           }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(Math.round(nx.hp*(diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1)));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
-      else{setTimeout(()=>{const cdBase=isW?5:isR?20:10;const cd=Math.round(cdBase*(diaBuff==='boostEnemy'?1.5:diaBuff==='reduceHp'?1:1.15));
+      else{setTimeout(()=>{const cdBase=isW?5:rp?10:20;const cd=Math.round(cdBase*(diaBuff==='boostEnemy'?1.5:diaBuff==='reduceHp'?1:1.15));
         if(shld){setShld(false);setLog(p=>[...p,{y:'i',t:'🛡️ Blocked!'}]);snd('sel');setAn(false);return}
         setSH(true);snd('hurt');setPHp(p=>{const nh=Math.max(0,p-cd);if(nh<=0){setLog(p2=>[...p2,{y:'e',t:'💥 -'+cd+'HP! Defeated...'}]);snd('lose');setTimeout(()=>setPh('defeat'),600)}else setLog(p2=>[...p2,{y:'e',t:'💢 Pushback! -'+cd+'HP'}]);return nh});
         setTimeout(()=>{setSH(false);setAn(false)},300)},400)}
