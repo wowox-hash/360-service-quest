@@ -324,16 +324,8 @@ function genMapData(){
  carveLine(b[2][0],b[2][1],b[8][0],b[8][1]);
  carveLine(b[4][0],b[4][1],b[8][0],b[8][1]);
  carveLine(b[8][0],b[8][1],Math.round(50*MW/100),MH-3);
- // Hedge ring around each building (at radius 4, skipping path tiles)
- ALL.forEach((e,i)=>{
-  const[cx,cy]=b[i];
-  for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){
-   const nx=cx+dx,ny=cy+dy;
-   if(nx<1||nx>=MW-1||ny<1||ny>=MH-1)continue;
-   const d=Math.max(Math.abs(dx),Math.abs(dy));
-   if(d===4&&m[ny][nx]===0)m[ny][nx]=5;
-  }
- });
+ // Hedge ring removed: it was creating maze-like corridors and dead ends
+ // around buildings. The carved stone paths are enough structure on their own.
  // Water pond top-left quadrant (decorative, player routes around it)
  const pondX=10,pondY=55;
  for(let dy=0;dy<5;dy++)for(let dx=0;dx<6;dx++){
@@ -805,7 +797,7 @@ class OverworldScene extends Phaser.Scene {
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
   this.cameras.main.setBounds(0,0,MPX,MPY);
-  this.cameras.main.setZoom(2.5);
+  this.cameras.main.setZoom(2.0);
   // Input
   this.cursors=this.input.keyboard.createCursorKeys();
   this.wasd=this.input.keyboard.addKeys('W,A,S,D');
@@ -976,20 +968,24 @@ function App(){
   useEffect(()=>{
    const onMap=ph==='map'&&tab==='map';
    if(onMap){
+    const el=document.getElementById('phaser-map');
+    if(!el||typeof Phaser==='undefined')return;
     if(!phaserRef.current){
-     const el=document.getElementById('phaser-map');
-     if(!el||typeof Phaser==='undefined')return;
      phaserRef.current=new Phaser.Game({
-      type:Phaser.AUTO,parent:'phaser-map',width:480,height:460,pixelArt:true,backgroundColor:'#020617',
+      type:Phaser.AUTO,parent:el,width:480,height:460,pixelArt:true,backgroundColor:'#020617',
       scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
       physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
       scene:[BootScene,OverworldScene]
      });
      setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),100);
     }else{
+     // The map div was unmounted while we were in dialogue/battle; re-attach the canvas.
+     const cv=phaserRef.current.canvas;
+     if(cv&&cv.parentNode!==el){el.appendChild(cv);if(phaserRef.current.scale&&phaserRef.current.scale.refresh)phaserRef.current.scale.refresh()}
      const ov=phaserRef.current.scene.getScene('Overworld');
-     if(ov&&ov.scene.isPaused())ov.scene.resume();
-     if(phaserRef.current.canvas)phaserRef.current.canvas.style.display='block';
+     if(ov){if(ov.scene.isPaused())ov.scene.resume();ov.cameras&&ov.cameras.main&&ov.hero&&ov.cameras.main.startFollow(ov.hero,true,0.08,0.08)}
+     if(cv)cv.style.display='block';
+     setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),50);
     }
    }else if(phaserRef.current){
     const ov=phaserRef.current.scene.getScene('Overworld');
