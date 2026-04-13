@@ -762,40 +762,6 @@ class OverworldScene extends Phaser.Scene {
 const TREES=[[6,12],[14,30],[8,52],[12,78],[18,92],[32,10],[44,6],[64,16],[68,8],[94,14],[34,56],[48,50],[66,66],[88,48],[4,62],[14,84],[88,78],[92,92],[90,30],[28,92],[72,36],[38,78],[10,38],[34,34],[54,68],[46,62]];
 const ROCKS=[[10,90],[90,86],[92,42],[8,32],[58,92],[30,66],[86,66]];
 const FLWRS=[[6,20],[92,64],[12,58],[64,12],[38,90],[72,78],[18,66],[56,22]];
-const SHP={
- GARAGE:[h('polygon',{key:'r',points:'-6,-1 -5,-4 5,-4 6,-1',fill:'#9c2820',stroke:'#4a0f0f',strokeWidth:.3}),h('rect',{key:'w',x:-6,y:-1,width:12,height:6,fill:'#a8a8a8',stroke:'#444',strokeWidth:.3}),h('rect',{key:'d',x:-2.5,y:0,width:5,height:5,fill:'#2a2a2a',stroke:'#000',strokeWidth:.3}),h('line',{key:'l1',x1:-2.5,y1:1.5,x2:2.5,y2:1.5,stroke:'#555',strokeWidth:.2}),h('line',{key:'l2',x1:-2.5,y1:3,x2:2.5,y2:3,stroke:'#555',strokeWidth:.2}),h('rect',{key:'w1',x:-5.5,y:-.3,width:1.5,height:1.3,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('rect',{key:'w2',x:4,y:-.3,width:1.5,height:1.3,fill:'#87ceeb',stroke:'#111',strokeWidth:.1})],
- HALL:[h('polygon',{key:'r',points:'-5.5,-1 -4.5,-2 0,-5.5 4.5,-2 5.5,-1',fill:'#d27a20',stroke:'#6a3a0a',strokeWidth:.3}),h('rect',{key:'w',x:-5,y:-1,width:10,height:6,fill:'#e4c48a',stroke:'#8b5a2b',strokeWidth:.3}),h('rect',{key:'d',x:-1.5,y:1,width:3,height:4,fill:'#4a2a10',stroke:'#000',strokeWidth:.2}),h('rect',{key:'w1',x:-4,y:0,width:2,height:1.8,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('rect',{key:'w2',x:2,y:0,width:2,height:1.8,fill:'#87ceeb',stroke:'#111',strokeWidth:.1}),h('circle',{key:'dk',cx:0,cy:3,r:.18,fill:'#FFD700'})],
- SHOP:[h('rect',{key:'aw',x:-5.5,y:-4,width:11,height:1.2,fill:'#2a2a2a'}),...[0,1,2,3,4,5,6].map(i=>h('rect',{key:'st'+i,x:-5.5+i*1.57,y:-3,width:1.57,height:.8,fill:i%2?'#f0f0f0':'#d83030'})),h('rect',{key:'w',x:-5,y:-2,width:10,height:7,fill:'#f2e4c0',stroke:'#8b5a2b',strokeWidth:.3}),h('rect',{key:'dw',x:-4.5,y:-1.5,width:6,height:3.5,fill:'#6b9fd5',stroke:'#2a3a5a',strokeWidth:.2}),h('line',{key:'mw',x1:-1.5,y1:-1.5,x2:-1.5,y2:2,stroke:'#2a3a5a',strokeWidth:.15}),h('rect',{key:'d',x:2.5,y:0,width:2.3,height:5,fill:'#4a2a10',stroke:'#000',strokeWidth:.2}),h('circle',{key:'dk',cx:3.65,cy:2.5,r:.12,fill:'#FFD700'})],
- DEPOT:[h('rect',{key:'r',x:-7,y:-3,width:14,height:1.5,fill:'#404040',stroke:'#1a1a1a',strokeWidth:.3}),h('rect',{key:'w',x:-7,y:-1.5,width:14,height:6.5,fill:'#7a7a7a',stroke:'#2a2a2a',strokeWidth:.3}),...[-6,-5,-4,-3,3,4,5,6].map(x=>h('line',{key:'cl'+x,x1:x,y1:-1.5,x2:x,y2:5,stroke:'#5a5a5a',strokeWidth:.15})),h('rect',{key:'d',x:-2.5,y:0,width:5,height:5,fill:'#2a2a2a',stroke:'#000',strokeWidth:.3}),...[0,1,2,3].map(i=>h('line',{key:'ld'+i,x1:-2.5,y1:1+i,x2:2.5,y2:1+i,stroke:'#555',strokeWidth:.15}))],
- OFFICE:[h('rect',{key:'r',x:-5,y:-3.5,width:10,height:1.2,fill:'#1a2a50',stroke:'#000',strokeWidth:.3}),h('rect',{key:'w',x:-5,y:-2.5,width:10,height:7.5,fill:'#2a3a6a',stroke:'#000',strokeWidth:.3}),...[0,1,2].flatMap(r=>[0,1,2].map(c=>h('rect',{key:'wd'+r+c,x:-4+c*3,y:-1.8+r*1.8,width:2,height:1.2,fill:'#5a9ddb',stroke:'#000',strokeWidth:.1}))),h('rect',{key:'d',x:-1,y:3.5,width:2,height:1.5,fill:'#FFD700',stroke:'#000',strokeWidth:.2})],
- CONV:[h('polygon',{key:'sp',points:'0,-7.5 .4,-6 -.4,-6',fill:'#FFD700',stroke:'#8b4513',strokeWidth:.15}),h('ellipse',{key:'dm',cx:0,cy:-4,rx:4,ry:2,fill:'#e8b400',stroke:'#8b4513',strokeWidth:.3}),h('rect',{key:'b',x:-7,y:-2,width:14,height:7,fill:'#d4c8a8',stroke:'#5a3a10',strokeWidth:.3}),...[-5.5,-3,3,5.5].map(x=>h('rect',{key:'co'+x,x:x-.3,y:-2,width:.8,height:6,fill:'#fff2d8',stroke:'#5a3a10',strokeWidth:.2})),h('rect',{key:'d',x:-1.5,y:1,width:3,height:4,fill:'#FFD700',stroke:'#5a3a10',strokeWidth:.3}),h('line',{key:'dl',x1:0,y1:1,x2:0,y2:5,stroke:'#5a3a10',strokeWidth:.15})],
-};
-const Building=(type,cx,cy,lk,d,near,id)=>h('g',{key:'b'+id,transform:`translate(${cx} ${cy})`,opacity:lk?.35:1,style:{filter:near?'drop-shadow(0 0 1.5px #FFD700) drop-shadow(0 0 3px #FFD700)':d?'drop-shadow(0 0 .8px #FFD700)':''}},h('ellipse',{cx:0,cy:5.5,rx:7,ry:.8,fill:'rgba(0,0,0,.45)'}),...(SHP[type]||SHP.GARAGE));
-
-const WorldMap=({scene,children,style:st})=>h('div',{className:'ff7',style:{position:'relative',overflow:'hidden',...st}},
-  h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',style:{position:'absolute',inset:0,width:'100%',height:'100%'}},
-    h('defs',null,
-      h('linearGradient',{id:'grs',x1:'0',y1:'0',x2:'0',y2:'1'},h('stop',{offset:'0',stopColor:'#5a9c40'}),h('stop',{offset:'1',stopColor:'#2a5a1f'})),
-      h('radialGradient',{id:'vig',cx:'.5',cy:'.5',r:'.7'},h('stop',{offset:'.6',stopColor:'#000',stopOpacity:'0'}),h('stop',{offset:'1',stopColor:'#000',stopOpacity:'.55'}))),
-    h('rect',{x:0,y:0,width:100,height:100,fill:'url(#grs)'}),
-    // Dirt path network (dark base + lighter overlay for 2-tone road)
-    ...[['M50,94 Q45,82 42,68 T40,42',5],['M10,42 Q25,40 40,42 T60,42 T90,42',5],['M22,22 Q26,32 40,42',4],['M50,14 Q45,28 40,42',4],['M78,22 Q70,30 60,42',4],['M22,42 Q20,56 22,68',4],['M60,42 Q70,50 78,58',4],['M22,68 Q35,78 50,84',4],['M78,58 Q65,72 50,84',4]].flatMap(([d,sw],i)=>[h('path',{key:'pa'+i,d,stroke:'#6a4824',strokeWidth:sw,fill:'none',strokeLinecap:'round'}),h('path',{key:'pb'+i,d,stroke:'#a07a48',strokeWidth:sw-1.5,fill:'none',strokeLinecap:'round'})]),
-    // Decorative flowers and rocks
-    ...ROCKS.map(([x,y],i)=>h('ellipse',{key:'rk'+i,cx:x,cy:y,rx:1,ry:.6,fill:'#7a7a7a',stroke:'#3a3a3a',strokeWidth:.15})),
-    ...FLWRS.map(([x,y],i)=>h('g',{key:'fl'+i,transform:`translate(${x} ${y})`},h('circle',{cx:0,cy:0,r:.4,fill:'#ff6eb0'}),h('circle',{cx:.6,cy:-.3,r:.35,fill:'#ffd700'}),h('circle',{cx:-.6,cy:.2,r:.35,fill:'#ff6eb0'}))),
-    // Buildings
-    ...(scene||[]),
-    // Trees (rendered after buildings so canopy overlaps)
-    ...TREES.map(([tx,ty],i)=>h('g',{key:'t'+i,transform:`translate(${tx} ${ty})`},
-      h('ellipse',{cx:0,cy:1,rx:1.8,ry:.4,fill:'rgba(0,0,0,.35)'}),
-      h('rect',{x:-.35,y:-1,width:.7,height:1.8,fill:'#3a2510'}),
-      h('circle',{cx:0,cy:-2.3,r:2.2,fill:'#1a4a1a'}),
-      h('circle',{cx:-.7,cy:-2.8,r:1.3,fill:'#2d6a2a'}),
-      h('circle',{cx:.6,cy:-1.9,r:.9,fill:'#2d6a2a'}))),
-    // Vignette + wooden fence border
-    h('rect',{x:0,y:0,width:100,height:100,fill:'url(#vig)'}),
-    h('rect',{x:.8,y:.8,width:98.4,height:98.4,fill:'none',stroke:'#3a2510',strokeWidth:.6,strokeDasharray:'2.5 1'})),
-  children);
 
 // ── Shared UI components (hoisted so they don't remount every render) ──
 const HpBar=({v,m,w='100%'})=>h('div',{className:'hpc',style:{width:w,height:12,borderRadius:3,overflow:'hidden'}},h('div',{style:{height:'100%',background:'linear-gradient(180deg,'+(v/m>.5?'#34d399 0%,#10B981 50%,#047857':v/m>.25?'#fcd34d 0%,#FFD700 50%,#b45309':'#f87171 0%,#EF4444 50%,#991b1b')+' 100%)',width:(v/m*100)+'%',transition:'width .3s',boxShadow:'inset 0 1px 0 rgba(255,255,255,.45)'}}));
@@ -842,28 +808,47 @@ function App(){
   const [t0,setT0]=useState(null);
   const [tab,setTab]=useState('map');
   const [flying,setFlying]=useState(null);
-  const [pos,setPos]=useState({x:50,y:92});
-  const [dir,setDir]=useState({x:0,y:0});
-  const [npcs,setNpcs]=useState(()=>{const o={};ENC.forEach(e=>{o[e.id]={x:e.mx,y:e.my,t:0}});o[99]={x:BOSS.mx,y:BOSS.my,t:0};return o});
   const logRef=useRef(null);
+  const phaserRef=useRef(null);
 
   useEffect(()=>{const iv=setInterval(()=>setHf(f=>(f+1)%4),400);return()=>clearInterval(iv)},[]);
   useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight},[log]);
   useEffect(()=>{sbLoad().then(d=>{if(d)setLb(d)})},[]);
-  // ── WALK: continuous movement while dir != 0 ──
-  useEffect(()=>{if(dir.x===0&&dir.y===0)return;const iv=setInterval(()=>{setPos(p=>{const n={x:p.x+dir.x*1.3,y:p.y+dir.y*1.3};const mag=Math.hypot(dir.x,dir.y);if(mag>1){n.x=p.x+dir.x/mag*1.3;n.y=p.y+dir.y/mag*1.3}return{x:Math.max(6,Math.min(94,n.x)),y:Math.max(8,Math.min(94,n.y))}})},50);return()=>clearInterval(iv)},[dir]);
-  // ── WALK: keyboard input (only on overworld) ──
-  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const m={ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},a:{x:-1,y:0},A:{x:-1,y:0},d:{x:1,y:0},D:{x:1,y:0},w:{x:0,y:-1},W:{x:0,y:-1},s:{x:0,y:1},S:{x:0,y:1}};const kd=ev=>{const v=m[ev.key];if(v){ev.preventDefault();setDir(v)}};const ku=ev=>{if(m[ev.key])setDir({x:0,y:0})};window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);return()=>{window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);setDir({x:0,y:0})}},[ph,tab]);
-  // ── WALK: NPC wander loop (distributors roam near their building) ──
-  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const iv=setInterval(()=>{setNpcs(prev=>{const n={...prev};for(const e of ENC){const h={x:e.mx,y:e.my};const cur=prev[e.id];const t=cur.t+1;let ang=cur.ang;if(!ang||t%8===0)ang=Math.random()*Math.PI*2;let nx=cur.x+Math.cos(ang)*.5,ny=cur.y+Math.sin(ang)*.5;const dist=Math.hypot(nx-h.x,ny-h.y);if(dist>4){const pull=.85;nx=h.x+(nx-h.x)*pull;ny=h.y+(ny-h.y)*pull;ang+=Math.PI}n[e.id]={x:nx,y:ny,t,ang}}const b={x:BOSS.mx,y:BOSS.my};const bc=prev[99];const bt=bc.t+1;let ba=bc.ang;if(!ba||bt%8===0)ba=Math.random()*Math.PI*2;let bnx=bc.x+Math.cos(ba)*.35,bny=bc.y+Math.sin(ba)*.35;const bd=Math.hypot(bnx-b.x,bny-b.y);if(bd>2.5){bnx=b.x+(bnx-b.x)*.85;bny=b.y+(bny-b.y)*.85;ba+=Math.PI}n[99]={x:bnx,y:bny,t:bt,ang:ba};return n})},350);return()=>clearInterval(iv)},[ph,tab]);
-  // ── WALK: collision with roaming NPCs ──
-  useEffect(()=>{if(ph!=='map'||tab!=='map')return;const hit=(id,m)=>{const np=npcs[id]||{x:m.mx,y:m.my};return Math.hypot(pos.x-np.x,pos.y-np.y)<4};for(const e of ENC){if(done.includes(e.id))continue;if((e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6))continue;if(hit(e.id,e)){go(e);return}}if(done.length>=6&&!done.includes(99)&&hit(99,BOSS))go(BOSS)},[pos,npcs,ph,tab,done,lv]);
+  // ── PHASER: encounter trigger listener ──
+  useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
+  // ── PHASER: mount / pause / resume game on map tab ──
+  useEffect(()=>{
+   const onMap=ph==='map'&&tab==='map';
+   if(onMap){
+    if(!phaserRef.current){
+     const el=document.getElementById('phaser-map');
+     if(!el||typeof Phaser==='undefined')return;
+     phaserRef.current=new Phaser.Game({
+      type:Phaser.AUTO,parent:'phaser-map',width:480,height:460,pixelArt:true,backgroundColor:'#020617',
+      scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
+      physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
+      scene:[BootScene,OverworldScene]
+     });
+     setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),100);
+    }else{
+     const ov=phaserRef.current.scene.getScene('Overworld');
+     if(ov&&ov.scene.isPaused())ov.scene.resume();
+     if(phaserRef.current.canvas)phaserRef.current.canvas.style.display='block';
+    }
+   }else if(phaserRef.current){
+    const ov=phaserRef.current.scene.getScene('Overworld');
+    if(ov&&!ov.scene.isPaused())ov.scene.pause();
+    if(phaserRef.current.canvas)phaserRef.current.canvas.style.display='none';
+   }
+  },[ph,tab]);
+  // ── PHASER: push game state to scene ──
+  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6})},[done,lv]);
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
   const cLv=Math.floor(txp/200)+1;
   useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
 
-  const go=(e)=>{snd('sel');setDir({x:0,y:0});setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setPh(e.dia?'dialogue':'intro')};
+  const go=(e)=>{snd('sel');setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setPh(e.dia?'dialogue':'intro')};
   const useI=(id)=>{const i=items.findIndex(x=>x.id===id&&x.u>0);if(i<0)return;const ni=[...items];ni[i]={...ni[i],u:ni[i].u-1};if(ni[i].u<=0)ni.splice(i,1);setItems(ni);snd('buy');
     if(id==='intel'){setShowW(true);setLog(p=>[...p,{y:'i',t:'🔍 Weaknesses revealed!'}])}else if(id==='coffee'){setPHp(p=>Math.min(MHP,p+30));setLog(p=>[...p,{y:'i',t:'☕ +30 HP!'}])}else if(id==='playbook'){setDmgB(true);setLog(p=>[...p,{y:'i',t:'📘 +25% damage!'}])}else if(id==='shield'){setShld(true);setLog(p=>[...p,{y:'i',t:'🛡️ Shield active!'}])}else if(id==='combo_charm'){setComboB(true);setLog(p=>[...p,{y:'i',t:'✨ Combo 2x!'}])}else if(id==='mega_heal'){setPHp(MHP);setLog(p=>[...p,{y:'i',t:'⚡ Full HP!'}])}};
 
@@ -1017,7 +1002,7 @@ function App(){
 
       // Return
       (ph==='victory'||ph==='defeat')&&h('div',{style:{textAlign:'center',marginTop:16}},
-        h('button',{onClick:()=>{setPh('map');setTab('map');setPos({x:50,y:92});setDir({x:0,y:0});snd('sel');sbLoad().then(d=>{if(d)setLb(d)})},style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 28px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'← World Map')));
+        h('button',{onClick:()=>{setPh('map');setTab('map');Bridge.emit('return-to-map',{});snd('sel');sbLoad().then(d=>{if(d)setLb(d)})},style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 28px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'← World Map')));
   }
 
   // ═══ MAP / SHOP / INVENTORY ═══
@@ -1063,28 +1048,13 @@ function App(){
             h('span',{className:'fs-sm',style:{flex:1,color:has?C.tx:C.mu}},s.n),
             h(Tier,{t:s.t}))}))))),
 
-    // WORLD MAP (walkable overworld)
+    // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
       h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
-      h(WorldMap,{
-        style:{height:460,marginTop:8},
-        scene:[
-          ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);const np=npcs[e.id]||{x:e.mx,y:e.my};const near=!lk&&!d&&Math.hypot(pos.x-np.x,pos.y-np.y)<8;return Building(e.bld,e.mx,e.my,lk,d,near,e.id)}),
-          (()=>{const d=done.includes(99);const lk=!bossReady;const np=npcs[99]||{x:BOSS.mx,y:BOSS.my};const near=bossReady&&!d&&Math.hypot(pos.x-np.x,pos.y-np.y)<8;return Building(BOSS.bld,BOSS.mx,BOSS.my,lk,d,near,99)})()
-        ]
-      },
-        // Location labels
-        ...ENC.map(e=>{const d=done.includes(e.id);const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;return h('div',{key:'lb'+e.id,className:'pf',style:{position:'absolute',left:e.mx+'%',top:(e.my+7)+'%',transform:'translate(-50%,0)',fontSize:7,color:d?'#FFD700':lk?C.no:'#fff',textShadow:'1px 1px 0 #000, -1px -1px 0 #000',whiteSpace:'nowrap',pointerEvents:'none',zIndex:3}},lk?'🔒 '+e.loc:d?'✓ '+e.loc:e.loc)}),
-        h('div',{className:'pf',style:{position:'absolute',left:BOSS.mx+'%',top:(BOSS.my+8)+'%',transform:'translate(-50%,0)',fontSize:9,color:done.includes(99)?'#FFD700':bossReady?C.no:C.mu,textShadow:'1px 1px 0 #000, -1px -1px 0 #000',whiteSpace:'nowrap',pointerEvents:'none',zIndex:3}},done.includes(99)?'👑 CHAMPION':bossReady?'👑 AUTOMECHANIKA':'🔒 Clear 6'),
-        // Roaming distributors (NPCs)
-        ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);if(lk||d)return null;const np=npcs[e.id]||{x:e.mx,y:e.my};return h('div',{key:'n'+e.id,style:{position:'absolute',left:np.x+'%',top:np.y+'%',transform:'translate(-50%,-70%)',width:20,height:30,transition:'left .35s linear,top .35s linear',filter:'drop-shadow(0 2px 3px rgba(0,0,0,.65))',pointerEvents:'none',zIndex:4},dangerouslySetInnerHTML:{__html:SP.npc(e.v)}})}),
-        bossReady&&!done.includes(99)&&(()=>{const np=npcs[99]||{x:BOSS.mx,y:BOSS.my};return h('div',{key:'nb',style:{position:'absolute',left:np.x+'%',top:np.y+'%',transform:'translate(-50%,-70%)',width:26,height:38,transition:'left .35s linear,top .35s linear',filter:'drop-shadow(0 3px 4px rgba(0,0,0,.65)) drop-shadow(0 0 5px '+C.no+')',pointerEvents:'none',zIndex:4},dangerouslySetInnerHTML:{__html:SP.mon('GROW',true)}})})(),
-        // Hero (walks via pos state)
-        h('div',{style:{position:'absolute',left:pos.x+'%',top:pos.y+'%',transform:'translate(-50%,-85%)',width:30,height:45,transition:'left .05s linear,top .05s linear',filter:'drop-shadow(0 4px 6px rgba(0,0,0,.75))',zIndex:6,pointerEvents:'none'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
-        // "!" prompt over near NPC
-        ...ENC.map(e=>{const lk=e.seg==='B'&&lv<3||e.seg==='A'&&lv<6;const d=done.includes(e.id);if(lk||d)return null;const np=npcs[e.id]||{x:e.mx,y:e.my};const near=Math.hypot(pos.x-np.x,pos.y-np.y)<8;if(!near)return null;return h('div',{key:'p'+e.id,className:'pf',style:{position:'absolute',left:np.x+'%',top:(np.y-10)+'%',transform:'translate(-50%,0)',color:'#FFD700',fontSize:14,animation:'blink 1s ease infinite',textShadow:'2px 2px 0 #000',pointerEvents:'none',zIndex:7}},'!')}),
-        // D-pad (touch overlay)
-        (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();setDir(v)};const rel=e=>{e.preventDefault();setDir({x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
+      h('div',{className:'ff7',style:{position:'relative',height:460,marginTop:8,overflow:'hidden'}},
+        h('div',{id:'phaser-map',style:{position:'absolute',inset:0}}),
+        // D-pad (React overlay → Bridge)
+        (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();Bridge.emit('dpad',v)};const rel=e=>{e.preventDefault();Bridge.emit('dpad',{x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:-1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▲'),h('div'),
           h('button',{style:btn,onPointerDown:press({x:-1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'◀'),h('div'),h('button',{style:btn,onPointerDown:press({x:1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▶'),
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▼'),h('div'))})()),
