@@ -96,6 +96,12 @@ const TUNIC_OPTS=[
  {nm:'Purple',hi:'#8a3aca',mid:'#5a1a8a',lo:'#3a0a5a',acc:'#aa5ada'},
 ];
 const CHAR={hair:1,skin:0,tunic:0};
+// ── MENTORS: passive class-like bonuses chosen at character creation ──
+const MENTORS=[
+ {nm:'The Veteran',ic:'🛡️',desc:'+20 max HP · resilient',hpBonus:20,wDmgMult:1,goldMult:1},
+ {nm:'The Specialist',ic:'⚔️',desc:'+25% weakness damage',hpBonus:0,wDmgMult:1.25,goldMult:1},
+ {nm:'The Closer',ic:'💰',desc:'+50% gold from victories',hpBonus:0,wDmgMult:1,goldMult:1.5},
+];
 
 /* ══════════════════════════════════════════════
    360° SERVICE QUEST v5 — MOBILE OPTIMIZED
@@ -1000,7 +1006,7 @@ function App(){
   const [oi,setOi]=useState(0);
   const [oHp,setOHp]=useState(0);
   const [pHp,setPHp]=useState(100);
-  const MHP=100;
+  const MHP=100+mentor.hpBonus;
   const [inv,setInv]=useState(SVC.filter(s=>s.t==='C').map(s=>s.id));
   const [sel,setSel]=useState(null);
   const [selP,setSelP]=useState(null);
@@ -1029,8 +1035,10 @@ function App(){
   const [hairIdx,setHairIdx]=useState(1);
   const [skinIdx,setSkinIdx]=useState(0);
   const [tunicIdx,setTunicIdx]=useState(0);
+  const [mentorIdx,setMentorIdx]=useState(0);
   // Sync to global CHAR so SP.hero / genHeroTex pick it up
   CHAR.hair=hairIdx;CHAR.skin=skinIdx;CHAR.tunic=tunicIdx;
+  const mentor=MENTORS[mentorIdx];
   const [lb,setLb]=useState([]);
   const [diaBuff,setDiaBuff]=useState(null);
   const [diaAns,setDiaAns]=useState(false);
@@ -1091,7 +1099,7 @@ function App(){
     let cm=1,nc=combo;if(sv.p===lastPil&&rp){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
     let d=0;
     if(isW){
-     d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1));
+     d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1)*mentor.wDmgMult);
      snd('crit');setSE(true);setFl({y:'c',v:d});
      setFlashCol('g');setTimeout(()=>setFlashCol(null),250);
      // Combo callouts
@@ -1107,7 +1115,7 @@ function App(){
     const nH=Math.max(0,oHp-d);setOHp(nH);
     setTimeout(()=>{setSE(false);setFl(null);
       if(nH<=0){setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
-        setTimeout(()=>{if(oi+1>=enc.objs.length){setGold(g=>g+enc.rw.gold);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+enc.rw.gold+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
+        setTimeout(()=>{if(oi+1>=enc.objs.length){const goldGain=Math.round(enc.rw.gold*mentor.goldMult);setGold(g=>g+goldGain);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+goldGain+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
             if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+enc.rw.gold,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
           }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(Math.round(nx.hp*(diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1)));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
       else{setTimeout(()=>{const cdBase=isW?5:rp?10:20;const cd=Math.round(cdBase*(diaBuff==='boostEnemy'?1.5:diaBuff==='reduceHp'?1:1.15));
@@ -1147,6 +1155,13 @@ function App(){
         h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
           h('span',{className:'fs-xs',style:{color:C.tx,fontWeight:700,minWidth:50}},'Tunic'),
           h('div',{style:{display:'flex',gap:8}},TUNIC_OPTS.map((o,i)=>h('button',{key:'t'+i,onClick:()=>setTunicIdx(i),title:o.nm,style:{width:32,height:32,borderRadius:'50%',background:`radial-gradient(circle at 35% 30%,${o.acc},${o.mid} 60%,${o.lo})`,border:tunicIdx===i?'3px solid #FFD700':'2px solid #7a96ff',cursor:'pointer',padding:0,boxShadow:tunicIdx===i?'0 0 8px #FFD700':'none'}}))))),
+      // ─── MENTOR PICKER ───
+      h('div',{className:'ff7',style:{maxWidth:340,margin:'0 auto 16px',padding:'14px 16px'}},
+        h('div',{className:'pf',style:{fontSize:9,color:'#FFD700',textAlign:'center',marginBottom:12,letterSpacing:1}},'⚔ CHOOSE YOUR MENTOR ⚔'),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}},MENTORS.map((m,i)=>h('button',{key:'m'+i,onClick:()=>setMentorIdx(i),style:{background:mentorIdx===i?'rgba(255,215,0,.18)':'rgba(12,24,96,.4)',border:mentorIdx===i?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'10px 6px',cursor:'pointer',color:C.tx,boxShadow:mentorIdx===i?'0 0 12px rgba(255,215,0,.5)':'none'}},
+          h('div',{style:{fontSize:24,marginBottom:4}},m.ic),
+          h('div',{className:'fs-xs',style:{fontWeight:700,marginBottom:2}},m.nm),
+          h('div',{style:{fontSize:9,color:C.mu,lineHeight:1.3}},m.desc))))),
       h('div',{style:{display:'flex',gap:8,justifyContent:'center',marginBottom:20}},
         h('button',{className:'ff7',onClick:()=>setSndOn(!sndOn),style:{color:sndOn?C.gold:C.mu,padding:'10px 16px',fontSize:14,cursor:'pointer'}},sndOn?'🔊 Sound ON':'🔇 Sound OFF')),
       h('button',{className:'ff7',onClick:async()=>{if(!nm.trim())return alert('Enter your name!');if(!aOn){await Tone.start();aOn=true}setT0(Date.now());setPh('map');snd('sel')},style:{color:C.gold,padding:'16px 40px',fontSize:16,fontWeight:700,cursor:'pointer',animation:'blink 2s ease infinite',letterSpacing:2}},'▶ START QUEST'),
@@ -1263,6 +1278,26 @@ function App(){
               h('div',{className:'fs-xs',style:{color:C.mu}},s.d)),
             h(Tier,{t:s.t})))),
         sel&&h('button',{onClick:atk,disabled:an,style:{width:'100%',marginTop:12,background:PC[selP],border:0,borderRadius:10,padding:'14px',fontSize:16,fontWeight:700,color:'#fff',cursor:an?'default':'pointer',opacity:an?.5:1}},'⚔️ Deploy '+SVC.find(s=>s.id===sel)?.n)),
+      // ─── LIMIT BREAK button (charges with weakness combos) ───
+      ph==='battle'&&lbReady&&!an&&h('button',{className:'lb-btn pf',onClick:()=>{
+        if(an)return;
+        setAn(true);setLbReady(false);setCombo(0);setLastPil(null);
+        snd('crit');setSE(true);setFlashCol('g');setTimeout(()=>setFlashCol(null),250);
+        setCallout({t:'⚡ LIMIT BREAK ⚡',c:'#ff00ff'});setTimeout(()=>setCallout(null),1400);
+        const dmg=999;setFl({y:'c',v:'BREAK!'});
+        setLog(p=>[...p,{y:'v',t:'⚡ LIMIT BREAK! Objection demolished.'}]);
+        setOHp(0);
+        setTimeout(()=>{setSE(false);setFl(null);
+          setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));
+          setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
+          setTimeout(()=>{
+            if(oi+1>=enc.objs.length){const goldGain=Math.round(enc.rw.gold*mentor.goldMult);setGold(g=>g+goldGain);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+goldGain+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
+              if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+goldGain,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
+            }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(Math.round(nx.hp*(diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1)));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}
+            setAn(false);
+          },800);
+        },700);
+      },style:{width:'100%',marginTop:10,background:'linear-gradient(135deg,#ff00ff,#FFD700,#ff00ff)',border:'3px solid #fff',borderRadius:10,padding:'14px',fontSize:14,fontWeight:700,color:'#fff',cursor:'pointer',letterSpacing:2,textShadow:'2px 2px 0 #000'}},'⚡ LIMIT BREAK ⚡'),
 
       // Return
       (ph==='victory'||ph==='defeat')&&h('div',{style:{textAlign:'center',marginTop:16}},
@@ -1274,9 +1309,13 @@ function App(){
   return h(Pad,null,
     h(LvlUp,{lvUp,lv}),
     // HUD
-    h('div',{className:'ff7',style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',marginTop:8}},
-      h('div',null,h('span',{className:'fs-xs',style:{color:C.mu}},'LV'),h('span',{className:'pf',style:{fontSize:16,color:C.gold,marginLeft:6}},lv)),
-      h('div',{className:'fs-sm',style:{fontWeight:600,color:C.tx}},nm),
+    h('div',{className:'ff7',style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',marginTop:8,gap:8}},
+      h('div',{title:mentor.nm+' · '+mentor.desc,style:{display:'flex',alignItems:'center',gap:6,minWidth:0}},
+        h('span',{style:{fontSize:18}},mentor.ic),
+        h('div',{style:{display:'flex',flexDirection:'column'}},
+          h('span',{className:'fs-xs',style:{color:C.mu,lineHeight:1}},'LV'),
+          h('span',{className:'pf',style:{fontSize:14,color:C.gold,lineHeight:1}},lv))),
+      h('div',{className:'fs-sm',style:{fontWeight:600,color:C.tx,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},nm),
       h('div',{className:'pf',style:{color:C.gold,fontSize:12}},'💰'+gold),
       h('button',{onClick:()=>setSndOn(!sndOn),style:{background:'none',border:'none',fontSize:18,cursor:'pointer',padding:4}},sndOn?'🔊':'🔇')),
     // XP bars
