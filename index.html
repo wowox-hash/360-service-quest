@@ -58,6 +58,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 .spark{animation:spark .6s ease forwards;position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}
 @keyframes lbPulse{0%,100%{box-shadow:0 0 16px #ff00ff,0 0 32px #FFD700,inset 0 0 16px rgba(255,255,255,.5)}50%{box-shadow:0 0 28px #ff00ff,0 0 56px #FFD700,inset 0 0 24px rgba(255,255,255,.7)}}
 .lb-btn{animation:lbPulse 1s ease-in-out infinite}
+@keyframes achSlide{0%{transform:translateX(120%);opacity:0}15%{transform:translateX(0);opacity:1}85%{transform:translateX(0);opacity:1}100%{transform:translateX(120%);opacity:0}}
+.ach-pop{animation:achSlide 3s ease forwards}
 .pf{text-shadow:2px 2px 0 #000,0 0 6px rgba(0,0,0,.7)}
 .ff7{background:linear-gradient(180deg,rgba(12,24,96,.92) 0%,rgba(4,10,48,.94) 100%)!important;border:2px solid transparent!important;border-image:linear-gradient(135deg,#ffffff 0%,#7a96ff 25%,#1a2a80 60%,#ffffff 100%) 1!important;box-shadow:0 0 18px rgba(80,120,255,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.55)!important;border-radius:8px!important}
 .hpc{background:linear-gradient(180deg,#1a1a2e,#0a0a1e)!important;border:1px solid #7a96ff!important;box-shadow:0 0 6px rgba(120,160,255,.45),inset 0 1px 0 rgba(255,255,255,.25)!important}
@@ -96,6 +98,17 @@ const TUNIC_OPTS=[
  {nm:'Purple',hi:'#8a3aca',mid:'#5a1a8a',lo:'#3a0a5a',acc:'#aa5ada'},
 ];
 const CHAR={hair:1,skin:0,tunic:0};
+// ── ACHIEVEMENTS: unlocked once and remembered for the session ──
+const ACHIEVEMENTS=[
+ {id:'first_blood',ic:'⚔️',nm:'First Blood',desc:'Win your first encounter'},
+ {id:'flawless',ic:'🛡️',nm:'Flawless',desc:'Win an encounter without taking damage'},
+ {id:'perfect_dia',ic:'💡',nm:'Master of Discovery',desc:'5 perfect discovery questions'},
+ {id:'limit',ic:'⚡',nm:'Limit Breaker',desc:'Use a Limit Break in combat'},
+ {id:'combo5',ic:'🔥',nm:'Combo King',desc:'Hit a 5-chain combo'},
+ {id:'rich',ic:'💰',nm:'Big Earner',desc:'Hit 200 gold'},
+ {id:'half',ic:'📈',nm:'Halfway There',desc:'Clear half the encounters'},
+ {id:'champ',ic:'👑',nm:'Sales Champion',desc:'Defeat the Automechanika boss'},
+];
 // ── MENTORS: passive class-like bonuses chosen at character creation ──
 const MENTORS=[
  {nm:'The Veteran',ic:'🛡️',desc:'+20 max HP · resilient',hpBonus:20,wDmgMult:1,goldMult:1},
@@ -1132,6 +1145,17 @@ function App(){
    else if(ph==='battle'){if(enc&&enc.isBoss)playBGM('boss');else playBGM('battle')}
    else if(ph==='victory'||ph==='defeat')stopBGM();
   },[ph,sndOn,enc]);
+  // ── ACHIEVEMENTS: auto-unlock on stat thresholds ──
+  useEffect(()=>{
+   const unlock=(id)=>{if(achs.includes(id))return;const a=ACHIEVEMENTS.find(x=>x.id===id);if(!a)return;setAchs(p=>[...p,id]);setAchPop(a);snd('lvl');setTimeout(()=>setAchPop(null),3000)};
+   if(done.length>=1)unlock('first_blood');
+   if(noHits>=1)unlock('flawless');
+   if(perfectDia>=5)unlock('perfect_dia');
+   if(maxCombo>=5)unlock('combo5');
+   if(gold>=200)unlock('rich');
+   if(done.length>=Math.ceil(ENC.length/2))unlock('half');
+   if(done.includes(99))unlock('champ');
+  },[done,noHits,perfectDia,maxCombo,gold]);
   // ── PHASER: random overworld event listener ──
   useEffect(()=>{
    const f=(d)=>{
@@ -1311,6 +1335,13 @@ function App(){
       flashCol&&h('div',{className:flashCol==='g'?'flash-g':'flash-r',style:{position:'fixed',inset:0,pointerEvents:'none',zIndex:9998}}),
       // Big combo callout
       callout&&h('div',{className:'callout pf',style:{position:'fixed',top:'30%',left:'50%',color:callout.c,fontSize:42,fontWeight:'bold',textShadow:'4px 4px 0 #000, 0 0 20px '+callout.c+', 0 0 40px '+callout.c,zIndex:9999,pointerEvents:'none',whiteSpace:'nowrap',letterSpacing:2}},callout.t),
+      // Achievement pop-up (also visible during battle)
+      achPop&&h('div',{key:achPop.id,className:'ach-pop ff7',style:{position:'fixed',top:14,right:14,padding:'10px 14px',display:'flex',alignItems:'center',gap:10,zIndex:9999,maxWidth:260,borderImage:'linear-gradient(135deg,#fff,#FFD700,#1a2a80,#fff) 1',boxShadow:'0 0 18px rgba(255,215,0,.6)'}},
+        h('div',{style:{fontSize:28}},achPop.ic),
+        h('div',null,
+          h('div',{className:'pf',style:{fontSize:9,color:'#FFD700',letterSpacing:1}},'ACHIEVEMENT UNLOCKED'),
+          h('div',{className:'fs-sm',style:{color:'#fff',fontWeight:700,marginTop:2}},achPop.nm),
+          h('div',{className:'fs-xs',style:{color:C.mu,marginTop:1}},achPop.desc))),
       // Arena
       h('div',{className:'ff7'+(sE?' shake':''),style:{padding:16,position:'relative',minHeight:180,marginTop:8,...(enc.isBoss?{borderImage:'linear-gradient(135deg,#fff 0%,#EF4444 30%,#800 60%,#fff 100%) 1',boxShadow:'0 0 24px rgba(239,68,68,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:{})}},
         // Enemy (top right)
@@ -1387,6 +1418,7 @@ function App(){
       // ─── LIMIT BREAK button (charges with weakness combos) ───
       ph==='battle'&&lbReady&&!an&&h('button',{className:'lb-btn pf',onClick:()=>{
         if(an)return;
+        if(!achs.includes('limit')){setAchs(p=>[...p,'limit']);const a=ACHIEVEMENTS.find(x=>x.id==='limit');setAchPop(a);setTimeout(()=>setAchPop(null),3000)}
         setAn(true);setLbReady(false);setCombo(0);setLastPil(null);
         snd('crit');setSE(true);setFlashCol('g');setTimeout(()=>setFlashCol(null),250);
         setCallout({t:'⚡ LIMIT BREAK ⚡',c:'#ff00ff'});setTimeout(()=>setCallout(null),1400);
@@ -1424,6 +1456,18 @@ function App(){
       h('div',{className:'fs-sm',style:{fontWeight:600,color:C.tx,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},nm),
       h('div',{className:'pf',style:{color:C.gold,fontSize:12}},'💰'+gold),
       h('button',{onClick:()=>setSndOn(!sndOn),style:{background:'none',border:'none',fontSize:18,cursor:'pointer',padding:4}},sndOn?'🔊':'🔇')),
+    // Quest log line
+    h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:4,padding:'2px 8px'}},
+      done.includes(99)?'👑 You are the 360° Sales Champion!':
+      done.length>=6?'⚠ Boss unlocked at the south arena':
+      '📋 Cleared '+done.length+'/'+(ENC.length+1)+' · '+(done.length>=6?'Boss ready':(6-done.length)+' until boss')),
+    // Achievement pop-up (top-right corner)
+    achPop&&h('div',{key:achPop.id,className:'ach-pop ff7',style:{position:'fixed',top:14,right:14,padding:'10px 14px',display:'flex',alignItems:'center',gap:10,zIndex:9999,maxWidth:260,borderImage:'linear-gradient(135deg,#fff,#FFD700,#1a2a80,#fff) 1',boxShadow:'0 0 18px rgba(255,215,0,.6)'}},
+      h('div',{style:{fontSize:28}},achPop.ic),
+      h('div',null,
+        h('div',{className:'pf',style:{fontSize:9,color:'#FFD700',letterSpacing:1}},'ACHIEVEMENT UNLOCKED'),
+        h('div',{className:'fs-sm',style:{color:'#fff',fontWeight:700,marginTop:2}},achPop.nm),
+        h('div',{className:'fs-xs',style:{color:C.mu,marginTop:1}},achPop.desc))),
     // XP bars
     h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginTop:8}},
       ['CONNECT','ENABLE','GROW','DELIVER'].map(p=>h('div',{key:p,className:'ff7',style:{padding:'8px 10px'}},
