@@ -256,7 +256,8 @@ const SHOP=[
   {id:'shield',nm:'Thick Skin',ds:'Block next counter-attack',cost:35,ic:'🛡️'},
   {id:'combo_charm',nm:'Combo Charm',ds:'Double combo multiplier',cost:50,ic:'✨'},
   {id:'mega_heal',nm:'Energy Drink',ds:'Full HP restore',cost:80,ic:'⚡'},
-  {id:'rallycar',nm:'Rally Car',ds:'+40% walking speed (permanent)',cost:150,ic:'🏎️',upgrade:true},
+  {id:'motorcycle',nm:'Red Motorcycle',ds:'+55% movement speed',cost:100,ic:'🏍️',upgrade:true},
+  {id:'rallycar',nm:'Blue Rally Car',ds:'+100% movement speed',cost:180,ic:'🏎️',upgrade:true},
 ];
 
 // ── ENCOUNTERS ──
@@ -571,6 +572,95 @@ function genBldTex(scene){
  });
 }
 // Random-event icons (16x16 each, drawn as colored circles with emoji-style center)
+// Blue rally car — top-down 2-frame spritesheet (16x24 per frame, default facing NORTH)
+function genCarTex(scene){
+ const FW=16,FH=24;
+ const c=document.createElement('canvas');c.width=FW*2;c.height=FH;
+ const x=c.getContext('2d');
+ for(let f=0;f<2;f++){
+  const ox=f*FW;
+  // Ground shadow
+  x.fillStyle='rgba(0,0,0,.35)';x.fillRect(ox+3,21,10,1);
+  // Main body dark blue outline
+  x.fillStyle='#0a1a6a';x.fillRect(ox+3,3,10,17);
+  // Body fill
+  x.fillStyle='#1a3ab8';x.fillRect(ox+4,4,8,15);
+  // Hood (lighter blue at top - front of car)
+  x.fillStyle='#2a5af8';x.fillRect(ox+4,4,8,2);
+  // Windshield (front, light blue with reflection)
+  x.fillStyle='#b8d8f8';x.fillRect(ox+4,6,8,3);
+  x.fillStyle='#d8e8ff';x.fillRect(ox+4,6,3,1);
+  // Roof (dark)
+  x.fillStyle='#0a1a6a';x.fillRect(ox+5,9,6,4);
+  // White racing stripe down the middle
+  x.fillStyle='#ffffff';x.fillRect(ox+7,9,2,4);
+  // Rear window
+  x.fillStyle='#b8d8f8';x.fillRect(ox+4,13,8,2);
+  // Rear body
+  x.fillStyle='#1a3ab8';x.fillRect(ox+4,15,8,4);
+  // Racing number circle
+  x.fillStyle='#ffffff';x.fillRect(ox+6,16,4,3);
+  x.fillStyle='#1a3ab8';x.fillRect(ox+7,17,2,1);
+  // Front bumper
+  x.fillStyle='#5a7ac8';x.fillRect(ox+3,3,10,1);
+  // Headlights (front, yellow)
+  x.fillStyle='#ffdd00';x.fillRect(ox+4,3,2,1);x.fillRect(ox+10,3,2,1);
+  // Tail lights (red at back)
+  x.fillStyle='#ff0000';x.fillRect(ox+4,19,2,1);x.fillRect(ox+10,19,2,1);
+  x.fillStyle='#ff8080';x.fillRect(ox+4,19,1,1);x.fillRect(ox+10,19,1,1);
+  // Side mirrors
+  x.fillStyle='#0a1a6a';x.fillRect(ox+2,7,1,2);x.fillRect(ox+13,7,1,2);
+  // Wheels: 4 wheels, each 2px wide, spin highlights alternate per frame
+  x.fillStyle='#111';
+  x.fillRect(ox+1,5,2,4);x.fillRect(ox+13,5,2,4);  // front
+  x.fillRect(ox+1,15,2,4);x.fillRect(ox+13,15,2,4); // rear
+  x.fillStyle='#666';
+  const wy=f===0?0:2;
+  x.fillRect(ox+1,5+wy,2,1);x.fillRect(ox+13,5+wy,2,1);
+  x.fillRect(ox+1,15+wy,2,1);x.fillRect(ox+13,15+wy,2,1);
+ }
+ scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
+}
+// Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
+function genBikeTex(scene){
+ const FW=16,FH=24;
+ const c=document.createElement('canvas');c.width=FW*2;c.height=FH;
+ const x=c.getContext('2d');
+ for(let f=0;f<2;f++){
+  const ox=f*FW;
+  // Shadow
+  x.fillStyle='rgba(0,0,0,.35)';x.fillRect(ox+6,21,4,1);
+  // Front wheel
+  x.fillStyle='#111';x.fillRect(ox+6,2,4,4);
+  x.fillStyle='#444';const fy=f===0?2:4;x.fillRect(ox+6,fy,4,1);
+  x.fillStyle='#888';x.fillRect(ox+7,3,2,1);
+  // Front fender + headlight (yellow)
+  x.fillStyle='#ffdd00';x.fillRect(ox+6,6,4,1);
+  x.fillStyle='#ffffff';x.fillRect(ox+7,6,2,1);
+  // Handlebars (dark gray, wide)
+  x.fillStyle='#2a2a2a';x.fillRect(ox+3,7,10,1);
+  x.fillStyle='#555';x.fillRect(ox+3,8,2,1);x.fillRect(ox+11,8,2,1);
+  // Fuel tank (red) with white racing stripe
+  x.fillStyle='#8a1010';x.fillRect(ox+5,8,6,4);  // outline
+  x.fillStyle='#e02020';x.fillRect(ox+6,8,4,4);  // body
+  x.fillStyle='#ff4040';x.fillRect(ox+6,8,4,1);  // highlight
+  x.fillStyle='#ffffff';x.fillRect(ox+7,9,2,3);  // stripe
+  // Seat (black)
+  x.fillStyle='#0a0a0a';x.fillRect(ox+6,12,4,2);
+  x.fillStyle='#2a2a2a';x.fillRect(ox+6,12,4,1);
+  // Rear body (red)
+  x.fillStyle='#8a1010';x.fillRect(ox+5,14,6,4);
+  x.fillStyle='#e02020';x.fillRect(ox+6,14,4,4);
+  x.fillStyle='#ff4040';x.fillRect(ox+6,14,1,4);
+  // Rear wheel
+  x.fillStyle='#111';x.fillRect(ox+6,18,4,3);
+  x.fillStyle='#444';const ry=f===0?19:20;x.fillRect(ox+6,ry,4,1);
+  x.fillStyle='#888';x.fillRect(ox+7,19,2,1);
+  // Exhaust pipe exit (chrome)
+  x.fillStyle='#c0c0c0';x.fillRect(ox+11,15,2,2);
+ }
+ scene.textures.addSpriteSheet('bike',c,{frameWidth:FW,frameHeight:FH});
+}
 function genEventTex(scene){
  const types=[
   {k:'coffee',base:'#6a3a10',ring:'#a87a40',accent:'#fff'},      // Coffee cup
@@ -795,14 +885,14 @@ function genNpcTex(scene){
 class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
-  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);
+  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);
   this.scene.start('Overworld');
  }
 }
 class OverworldScene extends Phaser.Scene {
  constructor(){super('Overworld')}
  create(){
-  this.doneIds=[];this.playerLv=1;this.bossReady=false;this.dpadDir={x:0,y:0};this.lastDir='down';
+  this.doneIds=[];this.playerLv=1;this.bossReady=false;this.vehicle=null;this.dpadDir={x:0,y:0};this.lastDir='down';
   const groundImg=this.add.image(MPX/2,MPY/2,'ground');groundImg.setDepth(-1000);
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
   // Hedge + water collision bodies (from MAP_DATA)
@@ -878,6 +968,11 @@ class OverworldScene extends Phaser.Scene {
    this.anims.create({key:'hero-walk-'+dir,frames:this.anims.generateFrameNumbers('hero',{start:i*3+1,end:i*3+2}),frameRate:6,repeat:-1});
    this.anims.create({key:'hero-idle-'+dir,frames:[{key:'hero',frame:i*3}],frameRate:1});
   });
+  // Vehicle anims (car + bike): 2-frame wheel-spin loop, directional rotation set in update()
+  ['car','bike'].forEach(v=>{
+   this.anims.create({key:v+'-drive',frames:this.anims.generateFrameNumbers(v,{start:0,end:1}),frameRate:12,repeat:-1});
+   this.anims.create({key:v+'-idle',frames:[{key:v,frame:0}],frameRate:1});
+  });
   // NPCs
   this.npcSprites={};this.npcState={};
   ENC.forEach(enc=>{
@@ -929,7 +1024,7 @@ class OverworldScene extends Phaser.Scene {
    this.hero.anims.play('hero-idle-down',true);
   });
   Bridge.on('game-state-sync',(d)=>{
-   this.doneIds=d?.done||[];this.playerLv=d?.lv||1;this.bossReady=d?.bossReady||false;this.hasCar=d?.hasCar||false;
+   this.doneIds=d?.done||[];this.playerLv=d?.lv||1;this.bossReady=d?.bossReady||false;this.vehicle=d?.vehicle||null;
    this.syncVisibility();
   });
   Bridge.on('dpad',(d)=>{this.dpadDir=d||{x:0,y:0}});
@@ -969,19 +1064,38 @@ class OverworldScene extends Phaser.Scene {
   // Stream hero position to React for the minimap (throttled ~4fps)
   this.posTimer=(this.posTimer||0)+delta;
   if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
-  const sp=this.hasCar?185:130;let vx=0,vy=0;
+  const sp=this.vehicle==='car'?260:this.vehicle==='bike'?200:130;
+  let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
   else if(this.cursors.right.isDown||this.wasd.D.isDown||this.dpadDir.x>0)vx=sp;
   if(this.cursors.up.isDown||this.wasd.W.isDown||this.dpadDir.y<0)vy=-sp;
   else if(this.cursors.down.isDown||this.wasd.S.isDown||this.dpadDir.y>0)vy=sp;
   if(vx!==0&&vy!==0){vx*=0.707;vy*=0.707}
   this.hero.setVelocity(vx,vy);
-  // Hero anim + facing
-  if(vx<0){this.hero.anims.play('hero-walk-left',true);this.lastDir='left'}
-  else if(vx>0){this.hero.anims.play('hero-walk-right',true);this.lastDir='right'}
-  else if(vy<0){this.hero.anims.play('hero-walk-up',true);this.lastDir='up'}
-  else if(vy>0){this.hero.anims.play('hero-walk-down',true);this.lastDir='down'}
-  else this.hero.anims.play('hero-idle-'+this.lastDir,true);
+  // Swap texture if vehicle changed
+  const wantTex=this.vehicle||'hero';
+  if(this.hero.texture.key!==wantTex){
+   this.hero.setTexture(wantTex,0);
+   if(this.vehicle){this.hero.body.setSize(12,10);this.hero.body.setOffset(2,7)}
+   else{this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);this.hero.setRotation(0)}
+  }
+  if(this.vehicle){
+   // Vehicle mode: rotate to face movement direction, play drive/idle anim
+   const v=this.vehicle;
+   if(vx<0){this.hero.setRotation(-Math.PI/2);this.lastDir='left'}
+   else if(vx>0){this.hero.setRotation(Math.PI/2);this.lastDir='right'}
+   else if(vy<0){this.hero.setRotation(0);this.lastDir='up'}
+   else if(vy>0){this.hero.setRotation(Math.PI);this.lastDir='down'}
+   if(vx||vy)this.hero.anims.play(v+'-drive',true);
+   else this.hero.anims.play(v+'-idle',true);
+  }else{
+   // Walking mode: existing hero anims
+   if(vx<0){this.hero.anims.play('hero-walk-left',true);this.lastDir='left'}
+   else if(vx>0){this.hero.anims.play('hero-walk-right',true);this.lastDir='right'}
+   else if(vy<0){this.hero.anims.play('hero-walk-up',true);this.lastDir='up'}
+   else if(vy>0){this.hero.anims.play('hero-walk-down',true);this.lastDir='down'}
+   else this.hero.anims.play('hero-idle-'+this.lastDir,true);
+  }
   // NPC wander + anim
   for(const enc of ALL){
    const npc=this.npcSprites[enc.id];if(!npc||!npc.visible)continue;
@@ -1102,6 +1216,8 @@ function App(){
   const [heroMapPos,setHeroMapPos]=useState({x:50,y:92});
   const [mapOpen,setMapOpen]=useState(false);
   const [hasCar,setHasCar]=useState(false);
+  const [hasBike,setHasBike]=useState(false);
+  const [vehicle,setVehicle]=useState(null);
   const [hf,setHf]=useState(0);
   const [items,setItems]=useState([]);
   const [showW,setShowW]=useState(false);
@@ -1215,10 +1331,10 @@ function App(){
     physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
     scene:[BootScene,OverworldScene]
    });
-   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,hasCar}),250);
+   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,vehicle}),250);
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
-  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,hasCar})},[done,lv,hasCar]);
+  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,vehicle})},[done,lv,vehicle]);
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
   const cLv=Math.floor(txp/200)+1;
@@ -1473,6 +1589,11 @@ function App(){
       done.includes(99)?'👑 You are the 360° Sales Champion!':
       done.length>=6?'⚠ Boss unlocked at the south arena':
       '📋 Cleared '+done.length+'/'+(ENC.length+1)+' · '+(done.length>=6?'Boss ready':(6-done.length)+' until boss')),
+    // Vehicle selector (only shown if player owns at least one vehicle)
+    (hasCar||hasBike)&&h('div',{style:{display:'flex',gap:6,justifyContent:'center',marginTop:6}},
+      h('button',{onClick:()=>setVehicle(null),disabled:vehicle===null,style:{background:vehicle===null?'rgba(255,215,0,.2)':'rgba(12,24,96,.6)',border:vehicle===null?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'4px 10px',fontSize:16,cursor:vehicle===null?'default':'pointer',color:C.tx}},'🚶'),
+      hasBike&&h('button',{onClick:()=>setVehicle('bike'),disabled:vehicle==='bike',style:{background:vehicle==='bike'?'rgba(255,215,0,.2)':'rgba(12,24,96,.6)',border:vehicle==='bike'?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'4px 10px',fontSize:16,cursor:vehicle==='bike'?'default':'pointer',color:C.tx}},'🏍️'),
+      hasCar&&h('button',{onClick:()=>setVehicle('car'),disabled:vehicle==='car',style:{background:vehicle==='car'?'rgba(255,215,0,.2)':'rgba(12,24,96,.6)',border:vehicle==='car'?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'4px 10px',fontSize:16,cursor:vehicle==='car'?'default':'pointer',color:C.tx}},'🏎️')),
     // Achievement pop-up (top-right corner)
     achPop&&h('div',{key:achPop.id,className:'ach-pop ff7',style:{position:'fixed',top:14,right:14,padding:'10px 14px',display:'flex',alignItems:'center',gap:10,zIndex:9999,maxWidth:260,borderImage:'linear-gradient(135deg,#fff,#FFD700,#1a2a80,#fff) 1',boxShadow:'0 0 18px rgba(255,215,0,.6)'}},
       h('div',{style:{fontSize:28}},achPop.ic),
@@ -1494,8 +1615,8 @@ function App(){
     tab==='shop'&&h('div',{style:{marginTop:12}},
       h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10}},'⭐ ITEM SHOP'),
       h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},
-        SHOP.map(it=>{const ow=items.filter(x=>x.id===it.id).reduce((a,x)=>a+x.u,0);const owned=it.upgrade&&it.id==='rallycar'&&hasCar;const dis=gold<it.cost||owned;
-          return h('button',{key:it.id,className:'ff7',onClick:()=>{if(dis)return;setGold(g=>g-it.cost);if(it.id==='rallycar'){setHasCar(true)}else{setItems(p=>[...p,{id:it.id,u:1}])}snd('buy')},disabled:dis,style:{padding:14,textAlign:'center',cursor:dis?'default':'pointer',opacity:dis?(owned?.7:.5):1,...(dis?{}:{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'})}},
+        SHOP.map(it=>{const ow=items.filter(x=>x.id===it.id).reduce((a,x)=>a+x.u,0);const owned=it.upgrade&&((it.id==='rallycar'&&hasCar)||(it.id==='motorcycle'&&hasBike));const dis=gold<it.cost||owned;
+          return h('button',{key:it.id,className:'ff7',onClick:()=>{if(dis)return;setGold(g=>g-it.cost);if(it.id==='rallycar'){setHasCar(true);setVehicle('car')}else if(it.id==='motorcycle'){setHasBike(true);setVehicle('bike')}else{setItems(p=>[...p,{id:it.id,u:1}])}snd('buy')},disabled:dis,style:{padding:14,textAlign:'center',cursor:dis?'default':'pointer',opacity:dis?(owned?.7:.5):1,...(dis?{}:{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'})}},
             h('div',{style:{fontSize:28}},it.ic),
             h('div',{className:'fs-sm',style:{fontWeight:600,marginTop:4}},it.nm),
             h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},it.ds),
