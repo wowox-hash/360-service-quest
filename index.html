@@ -1081,7 +1081,6 @@ function App(){
   const [oi,setOi]=useState(0);
   const [oHp,setOHp]=useState(0);
   const [pHp,setPHp]=useState(100);
-  const MHP=100+mentor.hpBonus;
   const [inv,setInv]=useState(SVC.filter(s=>s.t==='C').map(s=>s.id));
   const [sel,setSel]=useState(null);
   const [selP,setSelP]=useState(null);
@@ -1121,6 +1120,7 @@ function App(){
   // Sync to global CHAR so SP.hero / genHeroTex pick it up
   CHAR.hair=hairIdx;CHAR.skin=skinIdx;CHAR.tunic=tunicIdx;
   const mentor=MENTORS[mentorIdx];
+  const MHP=100+mentor.hpBonus;
   // Performance grade computed from running stats (used on boss victory)
   const computeGrade=()=>{
    const total=ENC.length+1;
