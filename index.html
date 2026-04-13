@@ -553,6 +553,29 @@ function genBldTex(scene){
   scene.textures.addCanvas('bld_'+type,c);
  });
 }
+// Random-event icons (16x16 each, drawn as colored circles with emoji-style center)
+function genEventTex(scene){
+ const types=[
+  {k:'coffee',base:'#6a3a10',ring:'#a87a40',accent:'#fff'},      // Coffee cup
+  {k:'treasure',base:'#FFD700',ring:'#c89000',accent:'#fff'},    // Gold chest
+  {k:'colleague',base:'#3a5ab8',ring:'#7a96ff',accent:'#fff'},   // Helpful NPC marker
+  {k:'competitor',base:'#a83a10',ring:'#ff6b35',accent:'#fff'},  // Rival marker
+  {k:'briefing',base:'#10B981',ring:'#34d399',accent:'#fff'},    // News/briefing
+ ];
+ types.forEach(t=>{
+  const c=document.createElement('canvas');c.width=20;c.height=20;
+  const x=c.getContext('2d');
+  // Shadow
+  x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(10,18,7,2,0,0,Math.PI*2);x.fill();
+  // Outer ring
+  x.fillStyle=t.ring;x.beginPath();x.arc(10,9,8,0,Math.PI*2);x.fill();
+  // Inner disc
+  x.fillStyle=t.base;x.beginPath();x.arc(10,9,6,0,Math.PI*2);x.fill();
+  // Highlight
+  x.fillStyle=t.accent;x.fillRect(8,5,4,1);x.fillRect(7,7,2,1);x.fillRect(11,11,2,1);
+  scene.textures.addCanvas('ev_'+t.k,c);
+ });
+}
 function genTreeTex(scene){
  const c=document.createElement('canvas');c.width=32;c.height=44;
  const x=c.getContext('2d');
@@ -755,7 +778,7 @@ function genNpcTex(scene){
 class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
-  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);
+  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);
   this.scene.start('Overworld');
  }
 }
@@ -875,6 +898,14 @@ class OverworldScene extends Phaser.Scene {
   this.wasd=this.input.keyboard.addKeys('W,A,S,D');
   // Exclamation sprite
   this.exclSprite=this.add.image(0,0,'excl').setVisible(false).setDepth(99999);
+  // Random overworld events
+  this.evGroup=this.physics.add.group();
+  this.evTimer=0;this.evNextSpawn=4000+Math.random()*4000;
+  this.physics.add.overlap(this.hero,this.evGroup,(h,ev)=>{
+   const t=ev.getData('type');if(!t)return;
+   ev.destroy();
+   Bridge.emit('event-trigger',{type:t});
+  });
   // Bridge
   Bridge.on('return-to-map',()=>{
    this.hero.setPosition(p2x(50),p2x(92));this.hero.setVelocity(0,0);
@@ -961,6 +992,30 @@ class OverworldScene extends Phaser.Scene {
    const bld=this.bldSprites[enc.id];
    if(bld)bld.setDepth(bld.y+bld.height*0.2);
   }
+  // Random event spawner
+  this.evTimer+=delta;
+  if(this.evTimer>=this.evNextSpawn&&this.evGroup.getChildren().length<3){
+   this.evTimer=0;this.evNextSpawn=8000+Math.random()*7000;
+   const types=['coffee','treasure','colleague','competitor','briefing'];
+   const t=types[Math.floor(Math.random()*types.length)];
+   // Pick a tile away from buildings, hero, and water (max 20 attempts)
+   for(let tries=0;tries<20;tries++){
+    const ex=80+Math.random()*(MPX-160),ey=80+Math.random()*(MPY-160);
+    if(MAP_DATA){const ti=Math.floor(ey/TS),tj=Math.floor(ex/TS);if(MAP_DATA[ti]&&MAP_DATA[ti][tj]===4)continue}
+    const dHero=Phaser.Math.Distance.Between(ex,ey,this.hero.x,this.hero.y);
+    if(dHero<60)continue;
+    let tooNear=false;
+    for(const enc of ALL){const dB=Phaser.Math.Distance.Between(ex,ey,p2x(enc.mx),p2x(enc.my));if(dB<48){tooNear=true;break}}
+    if(tooNear)continue;
+    const ev=this.physics.add.sprite(ex,ey,'ev_'+t);
+    ev.setData('type',t);
+    ev.setDepth(ey-2);
+    this.tweens.add({targets:ev,y:ey-3,duration:600,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+    this.tweens.add({targets:ev,scaleX:1.1,scaleY:1.1,duration:800,yoyo:true,repeat:-1,ease:'Sine.easeInOut'});
+    this.evGroup.add(ev);
+    break;
+   }
+  }
   // "!" indicator over nearest valid NPC
   let showed=false;
   for(const enc of ALL){
@@ -1019,8 +1074,12 @@ function App(){
   const [flashCol,setFlashCol]=useState(null);
   const [lbReady,setLbReady]=useState(false);
   const [perfectDia,setPerfectDia]=useState(0);
+  const [noHits,setNoHits]=useState(0);
+  const [maxCombo,setMaxCombo]=useState(0);
+  const dmgThisFight=useRef(0);
   const [achs,setAchs]=useState([]);
   const [achPop,setAchPop]=useState(null);
+  const [evPopup,setEvPopup]=useState(null);
   const [hf,setHf]=useState(0);
   const [items,setItems]=useState([]);
   const [showW,setShowW]=useState(false);
@@ -1039,6 +1098,20 @@ function App(){
   // Sync to global CHAR so SP.hero / genHeroTex pick it up
   CHAR.hair=hairIdx;CHAR.skin=skinIdx;CHAR.tunic=tunicIdx;
   const mentor=MENTORS[mentorIdx];
+  // Performance grade computed from running stats (used on boss victory)
+  const computeGrade=()=>{
+   const total=ENC.length+1;
+   const time=t0?Math.round((Date.now()-t0)/1000):0;
+   const allPerfect=perfectDia>=total;
+   const flawless=noHits>=total;
+   const fast=time<600;
+   if(allPerfect&&flawless&&fast)return{rank:'S',label:'LEGENDARY CLOSER',color:'#ff00ff'};
+   if(allPerfect&&flawless)return{rank:'S',label:'PERFECT RUN',color:'#FFD700'};
+   if(allPerfect)return{rank:'A',label:'MASTER CLOSER',color:'#FFD700'};
+   if(perfectDia>=total-2)return{rank:'B',label:'STRONG CLOSER',color:'#10B981'};
+   if(perfectDia>=total-4)return{rank:'C',label:'COMPETENT',color:'#3B82F6'};
+   return{rank:'D',label:'NEEDS WORK',color:'#94A3B8'};
+  };
   const [lb,setLb]=useState([]);
   const [diaBuff,setDiaBuff]=useState(null);
   const [diaAns,setDiaAns]=useState(false);
@@ -1059,6 +1132,33 @@ function App(){
    else if(ph==='battle'){if(enc&&enc.isBoss)playBGM('boss');else playBGM('battle')}
    else if(ph==='victory'||ph==='defeat')stopBGM();
   },[ph,sndOn,enc]);
+  // ── PHASER: random overworld event listener ──
+  useEffect(()=>{
+   const f=(d)=>{
+    const t=d.type;let title='',msg='',col='#FFD700';
+    if(t==='coffee'){
+     title='☕ COFFEE BREAK';msg='Fully refreshed for the next pitch!';col='#a87a40';
+     // Free Mega Heal item
+     setItems(p=>[...p,{id:'mega_heal',u:1}]);
+    }else if(t==='treasure'){
+     title='💰 TREASURE';msg='+30g found in the parking lot!';col='#FFD700';
+     setGold(g=>g+30);
+    }else if(t==='colleague'){
+     title='🧑‍💼 HELPFUL COLLEAGUE';msg='They shared insider intel — free Market Intel!';col='#7a96ff';
+     setItems(p=>[...p,{id:'intel',u:1}]);
+    }else if(t==='competitor'){
+     title='⚠️ COMPETITOR SPOTTED';msg='You scared them off! +20 XP all pillars';col='#ff6b35';
+     setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=20);return n});
+    }else if(t==='briefing'){
+     title='📰 INDUSTRY BRIEFING';msg='Free Sales Playbook!';col='#34d399';
+     setItems(p=>[...p,{id:'playbook',u:1}]);
+    }
+    snd('lvl');
+    setEvPopup({title,msg,col});
+    setTimeout(()=>setEvPopup(null),2200);
+   };
+   Bridge.on('event-trigger',f);return()=>Bridge.off('event-trigger',f);
+  },[]);
   // ── PHASER: encounter trigger listener ──
   useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
   // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
@@ -1088,7 +1188,7 @@ function App(){
   const cLv=Math.floor(txp/200)+1;
   useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
 
-  const go=(e)=>{snd('sel');setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);setPh(e.dia?'dialogue':'intro')};
+  const go=(e)=>{snd('sel');dmgThisFight.current=0;setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);setPh(e.dia?'dialogue':'intro')};
   const useI=(id)=>{const i=items.findIndex(x=>x.id===id&&x.u>0);if(i<0)return;const ni=[...items];ni[i]={...ni[i],u:ni[i].u-1};if(ni[i].u<=0)ni.splice(i,1);setItems(ni);snd('buy');
     if(id==='intel'){setShowW(true);setLog(p=>[...p,{y:'i',t:'🔍 Weaknesses revealed!'}])}else if(id==='coffee'){setPHp(p=>Math.min(MHP,p+30));setLog(p=>[...p,{y:'i',t:'☕ +30 HP!'}])}else if(id==='playbook'){setDmgB(true);setLog(p=>[...p,{y:'i',t:'📘 +25% damage!'}])}else if(id==='shield'){setShld(true);setLog(p=>[...p,{y:'i',t:'🛡️ Shield active!'}])}else if(id==='combo_charm'){setComboB(true);setLog(p=>[...p,{y:'i',t:'✨ Combo 2x!'}])}else if(id==='mega_heal'){setPHp(MHP);setLog(p=>[...p,{y:'i',t:'⚡ Full HP!'}])}};
 
@@ -1115,12 +1215,12 @@ function App(){
     const nH=Math.max(0,oHp-d);setOHp(nH);
     setTimeout(()=>{setSE(false);setFl(null);
       if(nH<=0){setXp(prev=>({...prev,[ob.p]:prev[ob.p]+40}));setLog(p=>[...p,{y:'s',t:'✨ Objection defeated! +40 '+ob.p+' XP'}]);snd('sel');
-        setTimeout(()=>{if(oi+1>=enc.objs.length){const goldGain=Math.round(enc.rw.gold*mentor.goldMult);setGold(g=>g+goldGain);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+goldGain+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
+        setTimeout(()=>{if(oi+1>=enc.objs.length){const goldGain=Math.round(enc.rw.gold*mentor.goldMult);setGold(g=>g+goldGain);const sp=Math.floor(enc.rw.xp/4);setXp(p=>{const n={...p};['CONNECT','ENABLE','GROW','DELIVER'].forEach(k=>n[k]+=sp);return n});setDone(p=>[...p,enc.id]);if(dmgThisFight.current===0)setNoHits(n=>n+1);setMaxCombo(m=>Math.max(m,nc));setLog(p=>[...p,{y:'v',t:'🏆 VICTORY! +'+goldGain+'g +'+enc.rw.xp+'XP'}]);snd('win');setPh('victory');
             if(enc.isBoss){const ft=Math.round((Date.now()-t0)/1000);sbPost({player_name:nm,level:cLv,gold:gold+enc.rw.gold,encounters_cleared:done.length+1,is_champion:true,total_time_seconds:ft,xp_connect:xp.CONNECT,xp_enable:xp.ENABLE,xp_grow:xp.GROW,xp_deliver:xp.DELIVER});sbLoad().then(d=>{if(d)setLb(d)})}
           }else{const nx=enc.objs[oi+1];setOi(oi+1);setOHp(Math.round(nx.hp*(diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1)));setLog(p=>[...p,{y:'s',t:'New objection incoming...'}]);snd('blip');setSelP(null);setSel(null)}setAn(false)},800)}
       else{setTimeout(()=>{const cdBase=isW?5:rp?10:20;const cd=Math.round(cdBase*(diaBuff==='boostEnemy'?1.5:diaBuff==='reduceHp'?1:1.15));
         if(shld){setShld(false);setLog(p=>[...p,{y:'i',t:'🛡️ Blocked!'}]);snd('sel');setAn(false);return}
-        setSH(true);snd('hurt');setPHp(p=>{const nh=Math.max(0,p-cd);if(nh<=0){setLog(p2=>[...p2,{y:'e',t:'💥 -'+cd+'HP! Defeated...'}]);snd('lose');setTimeout(()=>setPh('defeat'),600)}else setLog(p2=>[...p2,{y:'e',t:'💢 Pushback! -'+cd+'HP'}]);return nh});
+        setSH(true);snd('hurt');dmgThisFight.current+=cd;setPHp(p=>{const nh=Math.max(0,p-cd);if(nh<=0){setLog(p2=>[...p2,{y:'e',t:'💥 -'+cd+'HP! Defeated...'}]);snd('lose');setTimeout(()=>setPh('defeat'),600)}else setLog(p2=>[...p2,{y:'e',t:'💢 Pushback! -'+cd+'HP'}]);return nh});
         setTimeout(()=>{setSH(false);setAn(false)},300)},400)}
     },600);setSel(null);setSelP(null)
   },[sel,an,enc,oi,oHp,combo,lastPil,comboB,dmgB,shld,diaBuff,sndOn,xp]);
@@ -1189,7 +1289,7 @@ function App(){
     h('div',{className:'ff7',style:{padding:16,marginTop:12,animation:'fadeIn .5s ease .2s both',boxShadow:'0 0 24px rgba(255,215,0,.35),inset 0 1px 0 rgba(255,255,255,.35)',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'}},
       h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:700,marginBottom:8}},diaAns?'💡 DISCOVERY INSIGHT':'💬 CHOOSE YOUR DISCOVERY QUESTION'),
       h('div',{className:'fs-sm',style:{marginBottom:12,lineHeight:1.6,color:C.mu,fontStyle:'italic'}},enc.dia.q),
-      !diaAns?enc.dia.opts.map((o,i)=>h('button',{key:i,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)):
+      !diaAns?enc.dia.opts.map((o,i)=>h('button',{key:i,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);if(o.correct)setPerfectDia(p=>p+1);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)):
       h('div',null,
         enc.dia.opts.map((o,i)=>h('div',{key:i,style:{padding:'10px 12px',marginBottom:6,borderRadius:8,fontSize:13,lineHeight:1.6,background:o.correct?'rgba(16,185,129,.12)':diaBuff===o.buff&&!o.correct?'rgba(239,68,68,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.bd),color:o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.mu}},
           String.fromCharCode(65+i)+'. '+o.t,
@@ -1229,11 +1329,17 @@ function App(){
           h(HpBar,{v:pHp,m:MHP,w:70}),
           combo>0&&h('div',{className:'fs-xs',style:{color:C.ok}},'🔥 '+combo+'x combo')),
         // Overlays
-        ph==='victory'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.65)',borderRadius:12}},
+        ph==='victory'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.75)',borderRadius:12}},
           h('div',{style:{textAlign:'center',animation:'vb 1s ease infinite'}},
             h('div',{className:'pf fs-pixel-lg',style:{color:C.gold}},'🏆 VICTORY!'),
-            h('div',{className:'fs-md',style:{marginTop:8}},'+'+enc.rw.gold+'g · +'+enc.rw.xp+'XP'),
-            enc.isBoss&&h('div',{className:'pf fs-pixel-sm',style:{color:C.ok,marginTop:10}},'👑 360° SALES CHAMPION'))),
+            h('div',{className:'fs-md',style:{marginTop:8}},'+'+Math.round(enc.rw.gold*mentor.goldMult)+'g · +'+enc.rw.xp+'XP'),
+            enc.isBoss&&(()=>{const g=computeGrade();return h('div',{style:{marginTop:14}},
+              h('div',{className:'pf',style:{fontSize:48,color:g.color,textShadow:`4px 4px 0 #000, 0 0 24px ${g.color}`,letterSpacing:4}},'RANK '+g.rank),
+              h('div',{className:'pf fs-pixel-sm',style:{color:g.color,marginTop:6,letterSpacing:2,textShadow:'2px 2px 0 #000'}},g.label),
+              h('div',{className:'fs-xs',style:{color:'#fff',marginTop:8}},'Perfect discoveries: '+perfectDia+'/'+(ENC.length+1)),
+              h('div',{className:'fs-xs',style:{color:'#fff'}},'Flawless wins: '+noHits+'/'+(ENC.length+1)),
+              h('div',{className:'fs-xs',style:{color:'#fff'}},'Time: '+fmtT(t0?Math.round((Date.now()-t0)/1000):0)),
+              h('div',{className:'pf fs-pixel-sm',style:{color:C.ok,marginTop:10}},'👑 360° SALES CHAMPION'))})())),
         ph==='defeat'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.7)',borderRadius:12}},
           h('div',{style:{textAlign:'center'}},
             h('div',{className:'pf fs-pixel-md',style:{color:C.no}},'DEFEATED'),
@@ -1354,6 +1460,11 @@ function App(){
     // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
       h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
+      // Random event popup overlay
+      evPopup&&h('div',{style:{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9999,pointerEvents:'none',animation:'calloutPop 2.2s ease forwards'}},
+        h('div',{className:'ff7',style:{padding:'18px 24px',textAlign:'center',minWidth:240,borderImage:`linear-gradient(135deg,#fff,${evPopup.col},#1a2a80,#fff) 1`,boxShadow:`0 0 24px ${evPopup.col}`}},
+          h('div',{className:'pf',style:{fontSize:11,color:evPopup.col,marginBottom:8,letterSpacing:1,textShadow:'2px 2px 0 #000'}},evPopup.title),
+          h('div',{className:'fs-sm',style:{color:'#fff'}},evPopup.msg))),
       h('div',{className:'ff7',style:{position:'relative',height:460,marginTop:8,overflow:'hidden'}},
         h('div',{id:'phaser-map',style:{position:'absolute',inset:0}}),
         // D-pad (React overlay → Bridge)
