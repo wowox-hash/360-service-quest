@@ -98,6 +98,9 @@ const TUNIC_OPTS=[
  {nm:'Purple',hi:'#8a3aca',mid:'#5a1a8a',lo:'#3a0a5a',acc:'#aa5ada'},
 ];
 const CHAR={hair:1,skin:0,tunic:0};
+// ── MINIMAP: path connections between buildings (matches carveLine calls in genMapData) ──
+const PATH_LINKS=[[22,22,22,42],[22,42,22,68],[50,14,40,42],[78,22,60,42],[22,42,40,42],[40,42,60,42],[60,42,78,58],[22,68,50,84],[78,58,50,84],[50,84,50,92]];
+
 // ── ACHIEVEMENTS: unlocked once and remembered for the session ──
 const ACHIEVEMENTS=[
  {id:'first_blood',ic:'⚔️',nm:'First Blood',desc:'Win your first encounter'},
@@ -253,6 +256,7 @@ const SHOP=[
   {id:'shield',nm:'Thick Skin',ds:'Block next counter-attack',cost:35,ic:'🛡️'},
   {id:'combo_charm',nm:'Combo Charm',ds:'Double combo multiplier',cost:50,ic:'✨'},
   {id:'mega_heal',nm:'Energy Drink',ds:'Full HP restore',cost:80,ic:'⚡'},
+  {id:'rallycar',nm:'Rally Car',ds:'+40% walking speed (permanent)',cost:150,ic:'🏎️',upgrade:true},
 ];
 
 // ── ENCOUNTERS ──
@@ -925,7 +929,7 @@ class OverworldScene extends Phaser.Scene {
    this.hero.anims.play('hero-idle-down',true);
   });
   Bridge.on('game-state-sync',(d)=>{
-   this.doneIds=d?.done||[];this.playerLv=d?.lv||1;this.bossReady=d?.bossReady||false;
+   this.doneIds=d?.done||[];this.playerLv=d?.lv||1;this.bossReady=d?.bossReady||false;this.hasCar=d?.hasCar||false;
    this.syncVisibility();
   });
   Bridge.on('dpad',(d)=>{this.dpadDir=d||{x:0,y:0}});
@@ -962,7 +966,10 @@ class OverworldScene extends Phaser.Scene {
  }
  update(time,delta){
   if(!this.hero||!this.hero.body)return;
-  const sp=130;let vx=0,vy=0;
+  // Stream hero position to React for the minimap (throttled ~4fps)
+  this.posTimer=(this.posTimer||0)+delta;
+  if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
+  const sp=this.hasCar?185:130;let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
   else if(this.cursors.right.isDown||this.wasd.D.isDown||this.dpadDir.x>0)vx=sp;
   if(this.cursors.up.isDown||this.wasd.W.isDown||this.dpadDir.y<0)vy=-sp;
@@ -1093,6 +1100,9 @@ function App(){
   const [achs,setAchs]=useState([]);
   const [achPop,setAchPop]=useState(null);
   const [evPopup,setEvPopup]=useState(null);
+  const [heroMapPos,setHeroMapPos]=useState({x:50,y:92});
+  const [mapOpen,setMapOpen]=useState(false);
+  const [hasCar,setHasCar]=useState(false);
   const [hf,setHf]=useState(0);
   const [items,setItems]=useState([]);
   const [showW,setShowW]=useState(false);
@@ -1156,6 +1166,8 @@ function App(){
    if(done.length>=Math.ceil(ENC.length/2))unlock('half');
    if(done.includes(99))unlock('champ');
   },[done,noHits,perfectDia,maxCombo,gold]);
+  // ── PHASER: hero position stream for minimap ──
+  useEffect(()=>{const f=(d)=>setHeroMapPos({x:d.xPct,y:d.yPct});Bridge.on('hero-pos',f);return()=>Bridge.off('hero-pos',f)},[]);
   // ── PHASER: random overworld event listener ──
   useEffect(()=>{
    const f=(d)=>{
@@ -1203,10 +1215,10 @@ function App(){
     physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
     scene:[BootScene,OverworldScene]
    });
-   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),250);
+   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,hasCar}),250);
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
-  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6})},[done,lv]);
+  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,hasCar})},[done,lv,hasCar]);
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
   const cLv=Math.floor(txp/200)+1;
@@ -1482,13 +1494,13 @@ function App(){
     tab==='shop'&&h('div',{style:{marginTop:12}},
       h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10}},'⭐ ITEM SHOP'),
       h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},
-        SHOP.map(it=>{const ow=items.filter(x=>x.id===it.id).reduce((a,x)=>a+x.u,0);
-          return h('button',{key:it.id,className:'ff7',onClick:()=>{if(gold>=it.cost){setGold(g=>g-it.cost);setItems(p=>[...p,{id:it.id,u:1}]);snd('buy')}},disabled:gold<it.cost,style:{padding:14,textAlign:'center',cursor:gold>=it.cost?'pointer':'default',opacity:gold>=it.cost?1:.5,...(gold>=it.cost?{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'}:{})}},
+        SHOP.map(it=>{const ow=items.filter(x=>x.id===it.id).reduce((a,x)=>a+x.u,0);const owned=it.upgrade&&it.id==='rallycar'&&hasCar;const dis=gold<it.cost||owned;
+          return h('button',{key:it.id,className:'ff7',onClick:()=>{if(dis)return;setGold(g=>g-it.cost);if(it.id==='rallycar'){setHasCar(true)}else{setItems(p=>[...p,{id:it.id,u:1}])}snd('buy')},disabled:dis,style:{padding:14,textAlign:'center',cursor:dis?'default':'pointer',opacity:dis?(owned?.7:.5):1,...(dis?{}:{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'})}},
             h('div',{style:{fontSize:28}},it.ic),
             h('div',{className:'fs-sm',style:{fontWeight:600,marginTop:4}},it.nm),
             h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},it.ds),
-            h('div',{className:'fs-md',style:{color:C.gold,fontWeight:700,marginTop:4}},it.cost+'g'),
-            ow>0&&h('div',{className:'fs-xs',style:{color:C.ok,marginTop:2}},'Owned: ×'+ow))}))),
+            h('div',{className:'fs-md',style:{color:owned?C.ok:C.gold,fontWeight:700,marginTop:4}},owned?'OWNED ✓':it.cost+'g'),
+            ow>0&&!owned&&h('div',{className:'fs-xs',style:{color:C.ok,marginTop:2}},'Owned: ×'+ow))}))),
 
     // INVENTORY
     tab==='bag'&&h('div',{style:{marginTop:12}},
@@ -1504,6 +1516,22 @@ function App(){
     // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
       h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
+      // ── Full-screen WORLD MAP modal ──
+      mapOpen&&h('div',{onClick:()=>setMapOpen(false),style:{position:'fixed',inset:0,background:'rgba(0,0,0,.88)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
+        h('div',{className:'ff7',onClick:e=>e.stopPropagation(),style:{padding:18,maxWidth:380,width:'100%',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#1a2a80 60%,#fff 100%) 1',boxShadow:'0 0 32px rgba(255,215,0,.5)'}},
+          h('div',{className:'pf',style:{fontSize:11,color:'#FFD700',textAlign:'center',marginBottom:12,letterSpacing:2,textShadow:'2px 2px 0 #000'}},'📍 WORLD MAP'),
+          h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid meet',style:{width:'100%',height:340,display:'block',border:'2px solid #7a96ff',borderRadius:6,background:'#3d7a2c'}},
+            ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'ml'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:2.2,strokeLinecap:'round'})),
+            ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('g',{key:'mg'+e.id},
+              h('rect',{x:e.mx-3,y:e.my-3,width:6,height:6,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.5}),
+              h('text',{x:e.mx,y:e.my+6.5,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},e.loc))}),
+            h('rect',{x:BOSS.mx-4,y:BOSS.my-4,width:8,height:8,fill:done.includes(99)?'#FFD700':done.length>=6?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.6}),
+            h('text',{x:BOSS.mx,y:BOSS.my+7,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},'BOSS'),
+            // Player marker (concentric)
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:6,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.5}),
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:3.5,fill:'#00ffff',stroke:'#fff',strokeWidth:.6}),
+            h('text',{x:heroMapPos.x,y:heroMapPos.y-4,fontSize:'3',fill:'#00ffff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},'YOU')),
+          h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10}},'🟨 cleared · 🟥 available · ⬛ locked · 🟦 you · Tap anywhere to close'))),
       // Random event popup overlay
       evPopup&&h('div',{style:{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9999,pointerEvents:'none',animation:'calloutPop 2.2s ease forwards'}},
         h('div',{className:'ff7',style:{padding:'18px 24px',textAlign:'center',minWidth:240,borderImage:`linear-gradient(135deg,#fff,${evPopup.col},#1a2a80,#fff) 1`,boxShadow:`0 0 24px ${evPopup.col}`}},
@@ -1511,6 +1539,16 @@ function App(){
           h('div',{className:'fs-sm',style:{color:'#fff'}},evPopup.msg))),
       h('div',{className:'ff7',style:{position:'relative',height:460,marginTop:8,overflow:'hidden'}},
         h('div',{id:'phaser-map',style:{position:'absolute',inset:0}}),
+        // ── MINIMAP overlay (top-right of overworld) ──
+        h('div',{onClick:()=>setMapOpen(true),title:'Open world map',style:{position:'absolute',top:8,right:8,width:96,height:96,background:'rgba(12,24,96,.85)',border:'2px solid #7a96ff',borderRadius:6,cursor:'pointer',zIndex:15,overflow:'hidden',boxShadow:'0 0 12px rgba(80,120,255,.5)'}},
+          h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',style:{width:'100%',height:'100%',display:'block'}},
+            h('rect',{x:0,y:0,width:100,height:100,fill:'#3d7a2c'}),
+            ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:2.4,strokeLinecap:'round'})),
+            ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('rect',{key:'mb'+e.id,x:e.mx-2.5,y:e.my-2.5,width:5,height:5,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.4})}),
+            h('rect',{x:BOSS.mx-3,y:BOSS.my-3,width:6,height:6,fill:done.includes(99)?'#FFD700':done.length>=6?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.5}),
+            // Player position pulse
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:3.2,fill:'#00ffff',stroke:'#fff',strokeWidth:.6}),
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:5,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.6}))),
         // D-pad (React overlay → Bridge)
         (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();Bridge.emit('dpad',v)};const rel=e=>{e.preventDefault();Bridge.emit('dpad',{x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:-1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▲'),h('div'),
