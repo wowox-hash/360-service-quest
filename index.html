@@ -57,10 +57,14 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script type="text/babel">
 const {useState,useEffect,useRef,useCallback}=React;
 const h=React.createElement;
+
+// ── BRIDGE: Phaser ↔ React event emitter ──
+const Bridge={_l:{},on(e,f){(this._l[e]||=[]).push(f)},off(e,f){this._l[e]=(this._l[e]||[]).filter(x=>x!==f)},emit(e,d){(this._l[e]||[]).forEach(f=>f(d))}};
 
 /* ══════════════════════════════════════════════
    360° SERVICE QUEST v5 — MOBILE OPTIMIZED
