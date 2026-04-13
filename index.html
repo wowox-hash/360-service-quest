@@ -63,8 +63,28 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 const {useState,useEffect,useRef,useCallback}=React;
 const h=React.createElement;
 
-// ── BRIDGE: Phaser ↔ React event emitter ──
-const Bridge={_l:{},on(e,f){(this._l[e]||=[]).push(f)},off(e,f){this._l[e]=(this._l[e]||[]).filter(x=>x!==f)},emit(e,d){(this._l[e]||[]).forEach(f=>f(d))}};
+// ── BRIDGE: Phaser ↔ React event emitter (+ shared spawn position) ──
+const Bridge={_l:{},_lastPos:null,on(e,f){(this._l[e]||=[]).push(f)},off(e,f){this._l[e]=(this._l[e]||[]).filter(x=>x!==f)},emit(e,d){(this._l[e]||[]).forEach(f=>f(d))}};
+
+// ── CHARACTER BUILDER: palettes + currently-selected indices (mutable, read by both SP.hero and genHeroTex) ──
+const HAIR_OPTS=[
+ {nm:'Brown',hi:'#8a4a20',mid:'#6a3a10',lo:'#3a1a00'},
+ {nm:'Blonde',hi:'#ffe066',mid:'#c89000',lo:'#704400'},
+ {nm:'Black',hi:'#3a3a3a',mid:'#1a1a1a',lo:'#000000'},
+ {nm:'Red',hi:'#e8662a',mid:'#a83a10',lo:'#5a1a00'},
+];
+const SKIN_OPTS=[
+ {nm:'Light',hi:'#ffe0c0',mid:'#F5C99A',lo:'#D4956A'},
+ {nm:'Tan',hi:'#e8b888',mid:'#c8956a',lo:'#9a6a3a'},
+ {nm:'Dark',hi:'#a87a52',mid:'#8b5e3c',lo:'#5a3a20'},
+];
+const TUNIC_OPTS=[
+ {nm:'Blue',hi:'#4060a0',mid:'#1a1a5c',lo:'#0a0a3c',acc:'#5070b0'},
+ {nm:'Red',hi:'#c83a3a',mid:'#8a1a1a',lo:'#5a0a0a',acc:'#d85a5a'},
+ {nm:'Green',hi:'#3a8a3a',mid:'#1a5a1a',lo:'#0a3a0a',acc:'#5aaa5a'},
+ {nm:'Purple',hi:'#8a3aca',mid:'#5a1a8a',lo:'#3a0a5a',acc:'#aa5ada'},
+];
+const CHAR={hair:1,skin:0,tunic:0};
 
 /* ══════════════════════════════════════════════
    360° SERVICE QUEST v5 — MOBILE OPTIMIZED
@@ -104,7 +124,7 @@ const snd=(k)=>{if(aOn&&sfx[k])try{sfx[k]()}catch{}};
 
 // ── SPRITES (pixel art SVGs) ──
 const SP={
-  hero:(f=0)=>{const l=f%2;return`<svg viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hh${f}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#c89000"/></linearGradient><linearGradient id="hb${f}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4060a0"/><stop offset="1" stop-color="#0a1040"/></linearGradient></defs><path d="M3,5 L4,1 L5,4 L6,0 L8,3 L10,0 L11,4 L12,1 L13,5 L13,8 L3,8 Z" fill="url(#hh${f})" stroke="#704400" stroke-width=".3"/><rect x="4" y="5" width="8" height="4" fill="#F5C99A"/><rect x="4" y="8" width="8" height="1" fill="#D4956A"/><rect x="5" y="6" width="2" height="2" fill="#0a1a4a"/><rect x="9" y="6" width="2" height="2" fill="#0a1a4a"/><rect x="5" y="6" width="1" height="1" fill="#00bfff"/><rect x="9" y="6" width="1" height="1" fill="#00bfff"/><rect x="7" y="8" width="2" height="1" fill="#8a4a2a"/><rect x="3" y="9" width="10" height="5" fill="url(#hb${f})"/><polygon points="2,9 4,9 3,13" fill="#5070b0"/><polygon points="14,9 12,9 13,13" fill="#5070b0"/><rect x="7" y="9" width="2" height="5" fill="#FFD700"/><rect x="3" y="13" width="10" height="1" fill="#000"/><rect x="7" y="13" width="2" height="1" fill="#c0c0c0"/><rect x="3" y="14" width="4" height="5" fill="#0a0a1e"/><rect x="9" y="14" width="4" height="5" fill="#0a0a1e"/><rect x="3" y="${19+l}" width="4" height="2" fill="#3a3a5a"/><rect x="9" y="${20-l}" width="4" height="2" fill="#3a3a5a"/><rect x="13" y="3" width="2" height="14" fill="#e0e8f8"/><rect x="13" y="3" width="1" height="14" fill="#fff"/><rect x="12" y="16" width="4" height="2" fill="#5a2a10"/><rect x="13" y="17" width="2" height="1" fill="#c0c0c0"/></svg>`},
+  hero:(f=0)=>{const l=f%2;const H=HAIR_OPTS[CHAR.hair],S=SKIN_OPTS[CHAR.skin],T=TUNIC_OPTS[CHAR.tunic];return`<svg viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hh${f}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${H.hi}"/><stop offset="1" stop-color="${H.mid}"/></linearGradient><linearGradient id="hb${f}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T.hi}"/><stop offset="1" stop-color="${T.lo}"/></linearGradient></defs><path d="M3,5 L4,1 L5,4 L6,0 L8,3 L10,0 L11,4 L12,1 L13,5 L13,8 L3,8 Z" fill="url(#hh${f})" stroke="${H.lo}" stroke-width=".3"/><rect x="4" y="5" width="8" height="4" fill="${S.mid}"/><rect x="4" y="8" width="8" height="1" fill="${S.lo}"/><rect x="5" y="6" width="2" height="2" fill="#0a1a4a"/><rect x="9" y="6" width="2" height="2" fill="#0a1a4a"/><rect x="5" y="6" width="1" height="1" fill="#00bfff"/><rect x="9" y="6" width="1" height="1" fill="#00bfff"/><rect x="7" y="8" width="2" height="1" fill="#8a4a2a"/><rect x="3" y="9" width="10" height="5" fill="url(#hb${f})"/><polygon points="2,9 4,9 3,13" fill="${T.acc}"/><polygon points="14,9 12,9 13,13" fill="${T.acc}"/><rect x="7" y="9" width="2" height="5" fill="#FFD700"/><rect x="3" y="13" width="10" height="1" fill="#000"/><rect x="7" y="13" width="2" height="1" fill="#c0c0c0"/><rect x="3" y="14" width="4" height="5" fill="#0a0a1e"/><rect x="9" y="14" width="4" height="5" fill="#0a0a1e"/><rect x="3" y="${19+l}" width="4" height="2" fill="#3a3a5a"/><rect x="9" y="${20-l}" width="4" height="2" fill="#3a3a5a"/><rect x="13" y="3" width="2" height="14" fill="#e0e8f8"/><rect x="13" y="3" width="1" height="14" fill="#fff"/><rect x="12" y="16" width="4" height="2" fill="#5a2a10"/><rect x="13" y="17" width="2" height="1" fill="#c0c0c0"/></svg>`},
   npc:(v=0)=>{const s=['#DC2626','#059669','#7C3AED','#D97706','#0891B2','#BE185D','#4338CA','#0D9488','#B91C1C','#6D28D9','#047857','#CA8A04'];const hc=['#1a1a2e','#8B5E3C','#D4956A','#6B7280','#F59E0B','#374151','#92400E','#3B2507','#94A3B8','#1a1a2e','#D4956A','#8B5E3C'];return`<svg viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="nb${v}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".4" stop-color="${s[v%12]}"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient></defs><rect x="4" y="1" width="8" height="3" fill="${hc[v%12]}"/><rect x="4" y="4" width="8" height="4" fill="#F5C99A"/><rect x="4" y="7" width="8" height="1" fill="#D4956A"/><rect x="6" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="9" y="5" width="1" height="1" fill="#1a1a2e"/><rect x="3" y="8" width="10" height="6" fill="url(#nb${v})"/><polygon points="2,8 4,8 3,13" fill="${s[v%12]}" opacity=".7"/><polygon points="14,8 12,8 13,13" fill="${s[v%12]}" opacity=".7"/><rect x="3" y="14" width="10" height="1" fill="#000"/><rect x="7" y="14" width="2" height="1" fill="#c0c0c0"/><rect x="3" y="15" width="4" height="5" fill="#1a1a2e"/><rect x="9" y="15" width="4" height="5" fill="#1a1a2e"/><rect x="3" y="20" width="4" height="2" fill="#3a3a4a"/><rect x="9" y="20" width="4" height="2" fill="#3a3a4a"/></svg>`},
   mon:(p,boss=false)=>{const c={CONNECT:'#3B82F6',ENABLE:'#F59E0B',GROW:'#10B981',DELIVER:'#8B5CF6'}[p]||'#EF4444';const z=boss?32:24;const id=`m${p}${boss?1:0}`;return`<svg viewBox="0 0 ${z} ${z}" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="${id}" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="35%" stop-color="${c}"/><stop offset="100%" stop-color="#000" stop-opacity=".85"/></radialGradient><filter id="g${id}"><feGaussianBlur stdDeviation=".6"/></filter></defs><ellipse cx="${z/2}" cy="${z*.43}" rx="${z*.42}" ry="${z*.32}" fill="${c}" opacity=".35" filter="url(#g${id})"/><rect x="${z*.15}" y="${z*.17}" width="${z*.7}" height="${z*.52}" fill="url(#${id})" rx="3" stroke="${c}" stroke-width=".4"/>${boss?`<polygon points="${z/2},${z*.01} ${z*.35},${z*.17} ${z*.42},${z*.08} ${z*.5},${z*.14} ${z*.58},${z*.08} ${z*.65},${z*.17}" fill="#FFD700" stroke="#ff8800" stroke-width=".3"/>`:''}<rect x="${z*.08}" y="${z*.3}" width="${z*.14}" height="${z*.18}" fill="${c}" rx="1"/><rect x="${z*.78}" y="${z*.3}" width="${z*.14}" height="${z*.18}" fill="${c}" rx="1"/><rect x="${z*.3}" y="${z*.25}" width="${z*.12}" height="${z*.12}" fill="#fff" rx="2"/><rect x="${z*.58}" y="${z*.25}" width="${z*.12}" height="${z*.12}" fill="#fff" rx="2"/><rect x="${z*.33}" y="${z*.29}" width="${z*.06}" height="${z*.06}" fill="#ff2200"/><rect x="${z*.61}" y="${z*.29}" width="${z*.06}" height="${z*.06}" fill="#ff2200"/><rect x="${z*.3}" y="${z*.48}" width="${z*.4}" height="${z*.08}" fill="#1a1a2e" rx="1"/><rect x="${z*.34}" y="${z*.5}" width="${z*.04}" height="${z*.04}" fill="#fff"/><rect x="${z*.46}" y="${z*.5}" width="${z*.04}" height="${z*.04}" fill="#fff"/><rect x="${z*.58}" y="${z*.5}" width="${z*.04}" height="${z*.04}" fill="#fff"/><rect x="${z*.22}" y="${z*.7}" width="${z*.18}" height="${z*.16}" fill="${c}" rx="1"/><rect x="${z*.6}" y="${z*.7}" width="${z*.18}" height="${z*.16}" fill="${c}" rx="1"/></svg>`},
   plane:`<svg viewBox="0 0 20 12"><polygon points="10,0 20,6 10,4 0,6" fill="#e0dff0"/><polygon points="10,4 20,6 10,12 0,6" fill="#a0a0c0"/><rect x="8" y="3" width="4" height="2" fill="#3B82F6" rx="1"/></svg>`,
@@ -494,10 +514,11 @@ function genHeroTex(scene){
  const FW=16,FH=24;
  const c=document.createElement('canvas');c.width=FW*3;c.height=FH*4;
  const x=c.getContext('2d');
- // Palette
- const CAP='#1e3a8a',CAPH='#3b5fbf',CAPD='#0a1c5a',GOLD='#FFD700',GOLDD='#c89000';
- const SK='#fbcfa8',SKD='#d4956a',HAIR='#5c3a1a';
- const TUN='#2a4ab8',TUNH='#4a6ad8',TUND='#1a2a78';
+ // Palette (read from CHAR for hero customization)
+ const _H=HAIR_OPTS[CHAR.hair],_S=SKIN_OPTS[CHAR.skin],_T=TUNIC_OPTS[CHAR.tunic];
+ const CAP=_T.mid,CAPH=_T.acc,CAPD=_T.lo,GOLD='#FFD700',GOLDD='#c89000';
+ const SK=_S.mid,SKD=_S.lo,HAIR=_H.mid;
+ const TUN=_T.hi,TUNH=_T.acc,TUND=_T.mid;
  const BELT='#1a1a1a',BUCK='#e8c860';
  const PNT='#1a1a3a',PNTH='#2a2a5a';
  const BOOT='#3a2510',BOOTD='#1a0f00';
@@ -751,7 +772,9 @@ class OverworldScene extends Phaser.Scene {
    this.labels[enc.id]=lbl;
   });
   // Hero
-  this.hero=this.physics.add.sprite(p2x(50),p2x(92),'hero');
+  // Spawn from saved position (if returning from battle) or default spawn point
+  const sp=Bridge._lastPos||{x:p2x(50),y:p2x(92)};
+  this.hero=this.physics.add.sprite(sp.x,sp.y,'hero');
   this.hero.setCollideWorldBounds(true);
   this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);
   // Hero anims
@@ -832,6 +855,9 @@ class OverworldScene extends Phaser.Scene {
   if(id===99&&!this.bossReady)return;
   if((enc.seg==='B'&&this.playerLv<3)||(enc.seg==='A'&&this.playerLv<6))return;
   this.hero.setVelocity(0,0);
+  // Remember where the player was so the next scene respawns them here
+  // (offset south by ~24px so they don't immediately re-trigger the NPC)
+  Bridge._lastPos={x:this.hero.x,y:this.hero.y+24};
   Bridge.emit('npc-collide',{encounterId:id});
  }
  update(time,delta){
@@ -943,6 +969,12 @@ function App(){
   const [lastPil,setLastPil]=useState(null);
   const [lvUp,setLvUp]=useState(false);
   const [sndOn,setSndOn]=useState(true);
+  // Character builder state
+  const [hairIdx,setHairIdx]=useState(1);
+  const [skinIdx,setSkinIdx]=useState(0);
+  const [tunicIdx,setTunicIdx]=useState(0);
+  // Sync to global CHAR so SP.hero / genHeroTex pick it up
+  CHAR.hair=hairIdx;CHAR.skin=skinIdx;CHAR.tunic=tunicIdx;
   const [lb,setLb]=useState([]);
   const [diaBuff,setDiaBuff]=useState(null);
   const [diaAns,setDiaAns]=useState(false);
@@ -1025,7 +1057,22 @@ function App(){
         h('span',{style:{fontSize:28,filter:'drop-shadow(0 0 8px #FFD700)'}},'⚔️')),
       h('div',{className:'pf fs-pixel-lg',style:{marginTop:8,color:'#e8f0ff',letterSpacing:2}},'SERVICE QUEST'),
       h('p',{className:'fs-sm',style:{color:C.mu,marginTop:14,fontStyle:'italic'}},'Battle distributor objections with the right 360° services'),
-      h('input',{className:'ff7',value:nm,onChange:e=>setNm(e.target.value),placeholder:'Enter your name',maxLength:20,style:{width:'100%',maxWidth:300,margin:'22px auto',display:'block',padding:'14px 18px',color:C.tx,fontSize:16,textAlign:'center',outline:'none'}}),
+      h('input',{className:'ff7',value:nm,onChange:e=>setNm(e.target.value),placeholder:'Enter your name',maxLength:20,style:{width:'100%',maxWidth:300,margin:'18px auto 14px',display:'block',padding:'14px 18px',color:C.tx,fontSize:16,textAlign:'center',outline:'none'}}),
+      // ─── CHARACTER BUILDER ───
+      h('div',{className:'ff7',style:{maxWidth:340,margin:'0 auto 16px',padding:'14px 16px'}},
+        h('div',{className:'pf',style:{fontSize:9,color:'#FFD700',textAlign:'center',marginBottom:12,letterSpacing:1}},'⚔ BUILD YOUR HERO ⚔'),
+        // Hair row
+        h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}},
+          h('span',{className:'fs-xs',style:{color:C.tx,fontWeight:700,minWidth:50}},'Hair'),
+          h('div',{style:{display:'flex',gap:8}},HAIR_OPTS.map((o,i)=>h('button',{key:'h'+i,onClick:()=>setHairIdx(i),title:o.nm,style:{width:32,height:32,borderRadius:'50%',background:`radial-gradient(circle at 35% 30%,${o.hi},${o.mid} 60%,${o.lo})`,border:hairIdx===i?'3px solid #FFD700':'2px solid #7a96ff',cursor:'pointer',padding:0,boxShadow:hairIdx===i?'0 0 8px #FFD700':'none'}})))),
+        // Skin row
+        h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}},
+          h('span',{className:'fs-xs',style:{color:C.tx,fontWeight:700,minWidth:50}},'Skin'),
+          h('div',{style:{display:'flex',gap:8}},SKIN_OPTS.map((o,i)=>h('button',{key:'s'+i,onClick:()=>setSkinIdx(i),title:o.nm,style:{width:32,height:32,borderRadius:'50%',background:`radial-gradient(circle at 35% 30%,${o.hi},${o.mid} 60%,${o.lo})`,border:skinIdx===i?'3px solid #FFD700':'2px solid #7a96ff',cursor:'pointer',padding:0,boxShadow:skinIdx===i?'0 0 8px #FFD700':'none'}})))),
+        // Tunic row
+        h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between'}},
+          h('span',{className:'fs-xs',style:{color:C.tx,fontWeight:700,minWidth:50}},'Tunic'),
+          h('div',{style:{display:'flex',gap:8}},TUNIC_OPTS.map((o,i)=>h('button',{key:'t'+i,onClick:()=>setTunicIdx(i),title:o.nm,style:{width:32,height:32,borderRadius:'50%',background:`radial-gradient(circle at 35% 30%,${o.acc},${o.mid} 60%,${o.lo})`,border:tunicIdx===i?'3px solid #FFD700':'2px solid #7a96ff',cursor:'pointer',padding:0,boxShadow:tunicIdx===i?'0 0 8px #FFD700':'none'}}))))),
       h('div',{style:{display:'flex',gap:8,justifyContent:'center',marginBottom:20}},
         h('button',{className:'ff7',onClick:()=>setSndOn(!sndOn),style:{color:sndOn?C.gold:C.mu,padding:'10px 16px',fontSize:14,cursor:'pointer'}},sndOn?'🔊 Sound ON':'🔇 Sound OFF')),
       h('button',{className:'ff7',onClick:async()=>{if(!nm.trim())return alert('Enter your name!');if(!aOn){await Tone.start();aOn=true}setT0(Date.now());setPh('map');snd('sel')},style:{color:C.gold,padding:'16px 40px',fontSize:16,fontWeight:700,cursor:'pointer',animation:'blink 2s ease infinite',letterSpacing:2}},'▶ START QUEST'),
