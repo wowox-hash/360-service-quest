@@ -356,24 +356,17 @@ function drawGrass(x,ox,oy){
  x.fillRect(ox+3,oy+3,1,1);x.fillRect(ox+11,oy+2,1,1);x.fillRect(ox+8,oy+8,1,1);x.fillRect(ox+13,oy+12,1,1);
 }
 function drawPath(x,ox,oy){
- // Dark grout base
- x.fillStyle='#5a5a52';x.fillRect(ox,oy,16,16);
- // 4 stones (8x8 each with 1px grout gap)
- x.fillStyle='#c8c8be';
- x.fillRect(ox+1,oy+1,6,6);x.fillRect(ox+9,oy+1,6,6);
- x.fillRect(ox+1,oy+9,6,6);x.fillRect(ox+9,oy+9,6,6);
- // Top-left highlight on each stone
- x.fillStyle='#ece8dc';
- [[1,1],[9,1],[1,9],[9,9]].forEach(([sx,sy])=>{
-  x.fillRect(ox+sx,oy+sy,5,1);
-  x.fillRect(ox+sx,oy+sy,1,5);
- });
- // Bottom-right shadow
- x.fillStyle='#8a8880';
- [[1,1],[9,1],[1,9],[9,9]].forEach(([sx,sy])=>{
-  x.fillRect(ox+sx+1,oy+sy+5,5,1);
-  x.fillRect(ox+sx+5,oy+sy+1,1,5);
- });
+ // Smooth dirt path — soft brown ground, no brick lines
+ x.fillStyle='#a07a4a';x.fillRect(ox,oy,16,16);
+ // Subtle darker patches (worn-down dirt)
+ x.fillStyle='#8a6238';
+ x.fillRect(ox+2,oy+5,3,1);x.fillRect(ox+9,oy+9,4,1);x.fillRect(ox+4,oy+13,2,1);x.fillRect(ox+11,oy+3,2,1);
+ // Lighter sandy spots
+ x.fillStyle='#b89060';
+ x.fillRect(ox+7,oy+2,2,1);x.fillRect(ox+12,oy+7,2,1);x.fillRect(ox+1,oy+10,2,1);x.fillRect(ox+6,oy+11,1,1);
+ // Tiny dark pebbles for texture
+ x.fillStyle='#4a2e10';
+ x.fillRect(ox+5,oy+7,1,1);x.fillRect(ox+11,oy+13,1,1);x.fillRect(ox+13,oy+5,1,1);x.fillRect(ox+3,oy+3,1,1);
 }
 function drawHedge(x,ox,oy){
  x.fillStyle='#1a4a1a';x.fillRect(ox,oy,16,16);
@@ -776,7 +769,7 @@ class OverworldScene extends Phaser.Scene {
    this.npcSprites[enc.id]=npc;
    ['down','up','left','right'].forEach((dir,i)=>{
     const k='npc'+enc.v+'-walk-'+dir;
-    if(!this.anims.exists(k))this.anims.create({key:k,frames:this.anims.generateFrameNumbers('npc_'+enc.v,{start:i*2,end:i*2+1}),frameRate:4,repeat:-1});
+    if(!this.anims.exists(k))this.anims.create({key:k,frames:this.anims.generateFrameNumbers('npc_'+enc.v,{start:i*2,end:i*2+1}),frameRate:2,repeat:-1});
    });
    this.npcState[enc.id]={hx:sx+15,hy:sy+20,ang:Math.random()*Math.PI*2,t:0,iv:2000+Math.random()*1500};
   });
@@ -862,7 +855,7 @@ class OverworldScene extends Phaser.Scene {
    const st=this.npcState[enc.id];if(!st)continue;
    st.t+=delta;
    if(st.t>=st.iv){st.t=0;st.ang=Math.random()*Math.PI*2;st.iv=1800+Math.random()*2000}
-   const nspd=enc.isBoss?14:22;
+   const nspd=enc.isBoss?7:12;
    let nvx=Math.cos(st.ang)*nspd,nvy=Math.sin(st.ang)*nspd;
    const dh=Phaser.Math.Distance.Between(npc.x,npc.y,st.hx,st.hy);
    const md=enc.isBoss?32:48;
@@ -964,34 +957,25 @@ function App(){
   useEffect(()=>{sbLoad().then(d=>{if(d)setLb(d)})},[]);
   // ── PHASER: encounter trigger listener ──
   useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
-  // ── PHASER: mount / pause / resume game on map tab ──
+  // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
   useEffect(()=>{
+   const destroy=()=>{
+    if(phaserRef.current){try{phaserRef.current.destroy(true)}catch(e){}phaserRef.current=null}
+    // Clear stale Bridge listeners so they don't accumulate
+    delete Bridge._l['return-to-map'];delete Bridge._l['game-state-sync'];delete Bridge._l['dpad'];
+   };
    const onMap=ph==='map'&&tab==='map';
-   if(onMap){
-    const el=document.getElementById('phaser-map');
-    if(!el||typeof Phaser==='undefined')return;
-    if(!phaserRef.current){
-     phaserRef.current=new Phaser.Game({
-      type:Phaser.AUTO,parent:el,width:480,height:460,pixelArt:true,backgroundColor:'#020617',
-      scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
-      physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
-      scene:[BootScene,OverworldScene]
-     });
-     setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),100);
-    }else{
-     // The map div was unmounted while we were in dialogue/battle; re-attach the canvas.
-     const cv=phaserRef.current.canvas;
-     if(cv&&cv.parentNode!==el){el.appendChild(cv);if(phaserRef.current.scale&&phaserRef.current.scale.refresh)phaserRef.current.scale.refresh()}
-     const ov=phaserRef.current.scene.getScene('Overworld');
-     if(ov){if(ov.scene.isPaused())ov.scene.resume();ov.cameras&&ov.cameras.main&&ov.hero&&ov.cameras.main.startFollow(ov.hero,true,0.08,0.08)}
-     if(cv)cv.style.display='block';
-     setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),50);
-    }
-   }else if(phaserRef.current){
-    const ov=phaserRef.current.scene.getScene('Overworld');
-    if(ov&&!ov.scene.isPaused())ov.scene.pause();
-    if(phaserRef.current.canvas)phaserRef.current.canvas.style.display='none';
-   }
+   if(!onMap){destroy();return}
+   const el=document.getElementById('phaser-map');
+   if(!el||typeof Phaser==='undefined')return;
+   destroy();
+   phaserRef.current=new Phaser.Game({
+    type:Phaser.AUTO,parent:el,width:480,height:460,pixelArt:true,backgroundColor:'#020617',
+    scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},
+    physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
+    scene:[BootScene,OverworldScene]
+   });
+   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6}),250);
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
   useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6})},[done,lv]);
@@ -1030,9 +1014,12 @@ function App(){
   // ═══ TITLE ═══
   if(ph==='title')return h(Pad,null,
     h(LvlUp,{lvUp,lv}),
-    h('div',{style:{textAlign:'center',paddingTop:40}},
+    h('div',{style:{textAlign:'center',paddingTop:24}},
+      // WOLF OIL logo (pixel-styled to evoke the Wolf Oil Corp. logo)
+      h('div',{className:'pf',style:{color:'#1e3a8a',fontSize:32,letterSpacing:6,fontWeight:'bold',textShadow:'2px 2px 0 #fff, 4px 4px 0 #0a1450, 6px 6px 8px rgba(0,0,0,.6)',marginBottom:4}},'WOLF  OIL'),
+      h('div',{className:'pf',style:{color:'#1e3a8a',fontSize:9,letterSpacing:8,marginBottom:18,textShadow:'1px 1px 0 #fff, 2px 2px 0 #0a1450'}},'CORPORATION'),
       h('div',{style:{width:96,height:144,margin:'0 auto',animation:'float 3s ease-in-out infinite',filter:'drop-shadow(0 6px 12px rgba(0,0,0,.7))'},dangerouslySetInnerHTML:{__html:SP.hero(0)}}),
-      h('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:16,marginTop:20}},
+      h('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:16,marginTop:16}},
         h('span',{style:{fontSize:28,filter:'drop-shadow(0 0 8px #FFD700)',transform:'scaleX(-1)'}},'⚔️'),
         h('div',{className:'pf',style:{color:'#FFD700',fontSize:36,animation:'titleGlow 2.5s ease-in-out infinite',letterSpacing:2}},'360°'),
         h('span',{style:{fontSize:28,filter:'drop-shadow(0 0 8px #FFD700)'}},'⚔️')),
