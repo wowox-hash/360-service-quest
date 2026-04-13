@@ -262,7 +262,7 @@ const SHOP=[
 
 // ── ENCOUNTERS ──
 const ENC=[
-  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:22,my:42,bld:'GARAGE',
+  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:14,my:38,bld:'BRUSSELS',
     intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
     dia:{q:`Marc is losing €8,000/month to returns. You have one discovery question before the pitch — make it count.`,opts:[
       {t:`When your counter staff get a vehicle they're not sure about, walk me through exactly what happens today.`,buff:'reduceHp',correct:true,fb:`Marc: "They check the printed guide. If it's not listed, they call the hotline or just pick the closest match." — That's the gap. The outdated guide is shipping wrong products.`},
@@ -274,7 +274,7 @@ const ENC=[
       {t:`"We already have TecDoc through our parts platform. How is yours different?"`,hp:34,w:['tecdoc'],r:['marketing_portal','promo_calendar'],p:'CONNECT'},
       {t:`"How do I know this actually reduces returns? I need proof, not promises."`,hp:26,w:['tecdoc','reco_tool'],r:['co_visits','design_studio'],p:'CONNECT'},
     ],rw:{xp:120,gold:50}},
-  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:50,my:14,bld:'HALL',
+  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:50,my:9,bld:'STOCKHOLM',
     intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
     dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
       {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
@@ -286,7 +286,7 @@ const ENC=[
       {t:`"We've been burned before. Two days in a classroom, forgotten in a month."`,hp:40,w:['co_visits'],r:['marketing_portal','custom_label'],p:'ENABLE'},
       {t:`"Fleet managers want lab data — not a sales rep reading from a product sheet."`,hp:36,w:['oil_analysis','co_visits'],r:['promo_calendar','retail_kits'],p:'ENABLE'},
     ],rw:{xp:180,gold:75}},
-  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:22,my:68,bld:'SHOP',
+  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:14,my:66,bld:'MADRID',
     intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
     dia:{q:`Alejandra says garages see every supplier as interchangeable. She has no designer, no marketing budget, and zero campaigns. What do you probe?`,opts:[
       {t:`Have you ever tried running your own promotion to stand out — and what happened?`,buff:'reduceHp',correct:true,fb:`Alejandra: "I made a flyer in PowerPoint once. It looked terrible. Zero response." — Her instinct is right; the tools are missing. That's your opening.`},
@@ -297,7 +297,7 @@ const ENC=[
       {t:`"I don't have a single person who can create marketing materials."`,hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
       {t:`"Zero budget. Every euro goes to inventory and logistics."`,hp:30,w:['promo_templates','content_kits'],r:['oil_analysis','connectivity'],p:'GROW'},
     ],rw:{xp:100,gold:45}},
-  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:78,my:22,bld:'DEPOT',
+  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:84,my:14,bld:'WARSAW',
     intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
     dia:{q:`Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?`,opts:[
       {t:`When a product turns out to be backordered, what's the downstream impact on your workshops?`,buff:'reduceHp',correct:true,fb:`Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.`},
@@ -309,7 +309,7 @@ const ENC=[
       {t:`"How can I plan if I can't see Wolf stock before ordering?"`,hp:35,w:['stock_visibility','e_ordering'],r:['promo_templates','co_visits'],p:'DELIVER'},
       {t:`"My workshops want to know exactly when. So do I."`,hp:32,w:['order_tracker','lead_time'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
     ],rw:{xp:180,gold:75}},
-  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:78,my:58,bld:'SHOP',
+  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:84,my:62,bld:'DUBAI',
     intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
     dia:{q:`Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?`,opts:[
       {t:`If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?`,buff:'reduceHp',correct:true,fb:`Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.`},
@@ -321,7 +321,7 @@ const ENC=[
       {t:`"Even with equipment — what stops them filling it with competitor oil?"`,hp:36,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'GROW'},
       {t:`"Big investment. Show me the ROI numbers."`,hp:32,w:['lubricant_mgmt','oil_monitoring'],r:['push_a_button','goods_loading'],p:'GROW'},
     ],rw:{xp:200,gold:90}},
-  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:40,my:42,bld:'OFFICE',
+  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:42,my:40,bld:'PARIS',
     intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
     dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
       {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
@@ -332,7 +332,7 @@ const ENC=[
       {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
       {t:`"No IT department. We're a distribution company, not a tech company."`,hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
     ],rw:{xp:100,gold:45}},
-  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:22,my:22,bld:'HALL',
+  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:14,my:14,bld:'LONDON',
     intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
     dia:{q:`James lost a 200-truck account because competitors brought oil analysis data and he had nothing. What question cracks this open?`,opts:[
       {t:`What specifically made your competitors' oil analysis data compelling to that fleet manager?`,buff:'reduceHp',correct:true,fb:`James: "Lab reports with real wear trends and drain recommendations tailored to that fleet." — That's your capability gap in exact detail. Now you can propose it.`},
@@ -344,7 +344,7 @@ const ENC=[
       {t:`"Even with data, my reps can't present it to a fleet engineering manager."`,hp:36,w:['co_visits'],r:['marketing_portal','palletization'],p:'ENABLE'},
       {t:`"We're 12 months behind competitors. How do we catch up?"`,hp:32,w:['oil_analysis','co_visits'],r:['promo_calendar','goods_loading'],p:'ENABLE'},
     ],rw:{xp:200,gold:90}},
-  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:60,my:42,bld:'SHOP',
+  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:68,my:38,bld:'FRANKFURT',
     intro:`Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.`,
     dia:{q:`Klaus rejected Shell's partnership and won't settle for basic services. He's testing whether you're a strategic peer. What do you ask?`,opts:[
       {t:`When Shell's execution fell short, what specifically disappointed you about the way they showed up?`,buff:'reduceHp',correct:true,fb:`Klaus: "Generic materials with a logo swap. It felt like a template, not a partnership." — He just told you exactly what bespoke looks like. Now you can position Partnership Activation.`},
@@ -359,7 +359,7 @@ const ENC=[
 ];
 
 // ── BOSS ──
-const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:50,my:84,bld:'CONV',isBoss:true,
+const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:50,my:88,bld:'AUTOMECHANIKA',isBoss:true,
   intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
   dia:{q:`The Board has already heard Shell, Castrol, Fuchs and Motul this week. They're cynical. You have ONE question to prove you understand partnership differently.`,opts:[
     {t:`What would a true 360° partnership need to do DIFFERENTLY from your current suppliers to be worth switching volume?`,buff:'reduceHp',correct:true,fb:`Board: "Wrap data, knowledge, and operational tools around OUR business — not bolt your logo on top of ours." — You led with THEIR business. They're leaning in. This is your opening.`},
@@ -380,17 +380,12 @@ const ALL=[...ENC,BOSS];
 // ═══════════════════════════════════════
 // PHASER OVERWORLD ENGINE
 // ═══════════════════════════════════════
-const MW=60,MH=60,TS=16,MPX=MW*TS,MPY=MH*TS;
+const MW=100,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
 const p2x=p=>Math.round(p*MPX/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
-const BCOL={
- GARAGE:{roof:'#9c2820',wall:'#a8a8a8',door:'#2a2a2a'},
- HALL:{roof:'#d27a20',wall:'#e4c48a',door:'#4a2a10'},
- SHOP:{roof:'#d83030',wall:'#f2e4c0',door:'#4a2a10'},
- DEPOT:{roof:'#404040',wall:'#7a7a7a',door:'#2a2a2a'},
- OFFICE:{roof:'#1a2a50',wall:'#2a3a6a',door:'#FFD700'},
- CONV:{roof:'#e8b400',wall:'#d4c8a8',door:'#FFD700'},
-};
+// ── LANDMARK BUILDINGS: each distributor gets a city-themed silhouette atop a warehouse base ──
+// Dimensions returned from each draw fn (so physics bodies can size themselves correctly)
+const BLD_DIMS={PARIS:[64,88],LONDON:[64,84],BRUSSELS:[72,80],STOCKHOLM:[64,72],WARSAW:[64,88],FRANKFURT:[80,72],MADRID:[72,68],DUBAI:[56,96],AUTOMECHANIKA:[96,72]};
 let MAP_DATA=null;
 function genMapData(){
  const m=Array.from({length:MH},()=>Array(MW).fill(0));
@@ -420,17 +415,13 @@ function genMapData(){
  carveLine(b[8][0],b[8][1],Math.round(50*MW/100),MH-3);
  // Hedge ring removed: it was creating maze-like corridors and dead ends
  // around buildings. The carved stone paths are enough structure on their own.
- // Water pond top-left quadrant (decorative, player routes around it)
- const pondX=10,pondY=55;
- for(let dy=0;dy<5;dy++)for(let dx=0;dx<6;dx++){
-  const nx=pondX+dx,ny=pondY+dy;
-  if(m[ny]&&m[ny][nx]===0)m[ny][nx]=4;
- }
- // Second pond top-right
- const pond2X=48,pond2Y=6;
- for(let dy=0;dy<4;dy++)for(let dx=0;dx<5;dx++){
-  const nx=pond2X+dx,ny=pond2Y+dy;
-  if(m[ny]&&m[ny][nx]===0)m[ny][nx]=4;
+ // Decorative water ponds positioned off the path network
+ const ponds=[[3,55,9,7],[85,10,10,6],[3,8,8,5],[85,78,9,6]];
+ for(const[px,py,pw,ph] of ponds){
+  for(let dy=0;dy<ph;dy++)for(let dx=0;dx<pw;dx++){
+   const nx=px+dx,ny=py+dy;
+   if(m[ny]&&m[ny][nx]===0)m[ny][nx]=4;
+  }
  }
  return m;
 }
@@ -502,72 +493,331 @@ function genGround(scene){
  }
  scene.textures.addCanvas('ground',c);
 }
+// Helper: draw a warehouse base at the bottom of the canvas (loading dock style)
+function drawWarehouseBase(x,w,h,wallC,roofC,doorC){
+ // Ground shadow
+ x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(w/2,h-3,w/2-4,4,0,0,Math.PI*2);x.fill();
+ const by=h-20;
+ // Warehouse walls
+ x.fillStyle=wallC;x.fillRect(4,by,w-8,17);
+ x.fillStyle='#000';x.fillRect(4,by,w-8,1);x.fillRect(4,by,1,17);x.fillRect(w-5,by,1,17);x.fillRect(4,h-4,w-8,1);
+ // Roof strip
+ x.fillStyle=roofC;x.fillRect(2,by-2,w-4,2);
+ x.fillStyle='#000';x.fillRect(2,by-2,w-4,1);
+ // Loading-dock door (wide)
+ const dw=Math.min(24,w-16),dx=Math.round(w/2-dw/2);
+ x.fillStyle=doorC;x.fillRect(dx,by+3,dw,13);
+ x.fillStyle='#000';x.strokeStyle='#000';x.fillRect(dx,by+3,dw,1);x.fillRect(dx,by+15,dw,1);x.fillRect(dx,by+3,1,13);x.fillRect(dx+dw-1,by+3,1,13);
+ // Roll-up door lines
+ x.fillStyle='#555';
+ for(let i=1;i<4;i++)x.fillRect(dx+1,by+3+i*3,dw-2,1);
+ // Warehouse windows (left + right of door)
+ x.fillStyle='#87ceeb';
+ x.fillRect(6,by+4,6,4);x.fillRect(w-12,by+4,6,4);
+ x.fillStyle='#000';x.strokeRect(6,by+4,6,4);x.strokeRect(w-12,by+4,6,4);
+}
+
+// ── PARIS: Eiffel Tower ──
+function drawParis(x,w,h){
+ const lat='#6a3a10',latH='#8a5a2a',latL='#4a2010';
+ // Warehouse base
+ drawWarehouseBase(x,w,h,'#d8c8a0','#8b5a2b','#4a2a10');
+ // Eiffel silhouette, bottom at y=h-22, top at y=4
+ const cx=w/2,topY=4,baseY=h-22;
+ // Base legs (4 diagonal supports)
+ x.fillStyle=lat;
+ for(let i=0;i<14;i++){
+  const yy=baseY-14+i;
+  const off=1+Math.floor((13-i)*0.7);
+  x.fillRect(cx-off-3,yy,3,1);
+  x.fillRect(cx+off,yy,3,1);
+  // Inner struts
+  if(i%2===0){x.fillRect(cx-5,yy,2,1);x.fillRect(cx+3,yy,2,1)}
+ }
+ // Lower platform
+ x.fillStyle=lat;x.fillRect(cx-14,baseY-16,28,2);
+ x.fillStyle=latH;x.fillRect(cx-14,baseY-16,28,1);
+ // Middle section
+ for(let i=0;i<18;i++){
+  const yy=baseY-34+i;
+  const hw=9-Math.floor(i*0.25);
+  x.fillStyle=lat;x.fillRect(cx-hw,yy,hw*2,1);
+  if(i%3===0){x.fillStyle=latH;x.fillRect(cx-hw,yy,hw*2,1)}
+ }
+ // Middle platform
+ x.fillStyle=lat;x.fillRect(cx-7,baseY-36,14,2);
+ x.fillStyle=latH;x.fillRect(cx-7,baseY-36,14,1);
+ // Upper section
+ for(let i=0;i<16;i++){
+  const yy=baseY-52+i;
+  const hw=Math.max(1,4-Math.floor(i*0.2));
+  x.fillStyle=lat;x.fillRect(cx-hw,yy,hw*2,1);
+ }
+ // Top antenna
+ x.fillStyle='#c0c0c0';x.fillRect(cx-1,topY,2,6);
+ x.fillStyle='#ff0000';x.fillRect(cx,topY-1,1,2);
+}
+
+// ── LONDON: Big Ben clock tower ──
+function drawLondon(x,w,h){
+ const st='#c8b080',stH='#e8d0a0',stL='#8a7450';
+ drawWarehouseBase(x,w,h,'#c0c0d0','#4a4a5a','#2a2a3a');
+ const cx=w/2,topY=4,baseY=h-22;
+ // Pointed green copper roof
+ x.fillStyle='#2a8a6a';
+ for(let i=0;i<8;i++){
+  const hw=1+i;
+  x.fillRect(cx-hw,topY+i,hw*2,1);
+ }
+ // Gold crown band below roof
+ x.fillStyle='#FFD700';x.fillRect(cx-10,topY+8,20,2);
+ x.fillStyle='#c89000';x.fillRect(cx-10,topY+9,20,1);
+ // Tower shaft
+ x.fillStyle=st;x.fillRect(cx-11,topY+10,22,baseY-topY-10);
+ x.fillStyle=stL;x.fillRect(cx-11,topY+10,2,baseY-topY-10);
+ x.fillStyle=stH;x.fillRect(cx+9,topY+10,2,baseY-topY-10);
+ // Decorative band
+ x.fillStyle=stL;x.fillRect(cx-11,topY+14,22,1);
+ // Clock face (white circle with black hands)
+ x.fillStyle='#fff';x.fillRect(cx-6,topY+16,12,12);
+ x.fillStyle='#000';
+ x.fillRect(cx-6,topY+16,12,1);x.fillRect(cx-6,topY+27,12,1);
+ x.fillRect(cx-6,topY+16,1,12);x.fillRect(cx+5,topY+16,1,12);
+ // Clock numerals (simplified dots)
+ x.fillRect(cx-1,topY+17,2,1);x.fillRect(cx+3,topY+22,1,1);
+ x.fillRect(cx-1,topY+26,2,1);x.fillRect(cx-4,topY+22,1,1);
+ // Hands
+ x.fillRect(cx,topY+18,1,4);x.fillRect(cx,topY+22,3,1);
+ // Lower windows
+ x.fillStyle='#0a2a5a';
+ for(let i=0;i<3;i++){
+  const wy=topY+34+i*7;
+  x.fillRect(cx-3,wy,6,4);
+  x.fillStyle='#6080a0';x.fillRect(cx-3,wy,6,1);x.fillStyle='#0a2a5a';
+ }
+}
+
+// ── BRUSSELS: Atomium (connected silver spheres) ──
+function drawBrussels(x,w,h){
+ drawWarehouseBase(x,w,h,'#d0d0d0','#2a4a8a','#2a2a4a');
+ const cx=w/2,baseY=h-22;
+ // Spheres: center + 4 at corners of a diamond
+ function sphere(cxx,cyy,r){
+  x.fillStyle='#808088';x.beginPath();x.arc(cxx,cyy,r+1,0,Math.PI*2);x.fill();
+  x.fillStyle='#c8c8d0';x.beginPath();x.arc(cxx,cyy,r,0,Math.PI*2);x.fill();
+  x.fillStyle='#e8e8f0';x.beginPath();x.arc(cxx-r*0.4,cyy-r*0.4,r*0.35,0,Math.PI*2);x.fill();
+  x.fillStyle='#fff';x.beginPath();x.arc(cxx-r*0.5,cyy-r*0.55,r*0.15,0,Math.PI*2);x.fill();
+ }
+ // Connecting rods
+ x.strokeStyle='#606068';x.lineWidth=3;
+ const mid={x:cx,y:baseY-26};
+ const top={x:cx,y:baseY-52};
+ const left={x:cx-18,y:baseY-22};
+ const right={x:cx+18,y:baseY-22};
+ const below={x:cx,y:baseY-10};
+ [top,left,right,below].forEach(p=>{x.beginPath();x.moveTo(mid.x,mid.y);x.lineTo(p.x,p.y);x.stroke()});
+ // Side-to-side rods for triangular structure
+ x.beginPath();x.moveTo(left.x,left.y);x.lineTo(top.x,top.y);x.stroke();
+ x.beginPath();x.moveTo(right.x,right.y);x.lineTo(top.x,top.y);x.stroke();
+ x.beginPath();x.moveTo(left.x,left.y);x.lineTo(below.x,below.y);x.stroke();
+ x.beginPath();x.moveTo(right.x,right.y);x.lineTo(below.x,below.y);x.stroke();
+ // Spheres drawn on top of rods
+ sphere(top.x,top.y,7);
+ sphere(left.x,left.y,7);
+ sphere(right.x,right.y,7);
+ sphere(mid.x,mid.y,8);
+ sphere(below.x,below.y,6);
+}
+
+// ── STOCKHOLM: Nordic red cabin ──
+function drawStockholm(x,w,h){
+ drawWarehouseBase(x,w,h,'#e8d8a0','#8b4513','#4a2a10');
+ const cx=w/2,baseY=h-22;
+ // Steep triangular red roof
+ x.fillStyle='#8a1a10';
+ for(let i=0;i<18;i++){
+  const hw=i*1.2;
+  x.fillRect(cx-hw,baseY-36+i,hw*2,1);
+ }
+ x.fillStyle='#aa2a20';// highlight
+ for(let i=0;i<18;i++){
+  x.fillRect(cx-i*1.2,baseY-36+i,2,1);
+ }
+ // Roof trim
+ x.fillStyle='#fff';x.fillRect(cx-22,baseY-18,44,1);
+ // Walls (red with white trim)
+ x.fillStyle='#a01810';x.fillRect(cx-20,baseY-18,40,14);
+ x.fillStyle='#c02820';x.fillRect(cx-20,baseY-18,40,3);
+ // White window frames
+ x.fillStyle='#fff';
+ x.fillRect(cx-16,baseY-12,8,8);x.fillRect(cx+8,baseY-12,8,8);
+ x.fillStyle='#87ceeb';x.fillRect(cx-15,baseY-11,6,6);x.fillRect(cx+9,baseY-11,6,6);
+ x.fillStyle='#fff';x.fillRect(cx-12,baseY-11,1,6);x.fillRect(cx+12,baseY-11,1,6);x.fillRect(cx-15,baseY-8,6,1);x.fillRect(cx+9,baseY-8,6,1);
+ // Central door
+ x.fillStyle='#4a2a10';x.fillRect(cx-3,baseY-8,6,8);
+ x.fillStyle='#FFD700';x.fillRect(cx+2,baseY-5,1,1);
+ // Chimney
+ x.fillStyle='#8a8a8a';x.fillRect(cx+8,baseY-34,4,8);
+ x.fillStyle='#aaaaaa';x.fillRect(cx+8,baseY-34,1,8);
+ // Smoke
+ x.fillStyle='rgba(255,255,255,0.6)';x.beginPath();x.arc(cx+10,baseY-38,3,0,Math.PI*2);x.fill();
+}
+
+// ── WARSAW: Palace of Culture (stepped skyscraper) ──
+function drawWarsaw(x,w,h){
+ drawWarehouseBase(x,w,h,'#b8b0a0','#4a3a2a','#2a2010');
+ const cx=w/2,baseY=h-22,topY=4;
+ const st='#a89880',stH='#c8b8a0',stL='#887060';
+ // 5 tiers, each narrower
+ const tiers=[[18,baseY-20,18],[15,baseY-38,14],[12,baseY-52,12],[9,baseY-64,8],[6,baseY-72,4]];
+ tiers.forEach(([hw,ty,th])=>{
+  x.fillStyle=st;x.fillRect(cx-hw,ty,hw*2,th);
+  x.fillStyle=stH;x.fillRect(cx-hw,ty,hw*2,1);
+  x.fillStyle=stL;x.fillRect(cx+hw-1,ty,1,th);
+  // Window rows
+  x.fillStyle='#3a5a8a';
+  for(let r=1;r<th-1;r+=2){
+   for(let cc=1;cc<hw*2-1;cc+=2){
+    x.fillRect(cx-hw+cc,ty+r,1,1);
+   }
+  }
+ });
+ // Top spire
+ x.fillStyle='#a89880';x.fillRect(cx-1,topY,2,10);
+ x.fillStyle='#FFD700';x.fillRect(cx-2,topY,4,2);
+}
+
+// ── FRANKFURT: Römer (three gabled townhouses) ──
+function drawFrankfurt(x,w,h){
+ drawWarehouseBase(x,w,h,'#d0c0a0','#5a3a20','#2a1a10');
+ const baseY=h-22;
+ // Three houses side by side
+ const houses=[[8,24],[w/2-12,24],[w-32,24]];
+ const wallC='#f0e0c8',beam='#5a3a20',roofC='#8a2010',roofH='#aa3020';
+ houses.forEach(([hx,hw])=>{
+  const hy=baseY-34,hh=34;
+  // Walls (cream with dark beams)
+  x.fillStyle=wallC;x.fillRect(hx,hy+10,hw,hh-10);
+  // Vertical beams
+  x.fillStyle=beam;
+  x.fillRect(hx,hy+10,1,hh-10);x.fillRect(hx+hw-1,hy+10,1,hh-10);
+  x.fillRect(hx+Math.floor(hw/2),hy+10,1,hh-10);
+  // Horizontal beams
+  x.fillRect(hx,hy+10,hw,1);x.fillRect(hx,hy+18,hw,1);x.fillRect(hx,hy+26,hw,1);
+  // Pointed gable roof
+  x.fillStyle=roofC;
+  for(let i=0;i<10;i++){
+   x.fillRect(hx-1+i,hy+i,hw+2-i*2,1);
+  }
+  x.fillStyle=roofH;
+  for(let i=0;i<10;i++){
+   x.fillRect(hx-1+i,hy+i,1,1);
+  }
+  // Window
+  x.fillStyle='#6080a0';x.fillRect(hx+hw/2-2,hy+12,4,4);
+  x.fillRect(hx+hw/2-2,hy+20,4,4);
+ });
+}
+
+// ── MADRID: Puerta de Alcalá (triumphal arch) ──
+function drawMadrid(x,w,h){
+ drawWarehouseBase(x,w,h,'#e8d8a8','#8a5a2a','#4a2a10');
+ const cx=w/2,baseY=h-22;
+ const st='#f0e0b8',stH='#fff0d0',stL='#c8a878';
+ // Main rectangular body
+ x.fillStyle=st;x.fillRect(cx-24,baseY-32,48,32);
+ x.fillStyle=stH;x.fillRect(cx-24,baseY-32,48,1);
+ x.fillStyle=stL;x.fillRect(cx+22,baseY-32,2,32);
+ // Entablature (decorative top)
+ x.fillStyle=stL;x.fillRect(cx-26,baseY-36,52,4);
+ x.fillStyle=st;x.fillRect(cx-24,baseY-34,48,2);
+ // Spanish flag on top (red-yellow-red)
+ x.fillStyle='#8a8a8a';x.fillRect(cx-1,baseY-42,2,6);
+ x.fillStyle='#c00';x.fillRect(cx+1,baseY-42,6,1);
+ x.fillStyle='#ffcc00';x.fillRect(cx+1,baseY-41,6,2);
+ x.fillStyle='#c00';x.fillRect(cx+1,baseY-39,6,1);
+ // Three archways
+ const archX=[cx-18,cx-4,cx+10];
+ archX.forEach(ax=>{
+  // Arched opening
+  x.fillStyle='#2a1810';
+  x.fillRect(ax,baseY-22,8,22);
+  // Arch curve top
+  x.beginPath();x.arc(ax+4,baseY-22,4,Math.PI,Math.PI*2);x.fill();
+ });
+ // Central arch is taller
+ x.fillStyle='#2a1810';x.fillRect(cx-4,baseY-26,8,4);
+ x.beginPath();x.arc(cx,baseY-26,4,Math.PI,Math.PI*2);x.fill();
+ // Columns between arches
+ x.fillStyle=stL;
+ x.fillRect(cx-10,baseY-22,2,22);x.fillRect(cx+8,baseY-22,2,22);
+}
+
+// ── DUBAI: Burj Khalifa ──
+function drawDubai(x,w,h){
+ drawWarehouseBase(x,w,h,'#c8c8e8','#2a4a8a','#1a2a4a');
+ const cx=w/2,baseY=h-22,topY=4;
+ const gl='#6080c0',glH='#a0c0e0',glL='#4060a0';
+ // 3-tier stepped spire (narrows upward)
+ const tiers=[[14,baseY-22,12],[11,baseY-40,18],[8,baseY-62,22],[5,baseY-78,14]];
+ tiers.forEach(([hw,ty,th])=>{
+  x.fillStyle=gl;x.fillRect(cx-hw,ty,hw*2,th);
+  x.fillStyle=glH;x.fillRect(cx-hw,ty,hw*2,1);
+  x.fillStyle=glL;x.fillRect(cx+hw-1,ty,1,th);
+  // Grid of bright window pixels
+  x.fillStyle='#a0c0ff';
+  for(let r=2;r<th-1;r+=3){
+   for(let cc=1;cc<hw*2-1;cc+=2){
+    x.fillRect(cx-hw+cc,ty+r,1,1);
+   }
+  }
+ });
+ // Top needle spire
+ x.fillStyle='#c0c0d0';x.fillRect(cx-1,topY,2,8);
+ x.fillStyle='#FFD700';x.fillRect(cx,topY-1,1,2);
+}
+
+// ── AUTOMECHANIKA: grand convention center (boss) ──
+function drawAutomechanika(x,w,h){
+ drawWarehouseBase(x,w,h,'#d8c8a8','#4a2a10','#1a1a1a');
+ const cx=w/2,baseY=h-22;
+ // Wide marble base
+ x.fillStyle='#e8d8b8';x.fillRect(cx-36,baseY-38,72,16);
+ x.fillStyle='#c8b898';x.fillRect(cx-36,baseY-24,72,2);
+ x.fillStyle='#f0e0c0';x.fillRect(cx-36,baseY-38,72,1);
+ // Columns
+ x.fillStyle='#fff2d8';
+ for(let i=0;i<5;i++){
+  const xx=cx-30+i*15;
+  x.fillRect(xx-2,baseY-36,4,14);
+  x.fillStyle='#d8c8a8';x.fillRect(xx+1,baseY-36,1,14);x.fillStyle='#fff2d8';
+ }
+ // Pediment (triangle above columns)
+ x.fillStyle='#d8c8a8';
+ for(let i=0;i<10;i++){
+  x.fillRect(cx-36+i,baseY-48+i,72-i*2,1);
+ }
+ // Gold dome
+ x.fillStyle='#8a6a10';x.beginPath();x.arc(cx,baseY-48,18,Math.PI,Math.PI*2);x.fill();
+ x.fillStyle='#FFD700';x.beginPath();x.arc(cx,baseY-48,16,Math.PI,Math.PI*2);x.fill();
+ x.fillStyle='#ffe066';x.beginPath();x.arc(cx-5,baseY-52,5,Math.PI,Math.PI*2);x.fill();
+ // Gold spire on top of dome
+ x.fillStyle='#FFD700';x.fillRect(cx-1,baseY-72,2,10);
+ x.fillStyle='#ff8800';x.fillRect(cx,baseY-74,1,2);
+ // Flags on base corners
+ x.fillStyle='#8a8a8a';x.fillRect(cx-34,baseY-44,1,6);x.fillRect(cx+33,baseY-44,1,6);
+ x.fillStyle='#ff0000';x.fillRect(cx-34,baseY-44,5,2);
+ x.fillStyle='#00aa00';x.fillRect(cx+33,baseY-44,5,2);
+}
+
+const BLD_FNS={PARIS:drawParis,LONDON:drawLondon,BRUSSELS:drawBrussels,STOCKHOLM:drawStockholm,WARSAW:drawWarsaw,FRANKFURT:drawFrankfurt,MADRID:drawMadrid,DUBAI:drawDubai,AUTOMECHANIKA:drawAutomechanika};
+
 function genBldTex(scene){
- Object.entries(BCOL).forEach(([type,cl])=>{
-  const w=type==='DEPOT'||type==='CONV'?64:48;
-  const h=type==='OFFICE'||type==='CONV'?56:48;
+ Object.entries(BLD_DIMS).forEach(([type,[w,h]])=>{
   const c=document.createElement('canvas');c.width=w;c.height=h;
   const x=c.getContext('2d');
-  // shadow
-  x.fillStyle='rgba(0,0,0,0.35)';x.beginPath();x.ellipse(w/2,h-3,w/2-3,4,0,0,Math.PI*2);x.fill();
-  // walls
-  x.fillStyle=cl.wall;x.fillRect(4,Math.round(h*0.35),w-8,Math.round(h*0.6));
-  x.strokeStyle='#1a1a1a';x.lineWidth=1;x.strokeRect(4,Math.round(h*0.35),w-8,Math.round(h*0.6));
-  // roof
-  x.fillStyle=cl.roof;
-  if(type==='HALL'){
-   x.beginPath();x.moveTo(2,Math.round(h*0.35));x.lineTo(w/2,4);x.lineTo(w-2,Math.round(h*0.35));x.closePath();x.fill();
-   x.strokeStyle='#4a2010';x.lineWidth=1;x.stroke();
-  }else if(type==='CONV'){
-   x.beginPath();x.ellipse(w/2,Math.round(h*0.28),Math.round(w*0.32),Math.round(h*0.22),0,0,Math.PI*2);x.fill();
-   x.strokeStyle='#8b4513';x.lineWidth=1;x.stroke();
-   x.fillStyle='#FFD700';x.fillRect(w/2-1,2,3,8);
-  }else{
-   x.fillRect(2,Math.round(h*0.2),w-4,Math.round(h*0.18));
-   x.strokeStyle='#1a1a1a';x.lineWidth=1;x.strokeRect(2,Math.round(h*0.2),w-4,Math.round(h*0.18));
-  }
-  // awning for SHOP
-  if(type==='SHOP'){
-   for(let i=0;i<6;i++){
-    x.fillStyle=i%2?'#f0f0f0':'#d83030';
-    x.fillRect(4+i*((w-8)/6),Math.round(h*0.33),Math.ceil((w-8)/6)+1,5);
-   }
-  }
-  // columns for CONV
-  if(type==='CONV'){
-   x.fillStyle='#fff2d8';
-   [-18,-8,8,18].forEach(off=>x.fillRect(w/2+off-2,Math.round(h*0.38),4,Math.round(h*0.55)));
-  }
-  // windows
-  x.fillStyle='#87ceeb';
-  if(type==='OFFICE'){
-   for(let r=0;r<3;r++)for(let cc=0;cc<3;cc++){
-    const wx=8+cc*12,wy=Math.round(h*0.42)+r*10;
-    x.fillRect(wx,wy,8,6);
-    x.strokeStyle='#0a0a1e';x.lineWidth=1;x.strokeRect(wx,wy,8,6);
-    x.beginPath();x.moveTo(wx+4,wy);x.lineTo(wx+4,wy+6);x.stroke();
-   }
-  }else if(type!=='CONV'){
-   [[8,Math.round(h*0.45)],[w-16,Math.round(h*0.45)]].forEach(([wx,wy])=>{
-    x.fillRect(wx,wy,8,7);
-    x.strokeStyle='#1a1a1a';x.lineWidth=1;x.strokeRect(wx,wy,8,7);
-    x.beginPath();x.moveTo(wx+4,wy);x.lineTo(wx+4,wy+7);x.stroke();
-   });
-  }
-  // door
-  x.fillStyle=cl.door;
-  const dw=type==='DEPOT'||type==='GARAGE'?20:10;const dh=Math.round(h*0.32);
-  x.fillRect(Math.round(w/2-dw/2),h-3-dh,dw,dh);
-  x.strokeStyle='#000';x.lineWidth=1;x.strokeRect(Math.round(w/2-dw/2),h-3-dh,dw,dh);
-  if(type==='GARAGE'||type==='DEPOT'){
-   x.strokeStyle='#555';x.lineWidth=1;
-   for(let i=1;i<=3;i++){
-    const ly=h-3-dh+i*(dh/4);
-    x.beginPath();x.moveTo(Math.round(w/2-dw/2),ly);x.lineTo(Math.round(w/2+dw/2),ly);x.stroke();
-   }
-  }else{
-   x.fillStyle='#FFD700';x.fillRect(Math.round(w/2+dw/2-3),h-3-Math.round(dh/2),1,1);
-  }
+  const fn=BLD_FNS[type];
+  if(fn)fn(x,w,h);
   scene.textures.addCanvas('bld_'+type,c);
  });
 }
@@ -622,6 +872,29 @@ function genCarTex(scene){
  scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
 }
 // Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
+// Delivery van — small 14x10 top-down sprite, single frame (tint applied per building)
+function genVanTex(scene){
+ const FW=14,FH=10;
+ const c=document.createElement('canvas');c.width=FW;c.height=FH;
+ const x=c.getContext('2d');
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.35)';x.fillRect(1,9,12,1);
+ // Van body (white base, will be tinted)
+ x.fillStyle='#ffffff';x.fillRect(2,1,10,8);
+ // Outline
+ x.fillStyle='#1a1a1a';
+ x.fillRect(2,0,10,1);x.fillRect(2,9,10,1);x.fillRect(1,1,1,8);x.fillRect(12,1,1,8);
+ // Cab separator
+ x.fillRect(2,3,10,1);
+ // Windshield (blue, front)
+ x.fillStyle='#6aaacc';x.fillRect(3,1,8,2);
+ // Back door
+ x.fillStyle='#cccccc';x.fillRect(3,5,8,4);
+ x.fillStyle='#888';x.fillRect(7,5,1,4);
+ // Wheels (dark pixels)
+ x.fillStyle='#111';x.fillRect(0,2,1,2);x.fillRect(13,2,1,2);x.fillRect(0,6,1,2);x.fillRect(13,6,1,2);
+ scene.textures.addCanvas('van',c);
+}
 function genBikeTex(scene){
  const FW=16,FH=24;
  const c=document.createElement('canvas');c.width=FW*2;c.height=FH;
@@ -885,7 +1158,7 @@ function genNpcTex(scene){
 class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
-  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);
+  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);
   this.scene.start('Overworld');
  }
 }
@@ -936,18 +1209,20 @@ class OverworldScene extends Phaser.Scene {
   });
   // Buildings
   this.bldSprites={};this.bldBodies=this.physics.add.staticGroup();
-  this.labels={};
+  this.labels={};this.vans=[];
+  // Tint palette per distributor (applied to the white van body texture)
+  const VAN_TINT={1:0xff4a30,2:0xffd700,3:0xff1a1a,4:0xffffff,5:0xf0c040,6:0x3060f0,7:0xd42020,8:0x1a1a1a,99:0xffa000};
   ALL.forEach(enc=>{
    const sx=p2x(enc.mx),sy=p2x(enc.my);
-   const tex='bld_'+(enc.bld||'GARAGE');
+   const tex='bld_'+(enc.bld||'BRUSSELS');
    const bld=this.add.image(sx,sy,tex);
    bld.setOrigin(0.5,0.7);
    this.bldSprites[enc.id]=bld;
    // Invisible collision body covering the bottom half
    const body=this.physics.add.staticImage(sx,sy+10,tex);
    body.setAlpha(0);
-   body.body.setSize(bld.width*0.8,bld.height*0.45);
-   body.body.setOffset(bld.width*0.1,bld.height*0.45);
+   body.body.setSize(bld.width*0.8,bld.height*0.3);
+   body.body.setOffset(bld.width*0.1,bld.height*0.6);
    this.bldBodies.add(body);
    // Label
    const lbl=this.add.text(sx,sy+bld.height*0.35,enc.loc,{
@@ -956,6 +1231,19 @@ class OverworldScene extends Phaser.Scene {
    }).setOrigin(0.5,0);
    lbl.setDepth(sy+1000);
    this.labels[enc.id]=lbl;
+   // Two delivery vans orbiting the building on an elliptical path
+   const tint=VAN_TINT[enc.id]||0xffffff;
+   for(let k=0;k<2;k++){
+    const van=this.add.image(sx,sy,'van');
+    van.setTint(tint);
+    van.setDepth(sy+bld.height*0.22+0.5);
+    van.encId=enc.id;
+    van.bx=sx;van.by=sy+bld.height*0.22;
+    van.rx=bld.width*0.6+16;van.ry=bld.height*0.28+10;
+    van.phase=k*Math.PI+(Math.random()*0.2);
+    van.spd=0.0007+Math.random()*0.0003;
+    this.vans.push(van);
+   }
   });
   // Hero
   // Spawn from saved position (if returning from battle) or default spawn point
@@ -1116,6 +1404,20 @@ class OverworldScene extends Phaser.Scene {
     const adir=Math.abs(nvx)>Math.abs(nvy)?(nvx<0?'left':'right'):(nvy<0?'up':'down');
     const k='npc'+enc.v+'-walk-'+adir;
     if(this.anims.exists(k))npc.anims.play(k,true);
+   }
+  }
+  // Delivery vans orbit their building on an ellipse; rotate to face direction of travel
+  if(this.vans){
+   for(const van of this.vans){
+    van.phase+=van.spd*delta;
+    const a=van.phase;
+    const nx=van.bx+Math.cos(a)*van.rx;
+    const ny=van.by+Math.sin(a)*van.ry;
+    van.setPosition(nx,ny);
+    // Facing: tangent to the ellipse
+    const tx=-Math.sin(a)*van.rx;
+    const ty=Math.cos(a)*van.ry;
+    van.setRotation(Math.atan2(ty,tx)+Math.PI/2);
    }
   }
   // Depth sort (y-sort for hero + NPCs; buildings sort by their top-of-base edge)
