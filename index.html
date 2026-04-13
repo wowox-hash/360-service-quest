@@ -181,7 +181,7 @@ const BGM_TRACKS={
 function playBGM(name){
  if(bgmActive===name)return;
  stopBGM();
- if(!aOn||!sndOn||!BGM_TRACKS[name])return;
+ if(!aOn||!BGM_TRACKS[name])return;
  bgmActive=name;
  const t=BGM_TRACKS[name];
  try{Tone.Transport.bpm.value=t.bpm}catch(e){return}
