@@ -1254,6 +1254,7 @@ function App(){
   const [lb,setLb]=useState([]);
   const [diaBuff,setDiaBuff]=useState(null);
   const [diaAns,setDiaAns]=useState(false);
+  const [diaOrder,setDiaOrder]=useState([0,1,2]);
   const [t0,setT0]=useState(null);
   const [tab,setTab]=useState('map');
   const [flying,setFlying]=useState(null);
@@ -1340,7 +1341,10 @@ function App(){
   const cLv=Math.floor(txp/200)+1;
   useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
 
-  const go=(e)=>{snd('sel');dmgThisFight.current=0;setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);setPh(e.dia?'dialogue':'intro')};
+  const go=(e)=>{snd('sel');dmgThisFight.current=0;setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);
+   // Randomize discovery-question option order (Fisher-Yates) so the correct answer isn't always first
+   if(e.dia){const n=e.dia.opts.length;const ord=Array.from({length:n},(_,i)=>i);for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]]}setDiaOrder(ord)}
+   setPh(e.dia?'dialogue':'intro')};
   const useI=(id)=>{const i=items.findIndex(x=>x.id===id&&x.u>0);if(i<0)return;const ni=[...items];ni[i]={...ni[i],u:ni[i].u-1};if(ni[i].u<=0)ni.splice(i,1);setItems(ni);snd('buy');
     if(id==='intel'){setShowW(true);setLog(p=>[...p,{y:'i',t:'🔍 Weaknesses revealed!'}])}else if(id==='coffee'){setPHp(p=>Math.min(MHP,p+30));setLog(p=>[...p,{y:'i',t:'☕ +30 HP!'}])}else if(id==='playbook'){setDmgB(true);setLog(p=>[...p,{y:'i',t:'📘 +25% damage!'}])}else if(id==='shield'){setShld(true);setLog(p=>[...p,{y:'i',t:'🛡️ Shield active!'}])}else if(id==='combo_charm'){setComboB(true);setLog(p=>[...p,{y:'i',t:'✨ Combo 2x!'}])}else if(id==='mega_heal'){setPHp(MHP);setLog(p=>[...p,{y:'i',t:'⚡ Full HP!'}])}};
 
@@ -1441,11 +1445,11 @@ function App(){
     h('div',{className:'ff7',style:{padding:16,marginTop:12,animation:'fadeIn .5s ease .2s both',boxShadow:'0 0 24px rgba(255,215,0,.35),inset 0 1px 0 rgba(255,255,255,.35)',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'}},
       h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:700,marginBottom:8}},diaAns?'💡 DISCOVERY INSIGHT':'💬 CHOOSE YOUR DISCOVERY QUESTION'),
       h('div',{className:'fs-sm',style:{marginBottom:12,lineHeight:1.6,color:C.mu,fontStyle:'italic'}},enc.dia.q),
-      !diaAns?enc.dia.opts.map((o,i)=>h('button',{key:i,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);if(o.correct)setPerfectDia(p=>p+1);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)):
+      !diaAns?diaOrder.map((oi,i)=>{const o=enc.dia.opts[oi];return h('button',{key:oi,onClick:()=>{setDiaBuff(o.buff);setDiaAns(true);if(o.correct)setPerfectDia(p=>p+1);snd(o.correct?'good':'bad')},style:{display:'block',width:'100%',textAlign:'left',background:'rgba(255,255,255,.03)',border:'1px solid '+C.bd,borderRadius:8,padding:'12px 14px',marginBottom:8,fontSize:14,lineHeight:1.6,color:C.tx,cursor:'pointer'}},String.fromCharCode(65+i)+'. '+o.t)}):
       h('div',null,
-        enc.dia.opts.map((o,i)=>h('div',{key:i,style:{padding:'10px 12px',marginBottom:6,borderRadius:8,fontSize:13,lineHeight:1.6,background:o.correct?'rgba(16,185,129,.12)':diaBuff===o.buff&&!o.correct?'rgba(239,68,68,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.bd),color:o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.mu}},
+        diaOrder.map((oi,i)=>{const o=enc.dia.opts[oi];return h('div',{key:oi,style:{padding:'10px 12px',marginBottom:6,borderRadius:8,fontSize:13,lineHeight:1.6,background:o.correct?'rgba(16,185,129,.12)':diaBuff===o.buff&&!o.correct?'rgba(239,68,68,.12)':'rgba(255,255,255,.02)',border:'1px solid '+(o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.bd),color:o.correct?C.ok:diaBuff===o.buff&&!o.correct?C.no:C.mu}},
           String.fromCharCode(65+i)+'. '+o.t,
-          (o.correct||diaBuff===o.buff)&&h('div',{className:'fs-xs',style:{marginTop:6,color:o.correct?C.ok:C.no}},o.fb))),
+          (o.correct||diaBuff===o.buff)&&h('div',{className:'fs-xs',style:{marginTop:6,color:o.correct?C.ok:C.no}},o.fb))}),
         h('div',{style:{marginTop:10,padding:'10px 12px',borderRadius:8,fontSize:13,background:diaBuff==='reduceHp'?'rgba(16,185,129,.08)':diaBuff==='boostEnemy'?'rgba(239,68,68,.08)':'rgba(255,255,255,.03)',color:diaBuff==='reduceHp'?C.ok:diaBuff==='boostEnemy'?C.no:C.mu}},
           diaBuff==='reduceHp'?'✅ Sharp discovery! +15% dmg · Enemy softened (-15% HP)':diaBuff==='boostEnemy'?'❌ Customer defensive! Start 60 HP · Enemy +25% HP · Counters +50%':'➖ Shallow probe. Start 80 HP · Counters +15%'),
         h('button',{onClick:()=>{setPh('battle');const pStart=diaBuff==='boostEnemy'?60:diaBuff==='reduceHp'?100:80;const oMult=diaBuff==='boostEnemy'?1.25:diaBuff==='reduceHp'?.85:1;setPHp(pStart);setOHp(Math.round(enc.objs[0].hp*oMult));setLog([{y:'s',t:'⚔️ Battle start! '+enc.objs.length+' objections.'},diaBuff==='reduceHp'?{y:'v',t:'✅ Your discovery softened the customer.'}:diaBuff==='boostEnemy'?{y:'e',t:'❌ Your pitch put the customer on the defensive.'}:{y:'i',t:'➖ Your probe was shallow. Less momentum.'}]);enc.isBoss?snd('boss'):snd('blip')},style:{marginTop:12,width:'100%',background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'⚔️ ENTER BATTLE'))));
