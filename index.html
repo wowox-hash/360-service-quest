@@ -47,6 +47,17 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 @keyframes drift{to{background-position:400px -400px,-500px 500px,600px -600px,-450px 450px,550px -550px,-480px 480px}}
 @keyframes titleGlow{0%,100%{text-shadow:0 0 8px #FFD700,0 0 16px #ffae00,0 0 24px #ff6200}50%{text-shadow:0 0 16px #FFD700,0 0 32px #ffae00,0 0 56px #ff6200,0 0 80px #ff3000}}
 @keyframes materiaPulse{0%,100%{box-shadow:0 0 10px currentColor,inset 0 0 14px rgba(255,255,255,.45),inset 0 -6px 10px rgba(0,0,0,.35)}50%{box-shadow:0 0 24px currentColor,0 0 40px currentColor,inset 0 0 18px rgba(255,255,255,.65),inset 0 -6px 10px rgba(0,0,0,.35)}}
+@keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-8px,3px)}25%{transform:translate(7px,-3px)}40%{transform:translate(-5px,2px)}55%{transform:translate(6px,-2px)}70%{transform:translate(-3px,1px)}85%{transform:translate(2px,-1px)}}
+.shake{animation:screenShake .4s ease}
+@keyframes flashGold{0%,100%{background:transparent}50%{background:rgba(255,215,0,.45)}}
+@keyframes flashRed{0%,100%{background:transparent}50%{background:rgba(239,68,68,.4)}}
+.flash-g{animation:flashGold .25s ease}.flash-r{animation:flashRed .25s ease}
+@keyframes calloutPop{0%{transform:translate(-50%,-50%) scale(.2) rotate(-12deg);opacity:0}15%{transform:translate(-50%,-50%) scale(1.5) rotate(6deg);opacity:1}40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1.1);opacity:0}}
+.callout{animation:calloutPop 1.2s ease forwards}
+@keyframes spark{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.spark{animation:spark .6s ease forwards;position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none}
+@keyframes lbPulse{0%,100%{box-shadow:0 0 16px #ff00ff,0 0 32px #FFD700,inset 0 0 16px rgba(255,255,255,.5)}50%{box-shadow:0 0 28px #ff00ff,0 0 56px #FFD700,inset 0 0 24px rgba(255,255,255,.7)}}
+.lb-btn{animation:lbPulse 1s ease-in-out infinite}
 .pf{text-shadow:2px 2px 0 #000,0 0 6px rgba(0,0,0,.7)}
 .ff7{background:linear-gradient(180deg,rgba(12,24,96,.92) 0%,rgba(4,10,48,.94) 100%)!important;border:2px solid transparent!important;border-image:linear-gradient(135deg,#ffffff 0%,#7a96ff 25%,#1a2a80 60%,#ffffff 100%) 1!important;box-shadow:0 0 18px rgba(80,120,255,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.55)!important;border-radius:8px!important}
 .hpc{background:linear-gradient(180deg,#1a1a2e,#0a0a1e)!important;border:1px solid #7a96ff!important;box-shadow:0 0 6px rgba(120,160,255,.45),inset 0 1px 0 rgba(255,255,255,.25)!important}
@@ -121,6 +132,45 @@ const sfx={
   pil:()=>{sy.triggerAttackRelease('D5','32n')},
 };
 const snd=(k)=>{if(aOn&&sfx[k])try{sfx[k]()}catch{}};
+
+// ── BGM (background music via Tone.Loop) ──
+const bgmLead=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:.02,decay:.3,sustain:.15,release:.4},volume:-16}).toDestination();
+const bgmBass=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.02,decay:.4,sustain:.2,release:.4},volume:-18}).toDestination();
+const bgmHarm=new Tone.Synth({oscillator:{type:'square'},envelope:{attack:.02,decay:.3,sustain:.1,release:.3},volume:-22}).toDestination();
+let bgmActive=null;const bgmLoops=[];
+const BGM_TRACKS={
+ title:{bpm:90,
+  melody:['C5','E5','G5','C6','B5','G5','E5','G5','A5','C6','E6','G6','F6','D6','C6','G5'],melodyDur:'4n',
+  harm:['E4','G4','C5','E5','D5','B4','G4','B4','F4','A4','C5','F5','E5','C5','A4','E5'],harmDur:'4n',
+  bass:['C3','C3','A2','A2','F2','F2','G2','G2'],bassDur:'2n'},
+ overworld:{bpm:118,
+  melody:['G4','B4','D5','G5','D5','B4','G4','B4','A4','C5','E5','A5','E5','C5','A4','C5','D5','F5','A5','D6','A5','F5','D5','F5','C5','E5','G5','C6','G5','E5','C5','E5'],melodyDur:'8n',
+  harm:['G3','D4','G3','B3','A3','E4','A3','C4','D4','F4','D4','A3','C4','G4','C4','E4'],harmDur:'4n',
+  bass:['G2','G2','A2','A2','D2','D2','C2','C2'],bassDur:'2n'},
+ battle:{bpm:155,
+  melody:['A4','E5','A5','C6','A5','E5','A4','E5','G4','D5','G5','B5','G5','D5','G4','D5','F4','C5','F5','A5','F5','C5','F4','C5','E4','B4','E5','G5','E5','B4','E4','B4'],melodyDur:'8n',
+  harm:['A3','C4','A3','E4','G3','B3','G3','D4','F3','A3','F3','C4','E3','G3','E3','B3'],harmDur:'4n',
+  bass:['A2','A2','A2','E2','G2','G2','G2','D2','F2','F2','F2','C2','E2','E2','E2','B1'],bassDur:'4n'},
+ boss:{bpm:108,
+  melody:['E4','G4','B4','E5','D5','C5','B4','G4','A4','C5','E5','A5','G5','F5','E5','C5','D5','F5','A5','D6','C6','A5','G5','F5','E5','G5','B5','E6','D6','B5','A5','E5'],melodyDur:'4n',
+  harm:['E3','G3','B3','E4','D4','C4','B3','E4','A3','C4','E4','A4','G4','F4','E4','C4'],harmDur:'4n',
+  bass:['E2','E2','D2','D2','C2','C2','B2','B2'],bassDur:'2n'},
+};
+function playBGM(name){
+ if(bgmActive===name)return;
+ stopBGM();
+ if(!aOn||!sndOn||!BGM_TRACKS[name])return;
+ bgmActive=name;
+ const t=BGM_TRACKS[name];
+ try{Tone.Transport.bpm.value=t.bpm}catch(e){return}
+ let mi=0,hi=0,bi=0;
+ const lL=new Tone.Loop(time=>{try{bgmLead.triggerAttackRelease(t.melody[mi%t.melody.length],t.melodyDur,time)}catch(e){}mi++},t.melodyDur).start(0);
+ const hL=new Tone.Loop(time=>{try{bgmHarm.triggerAttackRelease(t.harm[hi%t.harm.length],t.harmDur,time)}catch(e){}hi++},t.harmDur).start(0);
+ const bL=new Tone.Loop(time=>{try{bgmBass.triggerAttackRelease(t.bass[bi%t.bass.length],t.bassDur,time)}catch(e){}bi++},t.bassDur).start(0);
+ bgmLoops.push(lL,hL,bL);
+ if(Tone.Transport.state!=='started')Tone.Transport.start();
+}
+function stopBGM(){bgmLoops.forEach(l=>{try{l.dispose()}catch(e){}});bgmLoops.length=0;bgmActive=null}
 
 // ── SPRITES (pixel art SVGs) ──
 const SP={
@@ -959,6 +1009,12 @@ function App(){
   const [sE,setSE]=useState(false);
   const [sH,setSH]=useState(false);
   const [fl,setFl]=useState(null);
+  const [callout,setCallout]=useState(null);
+  const [flashCol,setFlashCol]=useState(null);
+  const [lbReady,setLbReady]=useState(false);
+  const [perfectDia,setPerfectDia]=useState(0);
+  const [achs,setAchs]=useState([]);
+  const [achPop,setAchPop]=useState(null);
   const [hf,setHf]=useState(0);
   const [items,setItems]=useState([]);
   const [showW,setShowW]=useState(false);
@@ -987,6 +1043,14 @@ function App(){
   useEffect(()=>{const iv=setInterval(()=>setHf(f=>(f+1)%4),400);return()=>clearInterval(iv)},[]);
   useEffect(()=>{if(logRef.current)logRef.current.scrollTop=logRef.current.scrollHeight},[log]);
   useEffect(()=>{sbLoad().then(d=>{if(d)setLb(d)})},[]);
+  // ── BGM: switch tracks based on phase ──
+  useEffect(()=>{
+   if(!aOn||!sndOn){stopBGM();return}
+   if(ph==='title')playBGM('title');
+   else if(ph==='map'||ph==='dialogue')playBGM('overworld');
+   else if(ph==='battle'){if(enc&&enc.isBoss)playBGM('boss');else playBGM('battle')}
+   else if(ph==='victory'||ph==='defeat')stopBGM();
+  },[ph,sndOn,enc]);
   // ── PHASER: encounter trigger listener ──
   useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
   // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
@@ -1016,7 +1080,7 @@ function App(){
   const cLv=Math.floor(txp/200)+1;
   useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
 
-  const go=(e)=>{snd('sel');setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setPh(e.dia?'dialogue':'intro')};
+  const go=(e)=>{snd('sel');setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);setPh(e.dia?'dialogue':'intro')};
   const useI=(id)=>{const i=items.findIndex(x=>x.id===id&&x.u>0);if(i<0)return;const ni=[...items];ni[i]={...ni[i],u:ni[i].u-1};if(ni[i].u<=0)ni.splice(i,1);setItems(ni);snd('buy');
     if(id==='intel'){setShowW(true);setLog(p=>[...p,{y:'i',t:'🔍 Weaknesses revealed!'}])}else if(id==='coffee'){setPHp(p=>Math.min(MHP,p+30));setLog(p=>[...p,{y:'i',t:'☕ +30 HP!'}])}else if(id==='playbook'){setDmgB(true);setLog(p=>[...p,{y:'i',t:'📘 +25% damage!'}])}else if(id==='shield'){setShld(true);setLog(p=>[...p,{y:'i',t:'🛡️ Shield active!'}])}else if(id==='combo_charm'){setComboB(true);setLog(p=>[...p,{y:'i',t:'✨ Combo 2x!'}])}else if(id==='mega_heal'){setPHp(MHP);setLog(p=>[...p,{y:'i',t:'⚡ Full HP!'}])}};
 
@@ -1026,9 +1090,19 @@ function App(){
     const rp=ob.p===sv.p;
     let cm=1,nc=combo;if(sv.p===lastPil&&rp){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
     let d=0;
-    if(isW){d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1));snd('crit');setSE(true);setFl({y:'c',v:d})}
+    if(isW){
+     d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1));
+     snd('crit');setSE(true);setFl({y:'c',v:d});
+     setFlashCol('g');setTimeout(()=>setFlashCol(null),250);
+     // Combo callouts
+     if(nc>=4){setCallout({t:'LEGENDARY!',c:'#ff00ff'});setTimeout(()=>setCallout(null),1200)}
+     else if(nc>=2){setCallout({t:'EXCELLENT!',c:'#10B981'});setTimeout(()=>setCallout(null),1100)}
+     else if(nc>=1){setCallout({t:'PERFECT!',c:'#FFD700'});setTimeout(()=>setCallout(null),1000)}
+     // Limit Break charges with weakness combo
+     if(nc>=4&&!lbReady){setLbReady(true);setTimeout(()=>snd('lvl'),50)}
+    }
     else if(rp){d=Math.round(sv.pw*.6*cm*(dmgB?1.25:1));snd('atk');setSE(true);setFl({y:'n',v:d})}
-    else{d=0;snd('miss');setFl({y:'m',v:'MISS'})}
+    else{d=0;snd('miss');setFl({y:'m',v:'MISS'});setFlashCol('r');setTimeout(()=>setFlashCol(null),200)}
     setLog(p=>[...p,{y:isW?'v':rp?'p':'e',t:isW?`⚔️ SUPER EFFECTIVE! ${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`:rp?`${sv.n}: ${d} dmg${nc>0?' ('+nc+'x combo)':''}`:`❌ ${sv.n} — wrong pillar, 0 dmg`}]);
     const nH=Math.max(0,oHp-d);setOHp(nH);
     setTimeout(()=>{setSE(false);setFl(null);
@@ -1118,8 +1192,12 @@ function App(){
 
     return h(Pad,null,
       h(LvlUp,{lvUp,lv}),
+      // Full-screen flash overlay
+      flashCol&&h('div',{className:flashCol==='g'?'flash-g':'flash-r',style:{position:'fixed',inset:0,pointerEvents:'none',zIndex:9998}}),
+      // Big combo callout
+      callout&&h('div',{className:'callout pf',style:{position:'fixed',top:'30%',left:'50%',color:callout.c,fontSize:42,fontWeight:'bold',textShadow:'4px 4px 0 #000, 0 0 20px '+callout.c+', 0 0 40px '+callout.c,zIndex:9999,pointerEvents:'none',whiteSpace:'nowrap',letterSpacing:2}},callout.t),
       // Arena
-      h('div',{className:'ff7',style:{padding:16,position:'relative',minHeight:180,marginTop:8,...(enc.isBoss?{borderImage:'linear-gradient(135deg,#fff 0%,#EF4444 30%,#800 60%,#fff 100%) 1',boxShadow:'0 0 24px rgba(239,68,68,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:{})}},
+      h('div',{className:'ff7'+(sE?' shake':''),style:{padding:16,position:'relative',minHeight:180,marginTop:8,...(enc.isBoss?{borderImage:'linear-gradient(135deg,#fff 0%,#EF4444 30%,#800 60%,#fff 100%) 1',boxShadow:'0 0 24px rgba(239,68,68,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:{})}},
         // Enemy (top right)
         h('div',{style:{position:'absolute',right:16,top:12,textAlign:'center',animation:sE?'shake .3s ease':'none'}},
           ob&&h(React.Fragment,null,
