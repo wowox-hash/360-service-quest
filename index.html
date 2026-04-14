@@ -124,6 +124,11 @@ const MENTORS=[
  {nm:'The Specialist',ic:'⚔️',desc:'+25% weakness damage',hpBonus:0,wDmgMult:1.25,goldMult:1},
  {nm:'The Closer',ic:'💰',desc:'+50% gold from victories',hpBonus:0,wDmgMult:1,goldMult:1.5},
 ];
+// ── SAVE / LOAD ──
+const SAVE_KEY='360sq_save_v1';
+const loadSave=()=>{try{const s=localStorage.getItem(SAVE_KEY);return s?JSON.parse(s):null}catch(e){return null}};
+const writeSave=(d)=>{try{localStorage.setItem(SAVE_KEY,JSON.stringify(d))}catch(e){}};
+const clearSave=()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}};
 
 /* ══════════════════════════════════════════════
    360° SERVICE QUEST v5 — MOBILE OPTIMIZED
@@ -1694,6 +1699,39 @@ function App(){
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
   useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,vehicle})},[done,lv,vehicle]);
+  // ── SAVE: persist progress to localStorage (debounced by React batching) ──
+  const [loaded,setLoaded]=useState(false);
+  useEffect(()=>{
+   // Load once on mount
+   const s=loadSave();if(!s){setLoaded(true);return}
+   if(s.nm)setNm(s.nm);
+   if(typeof s.gold==='number')setGold(s.gold);
+   if(s.xp)setXp(s.xp);
+   if(typeof s.lv==='number')setLv(s.lv);
+   if(Array.isArray(s.done))setDone(s.done);
+   if(Array.isArray(s.inv))setInv(s.inv);
+   if(Array.isArray(s.items))setItems(s.items);
+   if(typeof s.hairIdx==='number')setHairIdx(s.hairIdx);
+   if(typeof s.skinIdx==='number')setSkinIdx(s.skinIdx);
+   if(typeof s.tunicIdx==='number')setTunicIdx(s.tunicIdx);
+   if(typeof s.genderIdx==='number')setGenderIdx(s.genderIdx);
+   if(typeof s.mentorIdx==='number')setMentorIdx(s.mentorIdx);
+   if(typeof s.hasCar==='boolean')setHasCar(s.hasCar);
+   if(typeof s.hasBike==='boolean')setHasBike(s.hasBike);
+   if(s.vehicle)setVehicle(s.vehicle);
+   if(typeof s.perfectDia==='number')setPerfectDia(s.perfectDia);
+   if(typeof s.noHits==='number')setNoHits(s.noHits);
+   if(typeof s.maxCombo==='number')setMaxCombo(s.maxCombo);
+   if(Array.isArray(s.achs))setAchs(s.achs);
+   if(typeof s.t0==='number')setT0(s.t0);
+   setLoaded(true);
+  },[]);
+  useEffect(()=>{
+   // Only persist once we've passed the title screen (i.e., user has pressed START/CONTINUE)
+   if(!loaded||ph==='title')return;
+   writeSave({nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0});
+  },[loaded,ph,nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0]);
+  const hasSave=loaded&&!!loadSave();
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
   const cLv=Math.floor(txp/200)+1;
@@ -1782,7 +1820,9 @@ function App(){
           h('div',{style:{fontSize:9,color:C.mu,lineHeight:1.3}},m.desc))))),
       h('div',{style:{display:'flex',gap:8,justifyContent:'center',marginBottom:20}},
         h('button',{className:'ff7',onClick:()=>setSndOn(!sndOn),style:{color:sndOn?C.gold:C.mu,padding:'10px 16px',fontSize:14,cursor:'pointer'}},sndOn?'🔊 Sound ON':'🔇 Sound OFF')),
-      h('button',{className:'ff7',onClick:async()=>{if(!nm.trim())return alert('Enter your name!');if(!aOn){await Tone.start();aOn=true}setT0(Date.now());setPh('map');snd('sel')},style:{color:C.gold,padding:'16px 40px',fontSize:16,fontWeight:700,cursor:'pointer',animation:'blink 2s ease infinite',letterSpacing:2}},'▶ START QUEST'),
+      h('div',{style:{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap'}},
+        hasSave&&h('button',{className:'ff7',onClick:async()=>{if(!aOn){await Tone.start();aOn=true}setPh('map');snd('sel')},style:{color:'#10B981',padding:'16px 30px',fontSize:15,fontWeight:700,cursor:'pointer',letterSpacing:2,border:'2px solid #10B981'}},'▶ CONTINUE'),
+        h('button',{className:'ff7',onClick:async()=>{if(!nm.trim())return alert('Enter your name!');if(hasSave&&!confirm('Start a new quest? Your saved progress will be lost.'))return;if(!aOn){await Tone.start();aOn=true}clearSave();setGold(0);setXp({CONNECT:0,ENABLE:0,GROW:0,DELIVER:0});setLv(1);setDone([]);setInv(SVC.filter(s=>s.t==='C').map(s=>s.id));setItems([]);setHasCar(false);setHasBike(false);setVehicle(null);setPerfectDia(0);setNoHits(0);setMaxCombo(0);setAchs([]);setT0(Date.now());setPh('map');snd('sel')},style:{color:C.gold,padding:'16px 30px',fontSize:15,fontWeight:700,cursor:'pointer',animation:hasSave?'none':'blink 2s ease infinite',letterSpacing:2}},hasSave?'✦ NEW QUEST':'▶ START QUEST')),
       // Leaderboard
       lb.length>0&&h('div',{style:{marginTop:28,textAlign:'left'}},
         h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10}},'🏆 GLOBAL LEADERBOARD'),
