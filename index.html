@@ -147,7 +147,20 @@ const sfx={
   crit:()=>{sy.triggerAttackRelease('E5','16n');setTimeout(()=>sy.triggerAttackRelease('G5','16n'),80);setTimeout(()=>sy.triggerAttackRelease('C6','8n'),160)},
   miss:()=>{bs.triggerAttackRelease('C3','8n')},
   hurt:()=>{ns.triggerAttackRelease('16n');bs.triggerAttackRelease('E2','16n')},
-  win:()=>{['C5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'8n'),i*120))},
+  win:()=>{
+    // Rising arpeggio
+    ['C5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*85));
+    // Tonic resolution + held chord
+    setTimeout(()=>sy.triggerAttackRelease('G5','16n'),380);
+    setTimeout(()=>sy.triggerAttackRelease('C6','16n'),470);
+    setTimeout(()=>sy.triggerAttackRelease('E6','4n'),580);
+    // Bass line
+    setTimeout(()=>bs.triggerAttackRelease('C3','4n'),0);
+    setTimeout(()=>bs.triggerAttackRelease('G2','4n'),280);
+    setTimeout(()=>bs.triggerAttackRelease('C3','2n'),560);
+    // Final cymbal-like noise hit
+    setTimeout(()=>{try{ns.triggerAttackRelease('16n')}catch(e){}},580);
+  },
   lose:()=>{['C4','B3','A3','G3'].forEach((n,i)=>setTimeout(()=>bs.triggerAttackRelease(n,'4n'),i*200))},
   lvl:()=>{['C5','D5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*80))},
   sel:()=>{sy.triggerAttackRelease('A4','32n')},
@@ -1828,7 +1841,7 @@ function App(){
         // Enemy (top right)
         h('div',{style:{position:'absolute',right:16,top:12,textAlign:'center',animation:sE?'shake .3s ease':'none'}},
           ob&&h(React.Fragment,null,
-            h('div',{style:{width:enc.isBoss?56:44,height:enc.isBoss?56:44,margin:'0 auto'},dangerouslySetInnerHTML:{__html:SP.mon(ob.p,enc.isBoss)}}),
+            h('div',{style:{width:enc.isBoss?56:44,height:enc.isBoss?84:66,margin:'0 auto'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon(ob.p,true):SP.npc(enc.v)}}),
             h('div',{className:'fs-xs',style:{color:PC[ob.p],fontWeight:700,marginTop:4}},ob.p),
             h(HpBar,{v:oHp,m:ob.hp,w:90}),
             h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},oHp+'/'+ob.hp),
