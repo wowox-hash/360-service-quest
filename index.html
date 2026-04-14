@@ -1842,11 +1842,22 @@ function App(){
   if(ph==='dialogue'&&enc)return h(Pad,null,
     h(LvlUp,{lvUp,lv}),
     enc.isBoss&&h('div',{className:'pf fs-pixel-sm',style:{color:C.no,textAlign:'center',marginTop:12,animation:'blink 1s ease infinite'}},'⚠️ FINAL BOSS ⚠️'),
-    h('div',{style:{textAlign:'center',marginTop:16}},
-      h('div',{style:{width:56,height:84,margin:'0 auto'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon('GROW',true):SP.npc(enc.v)}}),
-      h('div',{className:'fs-lg',style:{fontWeight:700,color:enc.isBoss?C.no:C.gold,marginTop:8}},enc.npc),
-      h('div',{className:'fs-sm',style:{color:C.mu}},enc.rl+' — '+enc.company),
-      h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},'📍 '+enc.loc+', '+enc.co+' · '+enc.ch)),
+    // ── VN-style dual portraits (hero left, distributor right) ──
+    h('div',{style:{display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginTop:14,gap:8}},
+      // Hero portrait (left, mirrored to face right)
+      h('div',{className:'ff7',style:{flex:'0 0 auto',padding:'10px 8px 6px',textAlign:'center',minWidth:110,background:'linear-gradient(180deg,rgba(59,130,246,.08),rgba(12,24,96,.55))',borderImage:'linear-gradient(135deg,#fff 0%,#3B82F6 30%,#0a1450 60%,#fff 100%) 1'}},
+        h('div',{style:{width:76,height:114,margin:'0 auto',transform:'scaleX(-1)',filter:'drop-shadow(0 4px 8px rgba(0,0,0,.6))',animation:'float 3.5s ease-in-out infinite'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
+        h('div',{className:'pf',style:{fontSize:9,color:'#3B82F6',marginTop:6,letterSpacing:1}},'YOU'),
+        h('div',{className:'fs-xs',style:{color:C.tx,fontWeight:700}},nm||'Hero')),
+      // VS diamond
+      h('div',{style:{flex:'0 0 auto',display:'flex',flexDirection:'column',alignItems:'center',paddingBottom:18}},
+        h('div',{className:'pf',style:{fontSize:20,color:'#FFD700',textShadow:'2px 2px 0 #000, 0 0 12px #FFD700',animation:'titleGlow 2s ease-in-out infinite'}},'VS')),
+      // Distributor portrait (right)
+      h('div',{className:'ff7',style:{flex:'0 0 auto',padding:'10px 8px 6px',textAlign:'center',minWidth:110,background:enc.isBoss?'linear-gradient(180deg,rgba(239,68,68,.12),rgba(60,12,12,.55))':'linear-gradient(180deg,rgba(255,215,0,.08),rgba(12,24,96,.55))',borderImage:enc.isBoss?'linear-gradient(135deg,#fff 0%,#EF4444 30%,#4a0a0a 60%,#fff 100%) 1':'linear-gradient(135deg,#fff 0%,#FFD700 30%,#4a3a0a 60%,#fff 100%) 1'}},
+        h('div',{style:{width:enc.isBoss?92:76,height:enc.isBoss?138:114,margin:'0 auto',filter:'drop-shadow(0 4px 8px rgba(0,0,0,.6))',animation:'float 3.5s ease-in-out infinite .4s'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon('GROW',true):SP.npc(enc.v)}}),
+        h('div',{className:'pf',style:{fontSize:9,color:enc.isBoss?C.no:C.gold,marginTop:6,letterSpacing:1}},enc.isBoss?'FINAL BOSS':enc.rl.toUpperCase()),
+        h('div',{className:'fs-xs',style:{color:C.tx,fontWeight:700}},enc.npc))),
+    h('div',{className:'fs-xs',style:{color:C.mu,textAlign:'center',marginTop:8}},enc.company+' · 📍 '+enc.loc+', '+enc.co+' · '+enc.ch),
     // NPC speech
     h('div',{className:'ff7',style:{padding:16,marginTop:16,animation:'fadeIn .5s ease'}},
       h('div',{className:'fs-sm',style:{color:'#e8f0ff',lineHeight:1.7}},enc.intro)),
