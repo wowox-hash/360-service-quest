@@ -2042,7 +2042,7 @@ function App(){
         h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},xp[p])))),
     // Tabs
     h('div',{style:{display:'flex',gap:6,marginTop:10}},
-      ['map','shop','bag'].map(t=>h('button',{key:t,className:'ff7',onClick:()=>{setTab(t);snd('blip')},style:{flex:1,padding:'12px 8px',fontSize:14,fontWeight:tab===t?700:500,color:tab===t?C.gold:C.mu,cursor:'pointer',...(tab===t?{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'}:{})}},t==='map'?'🗺️ Map':t==='shop'?'🛒 Shop':'🎒 '+inv.length+'/33'))),
+      ['map','shop','bag','codex'].map(t=>h('button',{key:t,className:'ff7',onClick:()=>{setTab(t);snd('blip')},style:{flex:1,padding:'12px 6px',fontSize:13,fontWeight:tab===t?700:500,color:tab===t?C.gold:C.mu,cursor:'pointer',...(tab===t?{borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#ff8800 60%,#fff 100%) 1'}:{})}},t==='map'?'🗺️ Map':t==='shop'?'🛒 Shop':t==='bag'?'🎒 '+inv.length+'/33':'📖 Codex'))),
 
     // SHOP
     tab==='shop'&&h('div',{style:{marginTop:12}},
@@ -2066,6 +2066,26 @@ function App(){
             h('span',{className:'pf',style:{fontSize:12,color:PC[p],fontWeight:'bold',minWidth:32}},has?'⚔️'+s.pw:'🔒'),
             h('span',{className:'fs-sm',style:{flex:1,color:has?C.tx:C.mu}},s.n),
             h(Tier,{t:s.t}))}))))),
+
+    // CODEX — all 33 services with full descriptions and pillar theory
+    tab==='codex'&&h('div',{style:{marginTop:12}},
+      h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:8}},'📖 360° SERVICE CODEX'),
+      h('div',{className:'fs-xs',style:{color:C.mu,textAlign:'center',marginBottom:12,fontStyle:'italic',lineHeight:1.5}},'Match the pillar to the customer, the service to the objection. Weakness hits deal 1.8× damage; wrong-pillar hits deal 0.'),
+      ['CONNECT','ENABLE','GROW','DELIVER'].map(p=>{
+        const theory={CONNECT:'Data & digital plumbing that hooks the distributor into Wolf\'s systems.',ENABLE:'Technical know-how that makes the counter staff Wolf experts.',GROW:'Brand, marketing & merchandising that drive sell-out.',DELIVER:'Logistics & supply chain reliability.'}[p];
+        return h('div',{key:'cx'+p,style:{marginBottom:16}},
+          h('div',{className:'ff7',style:{padding:'10px 12px',marginBottom:6,borderImage:'linear-gradient(135deg,#fff 0%,'+PC[p]+' 30%,#1a2a80 60%,#fff 100%) 1'}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+              h('span',{style:{fontSize:22}},PI[p]),
+              h('div',{style:{flex:1}},
+                h('div',{className:'fs-md',style:{color:PC[p],fontWeight:700}},PN[p].toUpperCase()),
+                h('div',{className:'fs-xs',style:{color:C.mu,lineHeight:1.5,marginTop:2}},theory)))),
+          SVC.filter(s=>s.p===p).map(s=>{const has=inv.includes(s.id);const locked=!has&&((s.t==='B'&&lv<3)||(s.t==='A'&&lv<6));return h('div',{key:'cs'+s.id,className:'ff7',style:{display:'flex',alignItems:'center',gap:10,padding:'10px 12px',marginBottom:4,opacity:locked?.4:1}},
+            h('span',{className:'pf',style:{fontSize:11,color:PC[p],fontWeight:'bold',minWidth:28,textAlign:'center'}},has?'⚔️'+s.pw:locked?'🔒':'·'+s.pw),
+            h('div',{style:{flex:1}},
+              h('div',{className:'fs-sm',style:{fontWeight:700,color:has?C.tx:C.mu}},s.n),
+              h('div',{className:'fs-xs',style:{color:C.mu,lineHeight:1.5,marginTop:2}},s.d)),
+            h(Tier,{t:s.t}))}))})),
 
     // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
