@@ -229,6 +229,92 @@ const SP={
 
 // ── COLORS ──
 const C={gold:'#FFD700',con:'#3B82F6',ena:'#F59E0B',gro:'#10B981',del:'#8B5CF6',ok:'#10B981',no:'#EF4444',bg:'#020617',cd:'#0c1850',bd:'#7a96ff',tx:'#e8f0ff',mu:'#8ca0d0'};
+/**
+ * @typedef {'CONNECT'|'ENABLE'|'GROW'|'DELIVER'} Pillar
+ *  The four 360° sales pillars. Each encounter belongs to exactly one;
+ *  only same-pillar services deal damage, same-pillar + weakness hits
+ *  deal 1.8× damage.
+ *
+ * @typedef {'C'|'B'|'A'} Tier
+ *  Service tier. C=Core (unlocked from level 1), B=Bronze (level 3+),
+ *  A=Advanced (level 6+).
+ *
+ * @typedef {Object} Service
+ * @property {string} id     Stable identifier used in `inv[]` and `ob.w[]`.
+ * @property {string} n      Display name.
+ * @property {Pillar} p      Pillar it belongs to.
+ * @property {Tier}   t      Unlock tier.
+ * @property {number} pw     Base attack power.
+ * @property {string} d      One-line description for codex/tooltips.
+ *
+ * @typedef {Object} Objection
+ * @property {Pillar}   p    Pillar of the customer's concern.
+ * @property {number}   hp   Objection HP.
+ * @property {string}   t    Objection text shown in battle.
+ * @property {string[]} w    Service ids that are super-effective against it.
+ *
+ * @typedef {Object} DialogueOption
+ * @property {string}   t    Option text.
+ * @property {string}   fb   Feedback shown after selection.
+ * @property {boolean=} correct       True if this is the best probe.
+ * @property {'reduceHp'|'boostEnemy'=} buff
+ *   Gameplay effect on the upcoming fight (sharp discovery vs defensive).
+ *
+ * @typedef {Object} Dialogue
+ * @property {string} q              The discovery question.
+ * @property {DialogueOption[]} opts 3 discovery options (order randomized at runtime).
+ *
+ * @typedef {Object} Encounter
+ * @property {number} id          Unique id (99 = boss).
+ * @property {string} npc         Distributor name.
+ * @property {string} rl          Role / title.
+ * @property {string} company     Distributor company name.
+ * @property {string} loc         Short location (used on map labels).
+ * @property {string} co          Country.
+ * @property {string} ch          Channel (B2B / Retail / Fleet / …).
+ * @property {number} mx          Map X percent [0..100].
+ * @property {number} my          Map Y percent [0..100].
+ * @property {'C'|'B'|'A'} seg    Unlock segment (level gated like Tier).
+ * @property {number} v           NPC sprite variant [0..7].
+ * @property {string=} bld        Building template id.
+ * @property {string} intro       First-line dialogue shown in the VN pane.
+ * @property {Dialogue} dia       Discovery question + options.
+ * @property {Objection[]} objs   Sequenced objections resolved in order.
+ * @property {{gold:number,xp:number}} rw Reward granted on victory.
+ * @property {boolean=} isBoss    True for the final Automechanika boss.
+ *
+ * @typedef {Object} Mentor
+ * @property {string} nm
+ * @property {string} ic
+ * @property {string} desc
+ * @property {number} hpBonus     Flat bonus to max HP.
+ * @property {number} wDmgMult    Multiplier applied to weakness damage.
+ * @property {number} goldMult    Multiplier applied to victory gold.
+ *
+ * @typedef {Object} SaveState
+ *  Snapshot persisted to localStorage under SAVE_KEY.
+ * @property {string}   nm
+ * @property {number}   gold
+ * @property {Record<Pillar,number>} xp
+ * @property {number}   lv
+ * @property {number[]} done
+ * @property {string[]} inv
+ * @property {{id:string,u:number}[]} items
+ * @property {number}   hairIdx
+ * @property {number}   skinIdx
+ * @property {number}   tunicIdx
+ * @property {number}   genderIdx
+ * @property {number}   mentorIdx
+ * @property {boolean}  hasCar
+ * @property {boolean}  hasBike
+ * @property {'car'|'bike'|null} vehicle
+ * @property {number}   perfectDia
+ * @property {number}   noHits
+ * @property {number}   maxCombo
+ * @property {string[]} achs
+ * @property {number}   t0       Run start timestamp (ms since epoch).
+ */
+
 const PC={CONNECT:'#3B82F6',ENABLE:'#F59E0B',GROW:'#10B981',DELIVER:'#8B5CF6'};
 const PCB={CONNECT:'rgba(59,130,246,.12)',ENABLE:'rgba(245,158,11,.12)',GROW:'rgba(16,185,129,.12)',DELIVER:'rgba(139,92,246,.12)'};
 const PI={CONNECT:'🔗',ENABLE:'🎓',GROW:'📈',DELIVER:'🚚'};
