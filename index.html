@@ -1572,6 +1572,8 @@ function App(){
   const [noHits,setNoHits]=useState(0);
   const [maxCombo,setMaxCombo]=useState(0);
   const dmgThisFight=useRef(0);
+  // Per-battle service usage tracker (for post-battle debrief)
+  const svcStatsRef=useRef({super:[],pillar:[],miss:[]});
   const [achs,setAchs]=useState([]);
   const [achPop,setAchPop]=useState(null);
   const [evPopup,setEvPopup]=useState(null);
@@ -1737,7 +1739,7 @@ function App(){
   const cLv=Math.floor(txp/200)+1;
   useEffect(()=>{if(cLv>lv){setLv(cLv);let ni=SVC.filter(s=>s.t==='C').map(s=>s.id);if(cLv>=3)ni=[...ni,...SVC.filter(s=>s.t==='B').map(s=>s.id)];if(cLv>=6)ni=[...ni,...SVC.filter(s=>s.t==='A').map(s=>s.id)];setInv(ni);setLvUp(true);snd('lvl');setTimeout(()=>setLvUp(false),2500)}},[cLv]);
 
-  const go=(e)=>{snd('sel');dmgThisFight.current=0;setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);
+  const go=(e)=>{snd('sel');dmgThisFight.current=0;svcStatsRef.current={super:[],pillar:[],miss:[]};setEnc(e);setOi(0);setOHp(e.objs[0].hp);setPHp(MHP);setLog([]);setSel(null);setSelP(null);setShowW(false);setDmgB(false);setShld(false);setComboB(false);setCombo(0);setLastPil(null);setDiaBuff(null);setDiaAns(false);setLbReady(false);setCallout(null);
    // Randomize discovery-question option order (Fisher-Yates) so the correct answer isn't always first
    if(e.dia){const n=e.dia.opts.length;const ord=Array.from({length:n},(_,i)=>i);for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ord[i],ord[j]]=[ord[j],ord[i]]}setDiaOrder(ord)}
    setPh(e.dia?'dialogue':'intro')};
@@ -1750,6 +1752,8 @@ function App(){
     const rp=ob.p===sv.p;
     let cm=1,nc=combo;if(sv.p===lastPil&&rp){nc=combo+1;cm=1+(nc*.15*(comboB?2:1))}else nc=0;setCombo(nc);setLastPil(sv.p);
     let d=0;
+    // Track service usage for the post-battle debrief
+    {const cat=isW?'super':rp?'pillar':'miss';const arr=svcStatsRef.current[cat];const e=arr.find(x=>x.id===sv.id);if(e)e.n++;else arr.push({id:sv.id,n:1})}
     if(isW){
      d=Math.round(sv.pw*1.8*cm*(dmgB?1.25:1)*(diaBuff==='reduceHp'?1.15:1)*mentor.wDmgMult);
      snd('crit');setSE(true);setFl({y:'c',v:d});
@@ -1894,17 +1898,40 @@ function App(){
           h(HpBar,{v:pHp,m:MHP,w:70}),
           combo>0&&h('div',{className:'fs-xs',style:{color:C.ok}},'🔥 '+combo+'x combo')),
         // Overlays
-        ph==='victory'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.75)',borderRadius:12}},
-          h('div',{style:{textAlign:'center',animation:'vb 1s ease infinite'}},
-            h('div',{className:'pf fs-pixel-lg',style:{color:C.gold}},'🏆 VICTORY!'),
-            h('div',{className:'fs-md',style:{marginTop:8}},'+'+Math.round(enc.rw.gold*mentor.goldMult)+'g · +'+enc.rw.xp+'XP'),
-            enc.isBoss&&(()=>{const g=computeGrade();return h('div',{style:{marginTop:14}},
-              h('div',{className:'pf',style:{fontSize:48,color:g.color,textShadow:`4px 4px 0 #000, 0 0 24px ${g.color}`,letterSpacing:4}},'RANK '+g.rank),
-              h('div',{className:'pf fs-pixel-sm',style:{color:g.color,marginTop:6,letterSpacing:2,textShadow:'2px 2px 0 #000'}},g.label),
-              h('div',{className:'fs-xs',style:{color:'#fff',marginTop:8}},'Perfect discoveries: '+perfectDia+'/'+(ENC.length+1)),
+        ph==='victory'&&(()=>{
+          const st=svcStatsRef.current;
+          const nameOf=(id)=>SVC.find(s=>s.id===id)?.n||id;
+          const sumN=(arr)=>arr.reduce((a,b)=>a+b.n,0);
+          const perfectFight=dmgThisFight.current===0;
+          const tip=sumN(st.miss)>0?'💡 Wrong-pillar services deal 0 damage. Match the customer\'s pillar icon first.':sumN(st.pillar)>sumN(st.super)?'💡 Right pillar, wrong service. Target their weakness for super-effective 1.8× damage.':perfectFight?'💡 Textbook close. Same pillar + exact weakness = maximum efficiency.':'💡 Solid win. Chain weakness hits for a combo multiplier bonus.';
+          return h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.88)',borderRadius:12,overflowY:'auto',padding:16}},
+          h('div',{style:{textAlign:'center',maxWidth:420,width:'100%'}},
+            h('div',{className:'pf fs-pixel-lg',style:{color:C.gold,animation:'vb 1s ease infinite'}},'🏆 VICTORY!'),
+            h('div',{className:'fs-md',style:{marginTop:6,color:C.gold}},'+'+Math.round(enc.rw.gold*mentor.goldMult)+'g · +'+enc.rw.xp+'XP'),
+            // ── DEBRIEF ──
+            h('div',{className:'ff7',style:{marginTop:12,padding:12,textAlign:'left',background:'rgba(12,24,96,.55)'}},
+              h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:8,letterSpacing:1}},'📋 DEBRIEF'),
+              sumN(st.super)>0&&h('div',{style:{marginBottom:6}},
+                h('div',{className:'fs-xs',style:{color:C.ok,fontWeight:700}},'⚔️ SUPER EFFECTIVE ('+sumN(st.super)+')'),
+                st.super.map((x,i)=>h('div',{key:'su'+i,className:'fs-xs',style:{color:'#e8f0ff',marginLeft:10}},'· '+nameOf(x.id)+(x.n>1?' ×'+x.n:'')))),
+              sumN(st.pillar)>0&&h('div',{style:{marginBottom:6}},
+                h('div',{className:'fs-xs',style:{color:'#FFD700',fontWeight:700}},'⚠️ RIGHT PILLAR / WEAK HIT ('+sumN(st.pillar)+')'),
+                st.pillar.map((x,i)=>h('div',{key:'pi'+i,className:'fs-xs',style:{color:'#e8f0ff',marginLeft:10}},'· '+nameOf(x.id)+(x.n>1?' ×'+x.n:'')))),
+              sumN(st.miss)>0&&h('div',{style:{marginBottom:6}},
+                h('div',{className:'fs-xs',style:{color:C.no,fontWeight:700}},'❌ WRONG PILLAR ('+sumN(st.miss)+')'),
+                st.miss.map((x,i)=>h('div',{key:'mi'+i,className:'fs-xs',style:{color:'#e8f0ff',marginLeft:10}},'· '+nameOf(x.id)+(x.n>1?' ×'+x.n:'')))),
+              h('div',{style:{display:'flex',justifyContent:'space-around',marginTop:10,paddingTop:8,borderTop:'1px solid '+C.bd}},
+                h('div',{style:{textAlign:'center'}},h('div',{className:'fs-xs',style:{color:C.mu}},'HP LOST'),h('div',{className:'fs-sm',style:{color:perfectFight?C.ok:C.tx,fontWeight:700}},dmgThisFight.current)),
+                h('div',{style:{textAlign:'center'}},h('div',{className:'fs-xs',style:{color:C.mu}},'MAX COMBO'),h('div',{className:'fs-sm',style:{color:C.gold,fontWeight:700}},combo+'×')),
+                h('div',{style:{textAlign:'center'}},h('div',{className:'fs-xs',style:{color:C.mu}},'DISCOVERY'),h('div',{className:'fs-sm',style:{color:diaBuff==='reduceHp'?C.ok:diaBuff==='boostEnemy'?C.no:C.mu,fontWeight:700}},diaBuff==='reduceHp'?'SHARP':diaBuff==='boostEnemy'?'OFF':'BASIC'))),
+              h('div',{className:'fs-xs',style:{marginTop:10,padding:8,background:'rgba(255,215,0,.08)',borderLeft:'2px solid '+C.gold,color:'#e8f0ff',lineHeight:1.5}},tip)),
+            enc.isBoss&&(()=>{const g=computeGrade();return h('div',{style:{marginTop:12}},
+              h('div',{className:'pf',style:{fontSize:40,color:g.color,textShadow:`4px 4px 0 #000, 0 0 24px ${g.color}`,letterSpacing:4}},'RANK '+g.rank),
+              h('div',{className:'pf fs-pixel-sm',style:{color:g.color,marginTop:4,letterSpacing:2,textShadow:'2px 2px 0 #000'}},g.label),
+              h('div',{className:'fs-xs',style:{color:'#fff',marginTop:6}},'Perfect discoveries: '+perfectDia+'/'+(ENC.length+1)),
               h('div',{className:'fs-xs',style:{color:'#fff'}},'Flawless wins: '+noHits+'/'+(ENC.length+1)),
               h('div',{className:'fs-xs',style:{color:'#fff'}},'Time: '+fmtT(t0?Math.round((Date.now()-t0)/1000):0)),
-              h('div',{className:'pf fs-pixel-sm',style:{color:C.ok,marginTop:10}},'👑 360° SALES CHAMPION'))})())),
+              h('div',{className:'pf fs-pixel-sm',style:{color:C.ok,marginTop:8}},'👑 360° SALES CHAMPION'))})()))})(),
         ph==='defeat'&&h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.7)',borderRadius:12}},
           h('div',{style:{textAlign:'center'}},
             h('div',{className:'pf fs-pixel-md',style:{color:C.no}},'DEFEATED'),
