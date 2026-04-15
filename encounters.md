@@ -51,50 +51,45 @@ Review and edit this document. Changes will need to be applied back to `index.ht
 
 ---
 
-## Encounter 2: Stockholm, Sweden
-*(Segment B)*
+## Encounter 2: Paris, France
+*(Segment C)*
 
-**Distributor:** Erik Lindqvist · Commercial Director
-**Company:** Nordic Oil Distribution
-**Channel:** 80 fleet operators + 45 HD workshops
-**Rewards:** +75g · +180 XP
+**Distributor:** Philippe Moreau · Purchasing Director
+**Company:** AutoDistri France
+**Channel:** 3 branches → 180 garages
+**Rewards:** +45g · +100 XP
 
 ### Opening speech (NPC intro)
-> I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.
+> Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.
 
 ### Discovery phase
-**Situational prompt:** _Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem._
+**Situational prompt:** _Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?_
 
 **Discovery questions the salesperson can ask (only ONE is correct):**
 
 **Option A** ✅ _correct — bonus damage_
-- Question: When your reps face a deep technical question in a fleet meeting, what actually happens in the room?
-- NPC response: Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.
+- Question: Walk me through exactly where in the process those 8% errors originate.
+- NPC response: Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.
 
 **Option B** ⚠️ _wrong pillar — enemy buff_
-- Question: Could your reps win more tenders if you sharpened their pricing and negotiation?
-- NPC response: Erik: "Pricing? My reps are great negotiators. That's not the gap." — You framed his problem as commercial weakness. He's insulted.
+- Question: Is Wolf shipping the wrong products to your branches?
+- NPC response: Philippe: "No — the errors are in MY process, not yours." — You accused the supplier before listening. He's now defending his own ops.
 
 **Option C** ➖ _shallow — neutral_
-- Question: Have you considered giving your reps more product brochures and TDS documents?
-- NPC response: Erik: "We have plenty of docs. They don't replace live technical credibility." — A surface-level probe. Missed the real issue.
+- Question: Are your branches sending unclear requests that confuse your team?
+- NPC response: Philippe: "Branches are fine. Errors happen during consolidation and re-entry." — Partial signal. You missed the bottleneck.
 
 ### Battle objections
 
-**Objection 1** (ENABLE pillar · 36 HP)
-- Text: ""Training takes my people off the road. We did a day last year — nothing changed.""
-- Weakness (super-effective services): physical_training, academy
-- Resistance (wrong-pillar / ineffective): promo_templates, edi
+**Objection 1** (CONNECT pillar · 30 HP)
+- Text: ""We've ordered by email for 15 years. Why change what works?""
+- Weakness (super-effective services): edi
+- Resistance (wrong-pillar / ineffective): content_kits, oil_analysis
 
-**Objection 2** (ENABLE pillar · 40 HP)
-- Text: ""We've been burned before. Two days in a classroom, forgotten in a month.""
-- Weakness (super-effective services): co_visits
-- Resistance (wrong-pillar / ineffective): marketing_portal, custom_label
-
-**Objection 3** (ENABLE pillar · 36 HP)
-- Text: ""Fleet managers want lab data — not a sales rep reading from a product sheet.""
-- Weakness (super-effective services): oil_analysis, co_visits
-- Resistance (wrong-pillar / ineffective): promo_calendar, retail_kits
+**Objection 2** (DELIVER pillar · 30 HP)
+- Text: ""No IT department. We're a distribution company, not a tech company.""
+- Weakness (super-effective services): e_ordering
+- Resistance (wrong-pillar / ineffective): co_visits, trade_fairs
 
 ---
 
@@ -140,143 +135,7 @@ Review and edit this document. Changes will need to be applied back to `index.ht
 
 ---
 
-## Encounter 4: Warsaw, Poland
-*(Segment B)*
-
-**Distributor:** Tomasz Kowalski · Supply Chain Mgr
-**Company:** Trans-Cargo Logistics
-**Channel:** 3 warehouses → 350 workshops
-**Rewards:** +75g · +180 XP
-
-### Opening speech (NPC intro)
-> I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.
-
-### Discovery phase
-**Situational prompt:** _Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?_
-
-**Discovery questions the salesperson can ask (only ONE is correct):**
-
-**Option A** ✅ _correct — bonus damage_
-- Question: When a product turns out to be backordered, what's the downstream impact on your workshops?
-- NPC response: Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.
-
-**Option B** ⚠️ _wrong pillar — enemy buff_
-- Question: Should we just escalate backorders faster through your Wolf account manager?
-- NPC response: Tomasz: "Escalation is firefighting. I need systems, not more phone calls." — You offered a band-aid before understanding the root cause.
-
-**Option C** ➖ _shallow — neutral_
-- Question: Have you considered holding extra safety stock to absorb backorders?
-- NPC response: Tomasz: "That's expensive — and I'd still be blind to incoming shipments." — A workaround discussion, not a real discovery.
-
-### Battle objections
-
-**Objection 1** (DELIVER pillar · 35 HP)
-- Text: ""I just need orders to arrive when you say they will.""
-- Weakness (super-effective services): lead_time
-- Resistance (wrong-pillar / ineffective): content_kits, academy
-
-**Objection 2** (DELIVER pillar · 35 HP)
-- Text: ""How can I plan if I can't see Wolf stock before ordering?""
-- Weakness (super-effective services): stock_visibility, e_ordering
-- Resistance (wrong-pillar / ineffective): promo_templates, co_visits
-
-**Objection 3** (DELIVER pillar · 32 HP)
-- Text: ""My workshops want to know exactly when. So do I.""
-- Weakness (super-effective services): order_tracker, lead_time
-- Resistance (wrong-pillar / ineffective): design_studio, oil_monitoring
-
----
-
-## Encounter 5: Dubai, UAE
-*(Segment B)*
-
-**Distributor:** Ahmed Al-Rashidi · Operations Director
-**Company:** Gulf Auto Supplies
-**Channel:** 80 garages + 30 fleet workshops
-**Rewards:** +90g · +200 XP
-
-### Opening speech (NPC intro)
-> Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.
-
-### Discovery phase
-**Situational prompt:** _Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?_
-
-**Discovery questions the salesperson can ask (only ONE is correct):**
-
-**Option A** ✅ _correct — bonus damage_
-- Question: If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?
-- NPC response: Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.
-
-**Option B** ⚠️ _wrong pillar — enemy buff_
-- Question: Isn't your product quality enough to differentiate at this volume?
-- NPC response: Ahmed: "Quality differences are invisible to garages at my scale." — You pitched a feature when he needed a structural moat.
-
-**Option C** ➖ _shallow — neutral_
-- Question: What about the long personal relationships you've built with these garages?
-- NPC response: Ahmed: "Relationships are nice — but they don't scale and they don't lock anyone in." — A soft probe without real leverage.
-
-### Battle objections
-
-**Objection 1** (GROW pillar · 40 HP)
-- Text: ""Garages say they don't want to invest. Just deliver drums.""
-- Weakness (super-effective services): lubricant_mgmt
-- Resistance (wrong-pillar / ineffective): promo_templates, edi
-
-**Objection 2** (GROW pillar · 36 HP)
-- Text: ""Even with equipment — what stops them filling it with competitor oil?""
-- Weakness (super-effective services): oil_monitoring
-- Resistance (wrong-pillar / ineffective): academy, regulatory_label
-
-**Objection 3** (GROW pillar · 32 HP)
-- Text: ""Big investment. Show me the ROI numbers.""
-- Weakness (super-effective services): lubricant_mgmt, oil_monitoring
-- Resistance (wrong-pillar / ineffective): push_a_button, goods_loading
-
----
-
-## Encounter 6: Paris, France
-*(Segment C)*
-
-**Distributor:** Philippe Moreau · Purchasing Director
-**Company:** AutoDistri France
-**Channel:** 3 branches → 180 garages
-**Rewards:** +45g · +100 XP
-
-### Opening speech (NPC intro)
-> Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.
-
-### Discovery phase
-**Situational prompt:** _Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?_
-
-**Discovery questions the salesperson can ask (only ONE is correct):**
-
-**Option A** ✅ _correct — bonus damage_
-- Question: Walk me through exactly where in the process those 8% errors originate.
-- NPC response: Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.
-
-**Option B** ⚠️ _wrong pillar — enemy buff_
-- Question: Is Wolf shipping the wrong products to your branches?
-- NPC response: Philippe: "No — the errors are in MY process, not yours." — You accused the supplier before listening. He's now defending his own ops.
-
-**Option C** ➖ _shallow — neutral_
-- Question: Are your branches sending unclear requests that confuse your team?
-- NPC response: Philippe: "Branches are fine. Errors happen during consolidation and re-entry." — Partial signal. You missed the bottleneck.
-
-### Battle objections
-
-**Objection 1** (CONNECT pillar · 30 HP)
-- Text: ""We've ordered by email for 15 years. Why change what works?""
-- Weakness (super-effective services): edi
-- Resistance (wrong-pillar / ineffective): content_kits, oil_analysis
-
-**Objection 2** (DELIVER pillar · 30 HP)
-- Text: ""No IT department. We're a distribution company, not a tech company.""
-- Weakness (super-effective services): e_ordering
-- Resistance (wrong-pillar / ineffective): co_visits, trade_fairs
-
----
-
-## Encounter 7: London, United Kingdom
+## Encounter 4: London, United Kingdom
 *(Segment B)*
 
 **Distributor:** James Hartley · Key Account Mgr, Fleet
@@ -323,50 +182,559 @@ Review and edit this document. Changes will need to be applied back to `index.ht
 
 ---
 
-## Encounter 8: Frankfurt, Germany
-*(Segment A)*
+## Encounter 5: Warsaw, Poland
+*(Segment B)*
 
-**Distributor:** Klaus Weber · CEO
-**Company:** Petrol-Parts GmbH
-**Channel:** €5M+ annual. 400 garages, 60 fleets.
-**Rewards:** +150g · +300 XP
+**Distributor:** Tomasz Kowalski · Supply Chain Mgr
+**Company:** Trans-Cargo Logistics
+**Channel:** 3 warehouses → 350 workshops
+**Rewards:** +75g · +180 XP
 
 ### Opening speech (NPC intro)
-> Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.
+> I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.
 
 ### Discovery phase
-**Situational prompt:** _Klaus rejected Shell's partnership and won't settle for basic services. He's testing whether you're a strategic peer. What do you ask?_
+**Situational prompt:** _Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?_
 
 **Discovery questions the salesperson can ask (only ONE is correct):**
 
 **Option A** ✅ _correct — bonus damage_
-- Question: When Shell's execution fell short, what specifically disappointed you about the way they showed up?
-- NPC response: Klaus: "Generic materials with a logo swap. It felt like a template, not a partnership." — He just told you exactly what bespoke looks like. Now you can position Partnership Activation.
+- Question: When a product turns out to be backordered, what's the downstream impact on your workshops?
+- NPC response: Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.
 
 **Option B** ⚠️ _wrong pillar — enemy buff_
-- Question: Was Shell's pricing the real issue — would better terms have saved the deal?
-- NPC response: Klaus: "Price? I'm offering significant volume. I care about execution." — You flagged yourself as a transactional vendor. He's disengaging.
+- Question: Should we just escalate backorders faster through your Wolf account manager?
+- NPC response: Tomasz: "Escalation is firefighting. I need systems, not more phone calls." — You offered a band-aid before understanding the root cause.
 
 **Option C** ➖ _shallow — neutral_
-- Question: Was it Shell's product quality that didn't match their premium positioning?
-- NPC response: Klaus: "Quality wasn't the problem — the partnership execution was." — You missed the real signal and burned a turn.
+- Question: Have you considered holding extra safety stock to absorb backorders?
+- NPC response: Tomasz: "That's expensive — and I'd still be blind to incoming shipments." — A workaround discussion, not a real discovery.
 
 ### Battle objections
 
-**Objection 1** (GROW pillar · 45 HP)
-- Text: ""Show me what's exclusive to a Wolf strategic partner. Not basic stuff.""
-- Weakness (super-effective services): partnership_activation
-- Resistance (wrong-pillar / ineffective): tecdoc, e_ordering
+**Objection 1** (DELIVER pillar · 35 HP)
+- Text: ""I just need orders to arrive when you say they will.""
+- Weakness (super-effective services): lead_time
+- Resistance (wrong-pillar / ineffective): content_kits, academy
 
-**Objection 2** (GROW pillar · 42 HP)
-- Text: ""Shell promised co-branded events and sent generic banners. Can you actually deliver?""
-- Weakness (super-effective services): partnership_activation, trade_fairs
-- Resistance (wrong-pillar / ineffective): push_a_button, palletization
+**Objection 2** (DELIVER pillar · 35 HP)
+- Text: ""How can I plan if I can't see Wolf stock before ordering?""
+- Weakness (super-effective services): stock_visibility, e_ordering
+- Resistance (wrong-pillar / ineffective): promo_templates, co_visits
 
-**Objection 3** (GROW pillar · 38 HP)
-- Text: ""My top customers are CEOs. They expect motorsport hospitality, not a conference room.""
-- Weakness (super-effective services): partnership_activation, trade_fairs
-- Resistance (wrong-pillar / ineffective): stock_visibility, academy
+**Objection 3** (DELIVER pillar · 32 HP)
+- Text: ""My workshops want to know exactly when. So do I.""
+- Weakness (super-effective services): order_tracker, lead_time
+- Resistance (wrong-pillar / ineffective): design_studio, oil_monitoring
+
+---
+
+## Encounter 6: Dubai, UAE
+*(Segment B)*
+
+**Distributor:** Ahmed Al-Rashidi · Operations Director
+**Company:** Gulf Auto Supplies
+**Channel:** 80 garages + 30 fleet workshops
+**Rewards:** +90g · +200 XP
+
+### Opening speech (NPC intro)
+> Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.
+
+### Discovery phase
+**Situational prompt:** _Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?
+- NPC response: Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: Isn't your product quality enough to differentiate at this volume?
+- NPC response: Ahmed: "Quality differences are invisible to garages at my scale." — You pitched a feature when he needed a structural moat.
+
+**Option C** ➖ _shallow — neutral_
+- Question: What about the long personal relationships you've built with these garages?
+- NPC response: Ahmed: "Relationships are nice — but they don't scale and they don't lock anyone in." — A soft probe without real leverage.
+
+### Battle objections
+
+**Objection 1** (GROW pillar · 40 HP)
+- Text: ""Garages say they don't want to invest. Just deliver drums.""
+- Weakness (super-effective services): lubricant_mgmt
+- Resistance (wrong-pillar / ineffective): promo_templates, edi
+
+**Objection 2** (GROW pillar · 36 HP)
+- Text: ""Even with equipment — what stops them filling it with competitor oil?""
+- Weakness (super-effective services): oil_monitoring
+- Resistance (wrong-pillar / ineffective): academy, regulatory_label
+
+**Objection 3** (GROW pillar · 32 HP)
+- Text: ""Big investment. Show me the ROI numbers.""
+- Weakness (super-effective services): lubricant_mgmt, oil_monitoring
+- Resistance (wrong-pillar / ineffective): push_a_button, goods_loading
+
+---
+
+## Encounter 7: Casablanca, Morocco
+*(Segment C)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Youssef El-Amrani · Sales Manager
+**Company:** Atlas Lubrifiants
+**Channel:** 140 garages across Morocco
+**Rewards:** +50g · +120 XP
+
+### Opening speech (NPC intro)
+> TODO: set up Morocco growth story (French technical training gap)
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Youssef El-Amrani: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Youssef El-Amrani: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Youssef El-Amrani: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (ENABLE pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): physical_training, academy
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (ENABLE pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): tech_inbox
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 8: Johannesburg, South Africa
+*(Segment B)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Thandiwe Nkosi · Operations Director
+**Company:** Veldt Oils
+**Channel:** 2 warehouses → 90 mine fleets
+**Rewards:** +75g · +180 XP
+
+### Opening speech (NPC intro)
+> TODO: set up mining-fleet pain story (need lab-backed drain intervals)
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Thandiwe Nkosi: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Thandiwe Nkosi: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Thandiwe Nkosi: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (ENABLE pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): oil_analysis, co_visits
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (ENABLE pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): oil_monitoring
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 9: Detroit, United States
+*(Segment C)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Sarah Johnson · VP Sales
+**Company:** Midwest Parts Co.
+**Channel:** 5 DCs → 700 fast-fit centres
+**Rewards:** +55g · +130 XP
+
+### Opening speech (NPC intro)
+> TODO: set up US e-commerce disruption story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Sarah Johnson: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Sarah Johnson: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Sarah Johnson: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (CONNECT pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): order_portal, e_ordering
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (CONNECT pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): reco_tool, tecdoc
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 10: Mexico City, Mexico
+*(Segment B)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Carlos Hernández · Commercial Director
+**Company:** Lubricantes del Bajío
+**Channel:** 300 garages + 50 fleets
+**Rewards:** +70g · +170 XP
+
+### Opening speech (NPC intro)
+> TODO: set up cross-border logistics story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Carlos Hernández: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Carlos Hernández: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Carlos Hernández: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (DELIVER pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): stock_visibility, lead_time
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (DELIVER pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): order_tracker
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 11: Bogotá, Colombia
+*(Segment B)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Valentina Ortiz · Purchasing Manager
+**Company:** Andes Auto Supply
+**Channel:** 180 independent garages
+**Rewards:** +75g · +180 XP
+
+### Opening speech (NPC intro)
+> TODO: set up coffee-grower 4×4 fleet story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Valentina Ortiz: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Valentina Ortiz: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Valentina Ortiz: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (ENABLE pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): oil_analysis, co_visits
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (ENABLE pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): academy, physical_training
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 12: Kyiv, Ukraine
+*(Segment C)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Olena Kovalenko · Key Account Mgr
+**Company:** Carpathian Oils
+**Channel:** 95 workshops + 20 agri-fleets
+**Rewards:** +45g · +110 XP
+
+### Opening speech (NPC intro)
+> TODO: set up post-conflict rebuild / value-not-volume story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Olena Kovalenko: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Olena Kovalenko: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Olena Kovalenko: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (GROW pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): content_kits, promo_templates
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (GROW pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): marketing_portal
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 13: Almaty, Kazakhstan
+*(Segment A)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Nurlan Abenov · Operations Director
+**Company:** Steppe Logistics
+**Channel:** 2 warehouses → 60 mining fleets
+**Rewards:** +120g · +260 XP
+
+### Opening speech (NPC intro)
+> TODO: set up long-distance / brutal winter / mining story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Nurlan Abenov: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Nurlan Abenov: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Nurlan Abenov: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (GROW pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): oil_monitoring, lubricant_mgmt
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (GROW pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): network_concept, partnership_activation
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 14: Shanghai, China
+*(Segment A)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Li Wei · Strategic Accounts
+**Company:** Jinlong Lubricants
+**Channel:** 6 DCs → 1,200 workshops
+**Rewards:** +150g · +300 XP
+
+### Opening speech (NPC intro)
+> TODO: set up premium-import brand positioning story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Li Wei: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Li Wei: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Li Wei: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (GROW pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): partnership_activation, network_concept
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (GROW pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): design_studio, trade_fairs
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 15: Ho Chi Minh, Vietnam
+*(Segment C)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Nguyễn Minh · Sales Manager
+**Company:** Mekong Auto Parts
+**Channel:** 220 scooter + 60 tuk-tuk workshops
+**Rewards:** +50g · +120 XP
+
+### Opening speech (NPC intro)
+> TODO: set up scooter workshop / high-volume low-margin story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Nguyễn Minh: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Nguyễn Minh: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Nguyễn Minh: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (CONNECT pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): reco_tool, tecdoc
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (CONNECT pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): push_a_button, content_kits
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 16: Tokyo, Japan
+*(Segment A)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Takashi Yamamoto · General Manager
+**Company:** Nihon Lubricants KK
+**Channel:** 140 dealerships + 40 JDM tuners
+**Rewards:** +150g · +300 XP
+
+### Opening speech (NPC intro)
+> TODO: set up Japanese OEM zero-defects story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Takashi Yamamoto: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Takashi Yamamoto: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Takashi Yamamoto: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (DELIVER pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): regulatory_label, custom_label
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (DELIVER pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): connectivity, lead_time
+- Resistance (wrong-pillar / ineffective): TODO
+
+---
+
+## Encounter 17: Sydney, Australia
+*(Segment A)*  `TODO:` new encounter — placeholder text only
+
+**Distributor:** Jack Wilson · Fleet Accounts
+**Company:** Southern Cross Oils
+**Channel:** 3 hubs → 60 mining + fleet accounts
+**Rewards:** +130g · +280 XP
+
+### Opening speech (NPC intro)
+> TODO: set up outback mining / extreme heat story
+
+### Discovery phase
+**Situational prompt:** _TODO: what do you probe?_
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: TODO: write the correct discovery probe.
+- NPC response: Jack Wilson: "TODO: write the insight revealed by the correct probe."
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: TODO: write a probe that pitches product before discovering needs.
+- NPC response: Jack Wilson: "TODO: write how the NPC gets defensive."
+
+**Option C** ➖ _shallow — neutral_
+- Question: TODO: write a surface-level probe.
+- NPC response: Jack Wilson: "TODO: write the partial information the shallow probe reveals."
+
+### Battle objections
+
+**Objection 1** (ENABLE pillar · 32 HP)
+- Text: "TODO: first objection text."
+- Weakness (super-effective services): oil_analysis, oil_monitoring
+- Resistance (wrong-pillar / ineffective): TODO
+
+**Objection 2** (ENABLE pillar · 30 HP)
+- Text: "TODO: second objection text."
+- Weakness (super-effective services): co_visits, physical_training
+- Resistance (wrong-pillar / ineffective): TODO
 
 ---
 
