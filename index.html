@@ -1741,7 +1741,7 @@ function App(){
   // ── BGM: switch tracks based on phase ──
   useEffect(()=>{
    if(!aOn||!sndOn){stopBGM();return}
-   if(ph==='title')playBGM('title');
+   if(ph==='title'||ph==='ending')playBGM('title');
    else if(ph==='map'||ph==='dialogue')playBGM('overworld');
    else if(ph==='battle'){if(enc&&enc.isBoss)playBGM('boss');else playBGM('battle')}
    else if(ph==='victory'||ph==='defeat')stopBGM();
@@ -2125,7 +2125,60 @@ function App(){
 
       // Return
       (ph==='victory'||ph==='defeat')&&h('div',{style:{textAlign:'center',marginTop:16}},
-        h('button',{onClick:()=>{setPh('map');setTab('map');Bridge.emit('return-to-map',{});snd('sel');sbLoad().then(d=>{if(d)setLb(d)})},style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 28px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},'← World Map')));
+        h('button',{onClick:()=>{
+          // Boss victory routes to the ending screen; everything else returns to the map
+          if(ph==='victory'&&enc.isBoss){setPh('ending');snd('win');return}
+          setPh('map');setTab('map');Bridge.emit('return-to-map',{});snd('sel');sbLoad().then(d=>{if(d)setLb(d)})
+        },style:{background:'none',border:'2px solid '+C.gold,color:C.gold,padding:'14px 28px',fontSize:16,fontWeight:700,borderRadius:10,cursor:'pointer'}},ph==='victory'&&enc.isBoss?'🏆 View Ending →':'← World Map')));
+  }
+
+  // ═══ ENDING ═══
+  if(ph==='ending'){
+   const g=computeGrade();
+   const time=t0?Math.round((Date.now()-t0)/1000):0;
+   const total=ENC.length+1;
+   return h(Pad,null,
+    h('div',{style:{textAlign:'center',paddingTop:20,animation:'fadeIn .8s ease'}},
+      h('div',{className:'pf',style:{fontSize:11,color:'#FFD700',letterSpacing:3,marginBottom:8,textShadow:'2px 2px 0 #000'}},'THE END'),
+      h('div',{className:'pf',style:{fontSize:26,color:C.gold,animation:'titleGlow 2.5s ease-in-out infinite',letterSpacing:2,marginBottom:10,textShadow:'3px 3px 0 #000, 0 0 20px #FFD700'}},'CHAMPION'),
+      h('div',{style:{width:96,height:144,margin:'16px auto',animation:'float 3s ease-in-out infinite',filter:'drop-shadow(0 6px 14px rgba(255,215,0,.7))'},dangerouslySetInnerHTML:{__html:SP.hero(0)}}),
+      h('div',{className:'fs-md',style:{color:'#e8f0ff',marginTop:8,lineHeight:1.7,padding:'0 14px',maxWidth:460,margin:'0 auto'}},
+        nm+', you\'ve done it.'),
+      h('div',{className:'fs-sm',style:{color:C.mu,marginTop:12,lineHeight:1.7,padding:'0 18px',maxWidth:460,margin:'12px auto 0',fontStyle:'italic'}},
+        'From TecDoc to Network Concept, you proved that every distributor objection has a 360° answer. The Wolf Oil sales academy salutes a new master closer.'),
+      // Final rank card
+      h('div',{className:'ff7',style:{maxWidth:360,margin:'20px auto',padding:'18px 16px',borderImage:`linear-gradient(135deg,#fff 0%,${g.color} 30%,#0a1450 60%,#fff 100%) 1`,boxShadow:`0 0 32px ${g.color}77`}},
+        h('div',{className:'pf',style:{fontSize:42,color:g.color,textShadow:`4px 4px 0 #000, 0 0 24px ${g.color}`,letterSpacing:4}},'RANK '+g.rank),
+        h('div',{className:'pf fs-pixel-sm',style:{color:g.color,marginTop:6,letterSpacing:2,textShadow:'2px 2px 0 #000'}},g.label),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:14,textAlign:'left'}},
+          h('div',{className:'fs-xs',style:{color:C.mu}},'⏱ Time'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},fmtT(time)),
+          h('div',{className:'fs-xs',style:{color:C.mu}},'💬 Perfect discoveries'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},perfectDia+'/'+total),
+          h('div',{className:'fs-xs',style:{color:C.mu}},'🛡 Flawless wins'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},noHits+'/'+total),
+          h('div',{className:'fs-xs',style:{color:C.mu}},'🔥 Max combo'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},maxCombo+'×'),
+          h('div',{className:'fs-xs',style:{color:C.mu}},'💰 Gold earned'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},gold+'g'),
+          h('div',{className:'fs-xs',style:{color:C.mu}},'🏆 Achievements'),h('div',{className:'fs-xs',style:{color:C.tx,textAlign:'right',fontWeight:700}},achs.length+'/'+ACHIEVEMENTS.length))),
+      // Credits
+      h('div',{className:'ff7',style:{maxWidth:360,margin:'0 auto 20px',padding:'14px 16px'}},
+        h('div',{className:'pf fs-pixel-sm',style:{color:C.gold,textAlign:'center',marginBottom:10,letterSpacing:1}},'· CREDITS ·'),
+        h('div',{className:'fs-xs',style:{color:C.mu,textAlign:'center',lineHeight:2}},
+          h('div',null,'Game Design · Wolf Oil Sales Academy'),
+          h('div',null,'Art & Code · 360° Quest Team'),
+          h('div',null,'Testing · You, '+(nm||'Champion')),
+          h('div',{style:{marginTop:8,color:C.gold,fontStyle:'italic'}},'Thanks for playing!'))),
+      // Actions
+      h('div',{style:{display:'flex',gap:10,justifyContent:'center',flexWrap:'wrap',marginBottom:24}},
+        h('button',{className:'ff7',onClick:()=>{
+          if(!confirm('Start a fresh run? Your save will be wiped.'))return;
+          clearSave();
+          setGold(0);setXp({CONNECT:0,ENABLE:0,GROW:0,DELIVER:0});setLv(1);setDone([]);
+          setInv(SVC.filter(s=>s.t==='C').map(s=>s.id));setItems([]);
+          setHasCar(false);setHasBike(false);setVehicle(null);
+          setPerfectDia(0);setNoHits(0);setMaxCombo(0);setAchs([]);
+          setEnc(null);setT0(null);
+          setPh('title');snd('sel');
+        },style:{color:C.gold,padding:'16px 28px',fontSize:14,fontWeight:700,cursor:'pointer',letterSpacing:2,animation:'blink 2.5s ease infinite'}},'↻ NEW GAME +'),
+        h('button',{className:'ff7',onClick:()=>{setPh('map');setTab('map');Bridge.emit('return-to-map',{});snd('blip')},style:{color:C.tx,padding:'16px 28px',fontSize:14,fontWeight:700,cursor:'pointer',letterSpacing:2}},'🗺 KEEP EXPLORING')),
+      h('div',{className:'fs-xs',style:{color:C.mu,marginBottom:16,fontStyle:'italic'}},'Wolf Oil Corporation · 360° Service Quest')));
   }
 
   // ═══ MAP / SHOP / INVENTORY ═══
