@@ -738,10 +738,21 @@ function genMapData(){
  return m;
 }
 // ── Structured tile drawing (LTTP-style patterns, not random pixels) ──
-function drawGrass(x,ox,oy){
- x.fillStyle='#4a8a3d';x.fillRect(ox,oy,16,16);
+// Regional grass palettes: [base, tuft, highlight] per continent.
+// Neutral = used outside any region (edges of the world map).
+const GRASS_PAL={
+ EU : ['#3a7a2f','#5a9a3f','#7aba5f'], // temperate green
+ AM : ['#6a8a3a','#8aaa4a','#a8c868'], // prairie olive
+ MEA: ['#c89850','#dcac68','#f0c080'], // desert sand
+ CIS: ['#a8b8b8','#c8d0d0','#e8ecec'], // tundra snow
+ AP : ['#2a7a4a','#3a9a5a','#5aba7a'], // jungle emerald
+ _  : ['#4a8a3d','#6aaa4d','#8aca6d'], // neutral grass (default)
+};
+function drawGrass(x,ox,oy,pal){
+ const p=pal||GRASS_PAL._;
+ x.fillStyle=p[0];x.fillRect(ox,oy,16,16);
  // Blade-tuft pattern at fixed positions for seamless tiling
- x.fillStyle='#6aaa4d';
+ x.fillStyle=p[1];
  const tufts=[[3,3],[11,2],[2,9],[8,8],[13,12],[6,13]];
  tufts.forEach(([tx,ty])=>{
   x.fillRect(ox+tx,oy+ty-1,1,1);
@@ -749,8 +760,13 @@ function drawGrass(x,ox,oy){
   x.fillRect(ox+tx,oy+ty+1,1,1);
  });
  // Bright highlight dots
- x.fillStyle='#8aca6d';
+ x.fillStyle=p[2];
  x.fillRect(ox+3,oy+3,1,1);x.fillRect(ox+11,oy+2,1,1);x.fillRect(ox+8,oy+8,1,1);x.fillRect(ox+13,oy+12,1,1);
+}
+// Return the region key that contains (px,py) in percent coords, or null.
+function regionAt(px,py){
+ for(const k in REGIONS){const r=REGIONS[k];if(px>=r.x[0]&&px<=r.x[1]&&py>=r.y[0]&&py<=r.y[1])return k}
+ return null;
 }
 function drawPath(x,ox,oy){
  // Smooth dirt path — soft brown ground, no brick lines
@@ -801,7 +817,12 @@ function genGround(scene){
   if(t===3)drawPath(x,ox,oy);
   else if(t===4)drawWater(x,ox,oy);
   else if(t===5)drawHedge(x,ox,oy);
-  else drawGrass(x,ox,oy);
+  else {
+   // Regional tinting: look up which continent this tile belongs to.
+   const px=(ix/MW)*100,py=(iy/MH)*100;
+   const rk=regionAt(px,py);
+   drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
+  }
  }
  scene.textures.addCanvas('ground',c);
 }
