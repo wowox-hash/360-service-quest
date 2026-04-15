@@ -1887,6 +1887,37 @@ function genVanTex(scene){
  x.fillRect(1,FH-5,2,1);x.fillRect(FW-3,FH-5,2,1);
  scene.textures.addCanvas('van',c);
 }
+// Small top-down airliner (white with blue stripe) — facing NORTH, rotated in update().
+function genPlaneTex(scene){
+ const FW=24,FH=20;
+ const c=document.createElement('canvas');c.width=FW;c.height=FH;
+ const x=c.getContext('2d');
+ const cx=FW/2;
+ // Faint shadow underneath
+ x.fillStyle='rgba(0,0,0,.2)';x.fillRect(cx-3,FH-2,6,1);
+ // Fuselage (vertical, pointed nose)
+ x.fillStyle='#0a1a3a';x.fillRect(cx-2,2,4,FH-4);
+ x.fillStyle='#ffffff';x.fillRect(cx-1,3,2,FH-6);
+ // Nose cone
+ x.fillStyle='#0a1a3a';x.fillRect(cx,1,1,1);x.fillRect(cx-1,2,2,1);
+ // Tail fin
+ x.fillStyle='#0a1a3a';x.fillRect(cx-2,FH-4,4,2);
+ x.fillStyle='#d03020';x.fillRect(cx-1,FH-3,2,1);
+ // Wings (wide horizontal)
+ x.fillStyle='#0a1a3a';x.fillRect(1,9,FW-2,3);
+ x.fillStyle='#ffffff';x.fillRect(2,10,FW-4,1);
+ x.fillStyle='#88bbe8';x.fillRect(2,10,FW-4,1); // subtle blue sheen
+ // Engine nacelles
+ x.fillStyle='#2a2a2a';x.fillRect(4,11,2,2);x.fillRect(FW-6,11,2,2);
+ // Blue livery stripe down the middle of the fuselage
+ x.fillStyle='#2a78c8';x.fillRect(cx-1,6,2,FH-12);
+ // Cockpit windows (tiny blue dots near nose)
+ x.fillStyle='#88ccff';x.fillRect(cx-1,3,2,1);
+ // Rear navigation lights (red port, green starboard)
+ x.fillStyle='#ff0000';x.fillRect(1,10,1,1);
+ x.fillStyle='#00ff80';x.fillRect(FW-2,10,1,1);
+ scene.textures.addCanvas('plane',c);
+}
 function genBikeTex(scene){
  const FW=16,FH=24;
  const c=document.createElement('canvas');c.width=FW*2;c.height=FH;
@@ -2187,7 +2218,7 @@ class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
   try{
-   genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);
+   genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);genPlaneTex(this);
    this.scene.start('Overworld');
   }catch(e){Bridge.emit('phaser-error',{msg:'Boot: '+(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}
  }
@@ -2197,6 +2228,7 @@ class OverworldScene extends Phaser.Scene {
  create(){try{this._create()}catch(e){Bridge.emit('phaser-error',{msg:String(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}}
  _create(){
   this.doneIds=[];this.playerLv=1;this.bossReady=false;this.vehicle=null;this.dpadDir={x:0,y:0};this.lastDir='down';
+  this.currentRegion='EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
   const groundImg=this.add.image(MPX/2,MPY/2,'ground');groundImg.setDepth(-1000);
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
   // Hedge + water collision bodies (from MAP_DATA)
@@ -2213,30 +2245,44 @@ class OverworldScene extends Phaser.Scene {
   }
   // Trees (canopy + trunk collision)
   this.treeGroup=this.physics.add.staticGroup();
-  TREES.forEach(([px,py])=>{
+  // Regional biome palettes for trees, rocks, flowers
+  const TREE_TINT={EU:0xffffff,AM:0xf0e0a0,MEA:0xf0c080,CIS:0xd0e0f0,AP:0xaaeaaa};
+  const ROCK_TINT={EU:[0x555555,0x7a7a7a,0x9a9a9a],AM:[0x705040,0x98745a,0xc09678],MEA:[0x806030,0xa87840,0xd0a060],CIS:[0x8098b0,0xa8c0d8,0xd0e0f0],AP:[0x3a5040,0x588568,0x80b090]};
+  const FLWR_TINT={EU:[0xff6eb0,0xffd700,0xff6eb0],AM:[0xf0a020,0xffe060,0xffa040],MEA:[0xff4020,0xffa020,0xff6020],CIS:[0xe0f0ff,0xffffff,0xc0d8f0],AP:[0xff2080,0xffe040,0xff40c0]};
+  TREES.forEach(([px,py,rk])=>{
    const sx=p2x(px),sy=p2x(py);
    const tree=this.add.image(sx,sy,'tree');
    tree.setOrigin(0.5,0.8);
    tree.setDepth(sy+30);
+   tree.setTint(TREE_TINT[rk]||0xffffff);
+   tree.regionKey=rk;
+   this.decoObjs.push(tree);
    const trunk=this.physics.add.staticImage(sx,sy+4,'tree');
    trunk.setAlpha(0);
    trunk.body.setSize(8,6);trunk.body.setOffset(12,28);
+   trunk.regionKey=rk;
    this.treeGroup.add(trunk);
   });
   // Rocks + flowers
-  ROCKS.forEach(([px,py])=>{
+  ROCKS.forEach(([px,py,rk])=>{
    const g=this.add.graphics();
-   g.fillStyle(0x555555,1);g.fillEllipse(0,1,14,5);
-   g.fillStyle(0x7a7a7a,1);g.fillEllipse(0,0,12,4);
-   g.fillStyle(0x9a9a9a,1);g.fillEllipse(-2,-1,4,2);
+   const c=ROCK_TINT[rk]||ROCK_TINT.EU;
+   g.fillStyle(c[0],1);g.fillEllipse(0,1,14,5);
+   g.fillStyle(c[1],1);g.fillEllipse(0,0,12,4);
+   g.fillStyle(c[2],1);g.fillEllipse(-2,-1,4,2);
    g.setPosition(p2x(px),p2x(py));g.setDepth(p2x(py));
+   g.regionKey=rk;
+   this.decoObjs.push(g);
   });
-  FLWRS.forEach(([px,py])=>{
+  FLWRS.forEach(([px,py,rk])=>{
    const g=this.add.graphics();
-   g.fillStyle(0xff6eb0,1);g.fillCircle(0,0,3);
-   g.fillStyle(0xffd700,1);g.fillCircle(5,-2,2.5);
-   g.fillStyle(0xff6eb0,1);g.fillCircle(-4,2,2.5);
+   const c=FLWR_TINT[rk]||FLWR_TINT.EU;
+   g.fillStyle(c[0],1);g.fillCircle(0,0,3);
+   g.fillStyle(c[1],1);g.fillCircle(5,-2,2.5);
+   g.fillStyle(c[2],1);g.fillCircle(-4,2,2.5);
    g.setPosition(p2x(px),p2x(py));g.setDepth(p2x(py));
+   g.regionKey=rk;
+   this.decoObjs.push(g);
   });
   // Buildings
   this.bldSprites={};this.bldBodies=this.physics.add.staticGroup();
@@ -2297,10 +2343,23 @@ class OverworldScene extends Phaser.Scene {
     stroke:'#000000',strokeThickness:3
    }).setOrigin(0.5,0);
    lbl.setDepth(sy+1000);
+   this.airportLabels[k]=lbl;
+   // Spawn 2 planes orbiting each airport on an elliptical path
+   for(let i=0;i<2;i++){
+    const pl=this.add.image(sx,sy-20,'plane');
+    pl.regionKey=k;
+    pl.bx=sx;pl.by=sy-6;
+    pl.rx=46+i*8;pl.ry=26+i*4;
+    pl.phase=i*Math.PI+Math.random()*0.3;
+    pl.spd=0.00055+Math.random()*0.00025;
+    pl.setDepth(99990); // always above ground / above trees so they read as "flying"
+    pl.setAlpha(0.95);
+    this.planes.push(pl);
+   }
   });
   // Hero
   // Spawn from saved position (if returning from battle) or default spawn point — default is Europe airport
-  const defEU=REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(defEU.ax+2),y:p2x(defEU.ay+2)};
+  const spawnR=REGIONS[this.currentRegion]||REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(spawnR.ax+2),y:p2x(spawnR.ay+2)};
   this.hero=this.physics.add.sprite(sp.x,sp.y,'hero');
   this.hero.setCollideWorldBounds(true);
   this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);
@@ -2353,8 +2412,8 @@ class OverworldScene extends Phaser.Scene {
   });
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
-  this.cameras.main.setBounds(0,0,MPX,MPY);
   this.cameras.main.setZoom(2.0);
+  this.applyRegionBounds();
   // Input
   this.cursors=this.input.keyboard.createCursorKeys();
   this.wasd=this.input.keyboard.addKeys('W,A,S,D');
@@ -2375,34 +2434,73 @@ class OverworldScene extends Phaser.Scene {
   });
   Bridge.on('game-state-sync',(d)=>{
    this.doneIds=d?.done||[];this.playerLv=d?.lv||1;this.bossReady=d?.bossReady||false;this.vehicle=d?.vehicle||null;
+   if(d?.currentRegion&&REGIONS[d.currentRegion])this.currentRegion=d.currentRegion;
+   this.applyRegionBounds();
    this.syncVisibility();
   });
   Bridge.on('dpad',(d)=>{this.dpadDir=d||{x:0,y:0}});
   Bridge.on('airport-travel',(d)=>{
    const r=REGIONS[d?.to];if(!r||!this.hero)return;
-   this.hero.setPosition(p2x(r.ax+2),p2x(r.ay+2));
-   this.hero.setVelocity(0,0);
-   this.cameras.main.centerOn(this.hero.x,this.hero.y);
-   this.airportCooldown=1500;
+   this.currentRegion=d.to;
+   // Fade to black, teleport hero, fade back in
+   this.cameras.main.fade(220,2,6,23,false);
+   this.time.delayedCall(240,()=>{
+    // Drop the hero slightly south-east of the airport so they don't re-trigger it
+    this.hero.setPosition(p2x(r.ax+3),p2x(r.ay+3));
+    this.hero.setVelocity(0,0);
+    this.applyRegionBounds();
+    this.syncVisibility();
+    this.cameras.main.centerOn(this.hero.x,this.hero.y);
+    this.cameras.main.fadeIn(300,2,6,23);
+    this.airportCooldown=1500;
+   });
   });
   this.syncVisibility();
  }
+ // Constrain the physics world + camera bounds to the currently-active region's
+ // bounding box so the player only sees one continent at a time.
+ applyRegionBounds(){
+  const r=REGIONS[this.currentRegion||'EU'];if(!r)return;
+  const x0=p2x(r.x[0]),y0=p2x(r.y[0]),x1=p2x(r.x[1]),y1=p2x(r.y[1]);
+  const bw=x1-x0,bh=y1-y0;
+  if(this.physics&&this.physics.world)this.physics.world.setBounds(x0,y0,bw,bh);
+  if(this.cameras&&this.cameras.main)this.cameras.main.setBounds(x0,y0,bw,bh);
+ }
  syncVisibility(){
+  const curR=this.currentRegion||'EU';
   ENC.forEach(enc=>{
    const npc=this.npcSprites[enc.id],bld=this.bldSprites[enc.id],lbl=this.labels[enc.id];
    if(!npc||!bld)return;
+   const inRegion=enc.region===curR;
    const locked=(enc.seg==='B'&&this.playerLv<3)||(enc.seg==='A'&&this.playerLv<6);
    const defeated=this.doneIds.includes(enc.id);
-   npc.setVisible(!locked&&!defeated);
-   if(npc.body)npc.body.enable=!locked&&!defeated;
+   npc.setVisible(inRegion&&!locked&&!defeated);
+   if(npc.body)npc.body.enable=inRegion&&!locked&&!defeated;
+   bld.setVisible(inRegion);
    bld.setAlpha(locked?.4:1);
    if(defeated)bld.setTint(0xffd788);else bld.clearTint();
-   if(lbl){lbl.setText((locked?'🔒 ':defeated?'✓ ':'')+enc.loc);lbl.setColor(defeated?'#FFD700':locked?'#EF4444':'#ffffff')}
+   if(lbl){lbl.setVisible(inRegion);lbl.setText((locked?'🔒 ':defeated?'✓ ':'')+enc.loc);lbl.setColor(defeated?'#FFD700':locked?'#EF4444':'#ffffff')}
   });
   const bn=this.npcSprites[99],bb=this.bldSprites[99],bl=this.labels[99];
-  if(bn){bn.setVisible(this.bossReady&&!this.doneIds.includes(99));if(bn.body)bn.body.enable=bn.visible}
-  if(bb){bb.setAlpha(this.bossReady?1:.4);if(this.doneIds.includes(99))bb.setTint(0xffd788)}
-  if(bl){bl.setText((this.bossReady?(this.doneIds.includes(99)?'👑 CHAMPION':'👑 AUTOMECHANIKA'):'🔒 Clear all '+ENC.length));bl.setColor(this.doneIds.includes(99)?'#FFD700':this.bossReady?'#EF4444':'#8ca0d0')}
+  const bossIn=BOSS.region===curR;
+  if(bn){bn.setVisible(bossIn&&this.bossReady&&!this.doneIds.includes(99));if(bn.body)bn.body.enable=bn.visible}
+  if(bb){bb.setVisible(bossIn);bb.setAlpha(this.bossReady?1:.4);if(this.doneIds.includes(99))bb.setTint(0xffd788)}
+  if(bl){bl.setVisible(bossIn);bl.setText((this.bossReady?(this.doneIds.includes(99)?'👑 CHAMPION':'👑 AUTOMECHANIKA'):'🔒 Clear all '+ENC.length));bl.setColor(this.doneIds.includes(99)?'#FFD700':this.bossReady?'#EF4444':'#8ca0d0')}
+  // Hide non-current-region vans and airports so only the active continent is visible
+  if(this.vans){const encRegion={};ENC.forEach(e=>{encRegion[e.id]=e.region});encRegion[99]=BOSS.region;
+   for(const van of this.vans)van.setVisible(encRegion[van.encId]===curR)}
+  if(this.airportSprites){Object.keys(this.airportSprites).forEach(k=>{
+   const ap=this.airportSprites[k],inR=k===curR;
+   if(ap)ap.setVisible(inR);
+  })}
+  if(this.airportBodies){this.airportBodies.getChildren().forEach(body=>{
+   const inR=body.getData('regionKey')===curR;body.setVisible(inR);if(body.body)body.body.enable=inR;
+  })}
+  if(this.airportLabels){Object.keys(this.airportLabels).forEach(k=>{const l=this.airportLabels[k];if(l)l.setVisible(k===curR)})}
+  if(this.planes){for(const p of this.planes)p.setVisible(p.regionKey===curR)}
+  if(this.treeGroup){this.treeGroup.getChildren().forEach(tr=>{const inR=tr.regionKey===undefined||tr.regionKey===curR;tr.body&&(tr.body.enable=inR)})}
+  // Hide rocks/flowers/trees outside region
+  if(this.decoObjs){for(const d of this.decoObjs)d.setVisible(d.regionKey===undefined||d.regionKey===curR)}
  }
  onNpcCollide(npc){
   const id=npc.getData('encId');
@@ -2504,6 +2602,18 @@ class OverworldScene extends Phaser.Scene {
     van.setRotation(Math.atan2(ty,tx)+Math.PI/2);
    }
   }
+  // Planes circle their airport on a wider ellipse, always facing motion direction
+  if(this.planes){
+   for(const pl of this.planes){
+    pl.phase+=pl.spd*delta;
+    const a=pl.phase;
+    pl.setPosition(pl.bx+Math.cos(a)*pl.rx,pl.by+Math.sin(a)*pl.ry);
+    const tx=-Math.sin(a)*pl.rx,ty=Math.cos(a)*pl.ry;
+    pl.setRotation(Math.atan2(ty,tx)+Math.PI/2);
+    // Subtle altitude bob
+    pl.setScale(1+Math.sin(a*2)*0.04);
+   }
+  }
   // Depth sort (y-sort for hero + NPCs; buildings sort by their top-of-base edge)
   this.hero.setDepth(this.hero.y);
   for(const enc of ALL){
@@ -2557,9 +2667,35 @@ class OverworldScene extends Phaser.Scene {
 }
 
 // ── OVERWORLD: trees, buildings, world map ──
-const TREES=[[6,12],[14,30],[8,52],[12,78],[18,92],[32,10],[44,6],[64,16],[68,8],[94,14],[34,56],[48,50],[66,66],[88,48],[4,62],[14,84],[88,78],[92,92],[90,30],[28,92],[72,36],[38,78],[10,38],[34,34],[54,68],[46,62]];
-const ROCKS=[[10,90],[90,86],[92,42],[8,32],[58,92],[30,66],[86,66]];
-const FLWRS=[[6,20],[92,64],[12,58],[64,12],[38,90],[72,78],[18,66],[56,22]];
+// Decorative sprite coordinates — generated per region from a deterministic
+// pseudo-random sequence so each continent gets its own trees/rocks/flowers
+// without having to maintain handcrafted arrays. Each entry is [px,py,region].
+const _rng=(s=>()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff})(42);
+const TREES=[],ROCKS=[],FLWRS=[];
+Object.keys(REGIONS).forEach(k=>{
+ const r=REGIONS[k];
+ // Expand the interior slightly so decorations don't crowd the airport/distributors
+ const x0=r.x[0]+2,x1=r.x[1]-2,y0=r.y[0]+3,y1=r.y[1]-3;
+ const rand=(lo,hi)=>lo+_rng()*(hi-lo);
+ const count={EU:14,AM:10,MEA:7,CIS:11,AP:14}[k]||10;
+ // Trees: sprinkled across the region, avoiding the airport inner ring
+ for(let i=0;i<count;i++){
+  const px=rand(x0,x1),py=rand(y0,y1);
+  const dAp=Math.hypot(px-r.ax,py-r.ay);
+  if(dAp<6)continue;
+  TREES.push([px,py,k]);
+ }
+ // Rocks (fewer)
+ for(let i=0;i<Math.max(3,Math.floor(count/3));i++){
+  const px=rand(x0,x1),py=rand(y0,y1);
+  ROCKS.push([px,py,k]);
+ }
+ // Flowers (even fewer, but visible pops of color)
+ for(let i=0;i<Math.max(3,Math.floor(count/4));i++){
+  const px=rand(x0,x1),py=rand(y0,y1);
+  FLWRS.push([px,py,k]);
+ }
+});
 
 // ── Shared UI components (hoisted so they don't remount every render) ──
 const HpBar=({v,m,w='100%'})=>h('div',{className:'hpc',style:{width:w,height:12,borderRadius:3,overflow:'hidden'}},h('div',{style:{height:'100%',background:'linear-gradient(180deg,'+(v/m>.5?'#34d399 0%,#10B981 50%,#047857':v/m>.25?'#fcd34d 0%,#FFD700 50%,#b45309':'#f87171 0%,#EF4444 50%,#991b1b')+' 100%)',width:(v/m*100)+'%',transition:'width .3s',boxShadow:'inset 0 1px 0 rgba(255,255,255,.45)'}}));
@@ -2616,6 +2752,7 @@ function App(){
   const [hasCar,setHasCar]=useState(false);
   const [hasBike,setHasBike]=useState(false);
   const [vehicle,setVehicle]=useState(null);
+  const [currentRegion,setCurrentRegion]=useState('EU');
   const [hf,setHf]=useState(0);
   const [items,setItems]=useState([]);
   const [showW,setShowW]=useState(false);
@@ -2735,10 +2872,10 @@ function App(){
     physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
     scene:[BootScene,OverworldScene]
    });
-   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle}),250);
+   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion}),250);
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
-  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle})},[done,lv,vehicle]);
+  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion})},[done,lv,vehicle,currentRegion]);
   // ── PAUSE: ESC toggles, only meaningful on map ──
   useEffect(()=>{const f=(e)=>{if(e.key==='Escape'&&ph==='map'){setPaused(p=>!p);snd('blip')}};window.addEventListener('keydown',f);return()=>window.removeEventListener('keydown',f)},[ph]);
   // ── SAVE: persist progress to localStorage (debounced by React batching) ──
@@ -2766,13 +2903,14 @@ function App(){
    if(typeof s.maxCombo==='number')setMaxCombo(s.maxCombo);
    if(Array.isArray(s.achs))setAchs(s.achs);
    if(typeof s.t0==='number')setT0(s.t0);
+   if(typeof s.currentRegion==='string'&&REGIONS[s.currentRegion])setCurrentRegion(s.currentRegion);
    setLoaded(true);
   },[]);
   useEffect(()=>{
    // Only persist once we've passed the title screen (i.e., user has pressed START/CONTINUE)
    if(!loaded||ph==='title')return;
-   writeSave({nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0});
-  },[loaded,ph,nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0]);
+   writeSave({nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0,currentRegion});
+  },[loaded,ph,nm,gold,xp,lv,done,inv,items,hairIdx,skinIdx,tunicIdx,genderIdx,mentorIdx,hasCar,hasBike,vehicle,perfectDia,noHits,maxCombo,achs,t0,currentRegion]);
   const hasSave=loaded&&!!loadSave();
 
   const txp=Object.values(xp).reduce((a,b)=>a+b,0);
@@ -3211,7 +3349,7 @@ function App(){
           h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
             Object.keys(REGIONS).filter(k=>k!==airport).map(k=>{
               const r=REGIONS[k];const cnt=ENC.filter(e=>e.region===k&&done.includes(e.id)).length;const tot=ENC.filter(e=>e.region===k).length;
-              return h('button',{key:k,className:'ff7 btn-press card-lift',onClick:()=>{Bridge.emit('airport-travel',{to:k});setAirport(null);snd('sel')},style:{padding:'14px 16px',fontSize:14,color:C.tx,fontWeight:700,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}},
+              return h('button',{key:k,className:'ff7 btn-press card-lift',onClick:()=>{setCurrentRegion(k);Bridge.emit('airport-travel',{to:k});setAirport(null);snd('sel')},style:{padding:'14px 16px',fontSize:14,color:C.tx,fontWeight:700,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}},
                 h('span',{style:{display:'flex',alignItems:'center',gap:10}},h('span',{style:{fontSize:18,filter:'drop-shadow(0 0 6px '+r.col+')'}},'✈'),h('span',null,r.nm)),
                 h('span',{className:'fs-xs',style:{color:cnt===tot?C.ok:C.mu,fontWeight:700}},cnt+'/'+tot))
             })),
@@ -3230,18 +3368,26 @@ function App(){
       mapOpen&&h('div',{onClick:()=>setMapOpen(false),className:'glass modal-in',style:{position:'fixed',inset:0,background:'rgba(2,6,23,.75)',zIndex:9998,display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
         h('div',{className:'ff7 panel-in',onClick:e=>e.stopPropagation(),style:{padding:18,maxWidth:420,width:'100%',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#1a2a80 60%,#fff 100%) 1',boxShadow:'0 0 0 1px rgba(255,215,0,.4),0 0 48px rgba(255,215,0,.45),0 20px 60px rgba(0,0,0,.7)'}},
           h('div',{className:'pf',style:{fontSize:11,color:'#FFD700',textAlign:'center',marginBottom:12,letterSpacing:2,textShadow:'2px 2px 0 #000'}},'📍 WORLD MAP'),
-          h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid meet',style:{width:'100%',height:340,display:'block',border:'2px solid #7a96ff',borderRadius:6,background:'#3d7a2c'}},
-            ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'ml'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:2.2,strokeLinecap:'round'})),
+          h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'xMidYMid meet',style:{width:'100%',height:340,display:'block',border:'2px solid #7a96ff',borderRadius:6,background:'#162a1a'}},
+            // Region bgs (colored plates per continent)
+            ...Object.keys(REGIONS).map(k=>{const r=REGIONS[k];const col={EU:'#3a7a2f',AM:'#6a8a3a',MEA:'#c89850',CIS:'#a8b8b8',AP:'#2a7a4a'}[k];return h('rect',{key:'rg'+k,x:r.x[0],y:r.y[0],width:r.x[1]-r.x[0],height:r.y[1]-r.y[0],fill:col,stroke:k===currentRegion?'#FFD700':'rgba(0,0,0,.4)',strokeWidth:k===currentRegion?.8:.3,opacity:k===currentRegion?1:.85})}),
+            // Region labels
+            ...Object.keys(REGIONS).map(k=>{const r=REGIONS[k];return h('text',{key:'rn'+k,x:(r.x[0]+r.x[1])/2,y:r.y[0]+3,fontSize:'2.4',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke',opacity:.7},REGIONS[k].nm)}),
+            ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'ml'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:1.4,strokeLinecap:'round',opacity:.6})),
             ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('g',{key:'mg'+e.id},
-              h('rect',{x:e.mx-3,y:e.my-3,width:6,height:6,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.5}),
-              h('text',{x:e.mx,y:e.my+6.5,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},e.loc))}),
-            h('rect',{x:BOSS.mx-4,y:BOSS.my-4,width:8,height:8,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.6}),
-            h('text',{x:BOSS.mx,y:BOSS.my+7,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},'BOSS'),
-            // Player marker (concentric)
-            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:6,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.5}),
-            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:3.5,fill:'#00ffff',stroke:'#fff',strokeWidth:.6}),
-            h('text',{x:heroMapPos.x,y:heroMapPos.y-4,fontSize:'3',fill:'#00ffff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},'YOU')),
-          h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10}},'🟨 cleared · 🟥 available · ⬛ locked · 🟦 you · Tap anywhere to close'))),
+              h('rect',{x:e.mx-2,y:e.my-2,width:4,height:4,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.35,transform:'rotate(45 '+e.mx+' '+e.my+')'}),
+              h('text',{x:e.mx,y:e.my+4.5,fontSize:'2.1',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.3',paintOrder:'stroke'},e.loc))}),
+            h('rect',{x:BOSS.mx-2.5,y:BOSS.my-2.5,width:5,height:5,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.5,transform:'rotate(45 '+BOSS.mx+' '+BOSS.my+')'}),
+            h('text',{x:BOSS.mx,y:BOSS.my+5.5,fontSize:'2.1',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.3',paintOrder:'stroke'},'BOSS'),
+            // Airport markers (one per region)
+            ...Object.keys(REGIONS).map(k=>{const r=REGIONS[k];return h('g',{key:'ap'+k},
+              h('circle',{cx:r.ax,cy:r.ay,r:2.8,fill:'rgba(255,215,0,.3)',stroke:'#FFD700',strokeWidth:.5}),
+              h('text',{x:r.ax,y:r.ay+1.3,fontSize:'3.6',fill:'#FFD700',textAnchor:'middle',style:{fontFamily:'sans-serif'}},'✈'))}),
+            // Player marker (concentric, larger so it shows on the busy world map)
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:4,fill:'none',stroke:'#00ffff',strokeWidth:.6,opacity:.6}),
+            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:2.5,fill:'#00ffff',stroke:'#fff',strokeWidth:.5}),
+            h('text',{x:heroMapPos.x,y:heroMapPos.y-3,fontSize:'2.2',fill:'#00ffff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.3',paintOrder:'stroke'},'YOU')),
+          h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10}},'◆ cleared/available/locked · ✈ airport · Tap to close'))),
       // Random event popup overlay
       evPopup&&h('div',{style:{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',zIndex:9999,pointerEvents:'none',animation:'calloutPop 2.2s ease forwards'}},
         h('div',{className:'ff7',style:{padding:'18px 24px',textAlign:'center',minWidth:240,borderImage:`linear-gradient(135deg,#fff,${evPopup.col},#1a2a80,#fff) 1`,boxShadow:`0 0 24px ${evPopup.col}`}},
@@ -3252,15 +3398,29 @@ function App(){
         // ── PAUSE button (top-left) ──
         h('button',{onClick:()=>{setPaused(true);snd('blip')},className:'btn-press',title:'Pause (ESC)',style:{position:'absolute',top:8,left:8,width:42,height:42,background:'linear-gradient(180deg,rgba(26,42,128,.9),rgba(6,16,48,.95))',border:'2px solid #7a96ff',borderRadius:8,color:'#e8f0ff',cursor:'pointer',zIndex:15,fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 0 0 1px rgba(122,150,255,.4),0 8px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)'}},'⏸'),
         // ── MINIMAP overlay (top-right of overworld) ──
-        h('div',{onClick:()=>setMapOpen(true),className:'card-lift',title:'Open world map',style:{position:'absolute',top:8,right:8,width:100,height:100,background:'linear-gradient(180deg,rgba(26,42,128,.9),rgba(6,16,48,.95))',border:'2px solid #7a96ff',borderRadius:8,cursor:'pointer',zIndex:15,overflow:'hidden',boxShadow:'0 0 0 1px rgba(122,150,255,.4),0 8px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)'}},
-          h('svg',{viewBox:'0 0 100 100',preserveAspectRatio:'none',style:{width:'100%',height:'100%',display:'block'}},
-            h('rect',{x:0,y:0,width:100,height:100,fill:'#3d7a2c'}),
-            ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:2.4,strokeLinecap:'round'})),
-            ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('rect',{key:'mb'+e.id,x:e.mx-2.5,y:e.my-2.5,width:5,height:5,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.4})}),
-            h('rect',{x:BOSS.mx-3,y:BOSS.my-3,width:6,height:6,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.5}),
-            // Player position pulse
-            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:3.2,fill:'#00ffff',stroke:'#fff',strokeWidth:.6}),
-            h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:5,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.6}))),
+        (()=>{
+          // Minimap cropped to the current region's bounding box so only
+          // same-continent distributors + airport render.
+          const r=REGIONS[currentRegion]||REGIONS.EU;
+          const vbx=r.x[0]-1,vby=r.y[0]-1,vbw=r.x[1]-r.x[0]+2,vbh=r.y[1]-r.y[0]+2;
+          const inR=e=>e.mx>=r.x[0]&&e.mx<=r.x[1]&&e.my>=r.y[0]&&e.my<=r.y[1];
+          const bgFill={EU:'#3a7a2f',AM:'#6a8a3a',MEA:'#c89850',CIS:'#a8b8b8',AP:'#2a7a4a'}[currentRegion]||'#3d7a2c';
+          return h('div',{onClick:()=>setMapOpen(true),className:'card-lift',title:'Open world map',style:{position:'absolute',top:8,right:8,width:100,height:100,background:'linear-gradient(180deg,rgba(26,42,128,.9),rgba(6,16,48,.95))',border:'2px solid #7a96ff',borderRadius:8,cursor:'pointer',zIndex:15,overflow:'hidden',boxShadow:'0 0 0 1px rgba(122,150,255,.4),0 8px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)'}},
+            h('svg',{viewBox:vbx+' '+vby+' '+vbw+' '+vbh,preserveAspectRatio:'xMidYMid slice',style:{width:'100%',height:'100%',display:'block'}},
+              h('rect',{x:vbx,y:vby,width:vbw,height:vbh,fill:bgFill}),
+              // Only render paths within the region
+              ...PATH_LINKS.filter(([x1,y1,x2,y2])=>x1>=r.x[0]&&x1<=r.x[1]&&x2>=r.x[0]&&x2<=r.x[1]&&y1>=r.y[0]&&y1<=r.y[1]&&y2>=r.y[0]&&y2<=r.y[1]).map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:vbw*0.022,strokeLinecap:'round'})),
+              // Distributor diamonds (rotated squares) — only current region
+              ...ENC.filter(e=>e.region===currentRegion&&inR(e)).map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);const sz=vbw*0.055;return h('rect',{key:'mb'+e.id,x:e.mx-sz/2,y:e.my-sz/2,width:sz,height:sz,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:vbw*0.004,transform:'rotate(45 '+e.mx+' '+e.my+')'})}),
+              // Boss, if in current region
+              BOSS.region===currentRegion&&h('rect',{key:'bs',x:BOSS.mx-vbw*0.032,y:BOSS.my-vbw*0.032,width:vbw*0.064,height:vbw*0.064,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:vbw*0.005,transform:'rotate(45 '+BOSS.mx+' '+BOSS.my+')'}),
+              // Airport — distinct circle + plane glyph
+              h('circle',{key:'apbg',cx:r.ax,cy:r.ay,r:vbw*0.06,fill:'rgba(255,215,0,.25)',stroke:'#FFD700',strokeWidth:vbw*0.006}),
+              h('text',{key:'apt',x:r.ax,y:r.ay+vbw*0.028,fontSize:vbw*0.09,fill:'#FFD700',textAnchor:'middle',style:{fontFamily:'sans-serif'}},'✈'),
+              // Player marker
+              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:vbw*0.04,fill:'#00ffff',stroke:'#fff',strokeWidth:vbw*0.005}),
+              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:vbw*0.06,fill:'none',stroke:'#00ffff',strokeWidth:vbw*0.006,opacity:.6})))
+        })(),
         // D-pad (React overlay → Bridge)
         (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();Bridge.emit('dpad',v)};const rel=e=>{e.preventDefault();Bridge.emit('dpad',{x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:-1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▲'),h('div'),
