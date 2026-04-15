@@ -998,7 +998,8 @@ function drawFrankfurt(x,w,h){
   });
   x.fillStyle=roofH;
   [0,3,5,7,9].forEach((off,i)=>{
-   x.fillRect(hx+off,hy-rh+i*2,sw=hw-off*2,1);
+   const sw=hw-off*2;
+   x.fillRect(hx+off,hy-rh+i*2,sw,1);
   });
   // Small round top finial
   x.fillStyle='#FFD700';x.fillRect(hx+Math.floor(hw/2),hy-rh-1,1,2);
