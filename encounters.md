@@ -738,6 +738,53 @@ Review and edit this document. Changes will need to be applied back to `index.ht
 
 ---
 
+## Encounter 18: Stockholm, Sweden
+*(Segment B)*
+
+**Distributor:** Erik Lindqvist · Commercial Director
+**Company:** Nordic Oil Distribution
+**Channel:** 80 fleet operators + 45 HD workshops
+**Rewards:** +75g · +180 XP
+
+### Opening speech (NPC intro)
+> I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.
+
+### Discovery phase
+**Situational prompt:** _Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem._
+
+**Discovery questions the salesperson can ask (only ONE is correct):**
+
+**Option A** ✅ _correct — bonus damage_
+- Question: When your reps face a deep technical question in a fleet meeting, what actually happens in the room?
+- NPC response: Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.
+
+**Option B** ⚠️ _wrong pillar — enemy buff_
+- Question: Could your reps win more tenders if you sharpened their pricing and negotiation?
+- NPC response: Erik: "Pricing? My reps are great negotiators. That's not the gap." — You framed his problem as commercial weakness. He's insulted.
+
+**Option C** ➖ _shallow — neutral_
+- Question: Have you considered giving your reps more product brochures and TDS documents?
+- NPC response: Erik: "We have plenty of docs. They don't replace live technical credibility." — A surface-level probe. Missed the real issue.
+
+### Battle objections
+
+**Objection 1** (ENABLE pillar · 36 HP)
+- Text: "Training takes my people off the road. We did a day last year — nothing changed."
+- Weakness (super-effective services): physical_training, academy
+- Resistance (wrong-pillar / ineffective): promo_templates, edi
+
+**Objection 2** (ENABLE pillar · 40 HP)
+- Text: "We've been burned before. Two days in a classroom, forgotten in a month."
+- Weakness (super-effective services): co_visits
+- Resistance (wrong-pillar / ineffective): marketing_portal, custom_label
+
+**Objection 3** (ENABLE pillar · 36 HP)
+- Text: "Fleet managers want lab data — not a sales rep reading from a product sheet."
+- Weakness (super-effective services): oil_analysis, co_visits
+- Resistance (wrong-pillar / ineffective): promo_calendar, retail_kits
+
+---
+
 ## BOSS — Encounter 99: Frankfurt, AUTOMECHANIKA
 *(Segment S — Final Boss)*
 

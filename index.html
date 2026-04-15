@@ -574,6 +574,18 @@ const ENC=[
       {t:`TODO: objection 1`,hp:42,w:['oil_analysis','oil_monitoring'],r:['content_kits','promo_templates'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:40,w:['co_visits','physical_training'],r:['custom_label','regulatory_label'],p:'ENABLE'},
     ],rw:{xp:280,gold:130}},
+  {id:18,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:40,my:32,bld:'STOCKHOLM',region:'EU',
+    intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
+    dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
+      {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
+      {t:`Could your reps win more tenders if you sharpened their pricing and negotiation?`,buff:'boostEnemy',correct:false,fb:`Erik: "Pricing? My reps are great negotiators. That's not the gap." — You framed his problem as commercial weakness. He's insulted.`},
+      {t:`Have you considered giving your reps more product brochures and TDS documents?`,buff:null,correct:false,fb:`Erik: "We have plenty of docs. They don't replace live technical credibility." — A surface-level probe. Missed the real issue.`},
+    ]},
+    objs:[
+      {t:`"Training takes my people off the road. We did a day last year — nothing changed."`,hp:36,w:['physical_training','academy'],r:['promo_templates','edi'],p:'ENABLE'},
+      {t:`"We've been burned before. Two days in a classroom, forgotten in a month."`,hp:40,w:['co_visits'],r:['marketing_portal','custom_label'],p:'ENABLE'},
+      {t:`"Fleet managers want lab data — not a sales rep reading from a product sheet."`,hp:36,w:['oil_analysis','co_visits'],r:['promo_calendar','retail_kits'],p:'ENABLE'},
+    ],rw:{xp:180,gold:75}},
 ];
 
 // ── BOSS ──
@@ -1685,7 +1697,7 @@ class OverworldScene extends Phaser.Scene {
   this.bldSprites={};this.bldBodies=this.physics.add.staticGroup();
   this.labels={};this.vans=[];
   // Tint palette per distributor (applied to the white van body texture)
-  const VAN_TINT={1:0xff4a30,2:0x3060f0,3:0xf0c040,4:0xffffff,5:0xd42020,6:0xffa040,7:0xd08040,8:0x60a060,9:0x3060f0,10:0x40a040,11:0xffd700,12:0x40a0ff,13:0x80c0ff,14:0xff3030,15:0xff6060,16:0xf0f0f0,17:0x1060c0,99:0xffa000};
+  const VAN_TINT={1:0xff4a30,2:0x3060f0,3:0xf0c040,4:0xffffff,5:0xd42020,6:0xffa040,7:0xd08040,8:0x60a060,9:0x3060f0,10:0x40a040,11:0xffd700,12:0x40a0ff,13:0x80c0ff,14:0xff3030,15:0xff6060,16:0xf0f0f0,17:0x1060c0,18:0xc0d8ff,99:0xffa000};
   ALL.forEach(enc=>{
    const sx=p2x(enc.mx),sy=p2x(enc.my);
    const tex='bld_'+(enc.bld||'BRUSSELS');
