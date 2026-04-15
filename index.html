@@ -1480,7 +1480,7 @@ class OverworldScene extends Phaser.Scene {
   const bn=this.npcSprites[99],bb=this.bldSprites[99],bl=this.labels[99];
   if(bn){bn.setVisible(this.bossReady&&!this.doneIds.includes(99));if(bn.body)bn.body.enable=bn.visible}
   if(bb){bb.setAlpha(this.bossReady?1:.4);if(this.doneIds.includes(99))bb.setTint(0xffd788)}
-  if(bl){bl.setText((this.bossReady?(this.doneIds.includes(99)?'👑 CHAMPION':'👑 AUTOMECHANIKA'):'🔒 Clear 6'));bl.setColor(this.doneIds.includes(99)?'#FFD700':this.bossReady?'#EF4444':'#8ca0d0')}
+  if(bl){bl.setText((this.bossReady?(this.doneIds.includes(99)?'👑 CHAMPION':'👑 AUTOMECHANIKA'):'🔒 Clear all '+ENC.length));bl.setColor(this.doneIds.includes(99)?'#FFD700':this.bossReady?'#EF4444':'#8ca0d0')}
  }
  onNpcCollide(npc){
   const id=npc.getData('encId');
@@ -1806,10 +1806,10 @@ function App(){
     physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
     scene:[BootScene,OverworldScene]
    });
-   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,vehicle}),250);
+   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle}),250);
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
-  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=6,vehicle})},[done,lv,vehicle]);
+  useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle})},[done,lv,vehicle]);
   // ── PAUSE: ESC toggles, only meaningful on map ──
   useEffect(()=>{const f=(e)=>{if(e.key==='Escape'&&ph==='map'){setPaused(p=>!p);snd('blip')}};window.addEventListener('keydown',f);return()=>window.removeEventListener('keydown',f)},[ph]);
   // ── SAVE: persist progress to localStorage (debounced by React batching) ──
@@ -2182,7 +2182,7 @@ function App(){
   }
 
   // ═══ MAP / SHOP / INVENTORY ═══
-  const bossReady=done.length>=6;
+  const bossReady=done.length>=ENC.length;
   return h(Pad,null,
     h(LvlUp,{lvUp,lv}),
     // HUD
@@ -2198,8 +2198,8 @@ function App(){
     // Quest log line
     h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:4,padding:'2px 8px'}},
       done.includes(99)?'👑 You are the 360° Sales Champion!':
-      done.length>=6?'⚠ Boss unlocked at the south arena':
-      '📋 Cleared '+done.length+'/'+(ENC.length+1)+' · '+(done.length>=6?'Boss ready':(6-done.length)+' until boss')),
+      done.length>=ENC.length?'⚠ Boss unlocked at the south arena':
+      '📋 Cleared '+done.length+'/'+ENC.length+' distributors · '+(ENC.length-done.length)+' until boss'),
     // Vehicle selector (only shown if player owns at least one vehicle)
     (hasCar||hasBike)&&h('div',{style:{display:'flex',gap:6,justifyContent:'center',marginTop:6}},
       h('button',{onClick:()=>setVehicle(null),disabled:vehicle===null,style:{background:vehicle===null?'rgba(255,215,0,.2)':'rgba(12,24,96,.6)',border:vehicle===null?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'4px 10px',fontSize:16,cursor:vehicle===null?'default':'pointer',color:C.tx}},'🚶'),
@@ -2287,7 +2287,7 @@ function App(){
             ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('g',{key:'mg'+e.id},
               h('rect',{x:e.mx-3,y:e.my-3,width:6,height:6,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.5}),
               h('text',{x:e.mx,y:e.my+6.5,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},e.loc))}),
-            h('rect',{x:BOSS.mx-4,y:BOSS.my-4,width:8,height:8,fill:done.includes(99)?'#FFD700':done.length>=6?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.6}),
+            h('rect',{x:BOSS.mx-4,y:BOSS.my-4,width:8,height:8,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.6}),
             h('text',{x:BOSS.mx,y:BOSS.my+7,fontSize:'3.2',fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:'.4',paintOrder:'stroke'},'BOSS'),
             // Player marker (concentric)
             h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:6,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.5}),
@@ -2309,7 +2309,7 @@ function App(){
             h('rect',{x:0,y:0,width:100,height:100,fill:'#3d7a2c'}),
             ...PATH_LINKS.map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:2.4,strokeLinecap:'round'})),
             ...ENC.map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('rect',{key:'mb'+e.id,x:e.mx-2.5,y:e.my-2.5,width:5,height:5,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:.4})}),
-            h('rect',{x:BOSS.mx-3,y:BOSS.my-3,width:6,height:6,fill:done.includes(99)?'#FFD700':done.length>=6?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.5}),
+            h('rect',{x:BOSS.mx-3,y:BOSS.my-3,width:6,height:6,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:.5}),
             // Player position pulse
             h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:3.2,fill:'#00ffff',stroke:'#fff',strokeWidth:.6}),
             h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:5,fill:'none',stroke:'#00ffff',strokeWidth:.8,opacity:.6}))),
