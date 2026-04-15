@@ -71,6 +71,25 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 .ff7{background:linear-gradient(180deg,rgba(12,24,96,.92) 0%,rgba(4,10,48,.94) 100%)!important;border:2px solid transparent!important;border-image:linear-gradient(135deg,#ffffff 0%,#7a96ff 25%,#1a2a80 60%,#ffffff 100%) 1!important;box-shadow:0 0 18px rgba(80,120,255,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.55)!important;border-radius:8px!important}
 .hpc{background:linear-gradient(180deg,#1a1a2e,#0a0a1e)!important;border:1px solid #7a96ff!important;box-shadow:0 0 6px rgba(120,160,255,.45),inset 0 1px 0 rgba(255,255,255,.25)!important}
 .orb{border-radius:50%!important;background:radial-gradient(circle at 35% 28%,#ffffff 0%,currentColor 50%,rgba(0,0,0,.75) 100%)!important;border:2px solid rgba(255,255,255,.55)!important;animation:materiaPulse 2.5s ease-in-out infinite!important}
+/* Tailwind utility classes for buttons/links — keep handrolled pixel-frame classes above untouched */
+.btn-press{transition:transform .1s ease,filter .15s ease,box-shadow .15s ease}
+.btn-press:hover:not(:disabled){transform:translateY(-1px) scale(1.02);filter:brightness(1.08)}
+.btn-press:active:not(:disabled){transform:translateY(0) scale(.97);filter:brightness(.92)}
+.card-lift{transition:transform .15s ease,box-shadow .2s ease}
+.card-lift:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(255,215,0,.25),0 0 0 1px rgba(255,215,0,.4)}
+.glass{backdrop-filter:blur(8px) saturate(1.2);-webkit-backdrop-filter:blur(8px) saturate(1.2)}
+.shadow-gold{box-shadow:0 0 0 1px rgba(255,215,0,.25),0 8px 24px rgba(255,215,0,.18),0 2px 6px rgba(0,0,0,.6)}
+.shadow-gold-lg{box-shadow:0 0 0 1px rgba(255,215,0,.4),0 0 32px rgba(255,215,0,.35),0 12px 36px rgba(0,0,0,.7)}
+.shadow-blue{box-shadow:0 0 0 1px rgba(122,150,255,.3),0 8px 24px rgba(80,120,255,.22),0 2px 6px rgba(0,0,0,.55)}
+.elev-1{box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.elev-2{box-shadow:0 6px 16px rgba(0,0,0,.5)}
+.elev-3{box-shadow:0 12px 32px rgba(0,0,0,.6)}
+@keyframes panelIn{0%{opacity:0;transform:translateY(12px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.panel-in{animation:panelIn .4s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes modalIn{0%{opacity:0;backdrop-filter:blur(0px)}100%{opacity:1;backdrop-filter:blur(8px)}}
+.modal-in{animation:modalIn .25s ease-out both}
+@keyframes goldPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.5),0 0 24px rgba(255,215,0,.3)}50%{box-shadow:0 0 0 8px rgba(255,215,0,0),0 0 40px rgba(255,215,0,.5)}}
+.gold-pulse{animation:goldPulse 2.2s ease-in-out infinite}
 </style>
 </head>
 <body><div id="R"></div>
@@ -78,6 +97,45 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+// Tailwind Play CDN config: brand palette, pixel font, custom shadows
+// Keep handrolled classes (ff7, pf, hpc, orb) in the <style> block above — they
+// do border-image pixel-frame tricks Tailwind can't replicate.
+tailwind.config = {
+ theme: {
+  extend: {
+   colors: {
+    wolf: {
+     gold:'#FFD700', gold2:'#ff8800', bg:'#020617',
+     panel:'#0b1440', panel2:'#061030',
+     ink:'#e8f0ff', mute:'#94a3b8',
+     ok:'#10B981', no:'#EF4444', rare:'#8B5CF6',
+     blue:'#3B82F6', amber:'#F59E0B',
+     frame:'#7a96ff', deep:'#1a2a80',
+    },
+   },
+   fontFamily: {
+    pixel:['"Press Start 2P"','monospace'],
+    body:['"DM Sans"','sans-serif'],
+   },
+   boxShadow: {
+    'pop':'0 0 0 1px rgba(255,215,0,.25),0 8px 24px rgba(255,215,0,.18),0 2px 6px rgba(0,0,0,.6)',
+    'pop-lg':'0 0 0 1px rgba(255,215,0,.4),0 0 32px rgba(255,215,0,.35),0 12px 36px rgba(0,0,0,.7)',
+    'frame':'0 0 18px rgba(80,120,255,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(0,0,0,.55)',
+   },
+   keyframes: {
+    floatY:{'0%,100%':{transform:'translateY(0)'},'50%':{transform:'translateY(-6px)'}},
+    pulseGold:{'0%,100%':{boxShadow:'0 0 0 0 rgba(255,215,0,.5)'},'50%':{boxShadow:'0 0 0 8px rgba(255,215,0,0)'}},
+   },
+   animation: {
+    floatY:'floatY 3s ease-in-out infinite',
+    pulseGold:'pulseGold 2.2s ease-in-out infinite',
+   },
+  }
+ }
+};
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script type="text/babel">
 const {useState,useEffect,useRef,useCallback}=React;
