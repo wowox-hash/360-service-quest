@@ -1646,13 +1646,16 @@ function genNpcTex(scene){
 class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
-  genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);
-  this.scene.start('Overworld');
+  try{
+   genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);
+   this.scene.start('Overworld');
+  }catch(e){Bridge.emit('phaser-error',{msg:'Boot: '+(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}
  }
 }
 class OverworldScene extends Phaser.Scene {
  constructor(){super('Overworld')}
- create(){
+ create(){try{this._create()}catch(e){Bridge.emit('phaser-error',{msg:String(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}}
+ _create(){
   this.doneIds=[];this.playerLv=1;this.bossReady=false;this.vehicle=null;this.dpadDir={x:0,y:0};this.lastDir='down';
   const groundImg=this.add.image(MPX/2,MPY/2,'ground');groundImg.setDepth(-1000);
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
@@ -1735,19 +1738,19 @@ class OverworldScene extends Phaser.Scene {
   });
   // ── AIRPORTS: one per populated region, triggers fast-travel modal ──
   this.airportSprites={};
-  this.airportGroup=this.physics.add.group({allowGravity:false,immovable:true});
+  this.airportBodies=this.physics.add.staticGroup();
   Object.keys(REGIONS).forEach(k=>{
    const r=REGIONS[k];const sx=p2x(r.ax),sy=p2x(r.ay);
    const ap=this.add.image(sx,sy,'bld_AIRPORT');
    ap.setOrigin(0.5,0.7);
+   ap.setData('regionKey',k);
    this.airportSprites[k]=ap;
-   // Collision body (walking INTO opens the modal)
+   // Invisible collision body sitting on the airport's footprint
    const body=this.physics.add.staticImage(sx,sy+6,'bld_AIRPORT');
    body.setAlpha(0);
-   body.body.setSize(ap.width*0.5,ap.height*0.2);
-   body.body.setOffset(ap.width*0.25,ap.height*0.65);
-   body.regionKey=k;
-   this.airportGroup.add(body);
+   if(body.body){body.body.setSize(ap.width*0.5,ap.height*0.2);body.body.setOffset(ap.width*0.25,ap.height*0.65)}
+   body.setData('regionKey',k);
+   this.airportBodies.add(body);
    // Label
    const lbl=this.add.text(sx,sy+ap.height*0.35,'✈ '+r.nm,{
     fontSize:'8px',fontFamily:'"Press Start 2P",monospace',color:'#FFD700',
@@ -1802,11 +1805,11 @@ class OverworldScene extends Phaser.Scene {
   // Airport overlap: opens the fast-travel modal, with a short cooldown so
   // re-spawning at the destination airport doesn't immediately re-open it.
   this.airportCooldown=0;
-  this.physics.add.overlap(this.hero,this.airportGroup,(h,ap)=>{
+  this.physics.add.overlap(this.hero,this.airportBodies,(h,ap)=>{
    if(this.airportCooldown>0)return;
    this.airportCooldown=1500;
    Bridge._lastPos={x:this.hero.x,y:this.hero.y};
-   Bridge.emit('airport-open',{from:ap.regionKey});
+   Bridge.emit('airport-open',{from:ap.getData('regionKey')});
   });
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
@@ -2069,6 +2072,7 @@ function App(){
   const [mapOpen,setMapOpen]=useState(false);
   const [paused,setPaused]=useState(false);
   const [airport,setAirport]=useState(null);
+  const [phaserErr,setPhaserErr]=useState(null);
   const [hasCar,setHasCar]=useState(false);
   const [hasBike,setHasBike]=useState(false);
   const [vehicle,setVehicle]=useState(null);
@@ -2171,6 +2175,8 @@ function App(){
   useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
   // ── PHASER: airport fast-travel ──
   useEffect(()=>{const f=(d)=>{snd('blip');setAirport(d.from)};Bridge.on('airport-open',f);return()=>Bridge.off('airport-open',f)},[]);
+  // ── PHASER: runtime error banner (surface crashes to the player) ──
+  useEffect(()=>{const f=(d)=>{console.error('Phaser:',d);setPhaserErr(d)};Bridge.on('phaser-error',f);return()=>Bridge.off('phaser-error',f)},[]);
   // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
   useEffect(()=>{
    const destroy=()=>{
@@ -2651,6 +2657,12 @@ function App(){
     // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
       h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
+      // ── PHASER error banner (debug aid — only visible if the scene crashed) ──
+      phaserErr&&h('div',{style:{position:'fixed',bottom:8,left:8,right:8,zIndex:9999,background:'rgba(180,20,20,.95)',border:'2px solid #fff',borderRadius:6,padding:'10px 14px',color:'#fff',fontSize:11,fontFamily:'monospace',maxWidth:'95vw',wordBreak:'break-word'}},
+        h('div',{style:{fontWeight:700,marginBottom:4}},'⚠ MAP ERROR'),
+        h('div',null,phaserErr.msg),
+        h('div',{style:{opacity:.75,marginTop:4,fontSize:10}},phaserErr.stack||''),
+        h('button',{onClick:()=>setPhaserErr(null),style:{marginTop:6,background:'#fff',border:0,color:'#b01414',padding:'4px 10px',fontSize:11,fontWeight:700,cursor:'pointer',borderRadius:4}},'Dismiss')),
       // ── AIRPORT fast-travel modal ──
       airport&&h('div',{onClick:()=>setAirport(null),style:{position:'fixed',inset:0,background:'rgba(0,0,0,.88)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
         h('div',{className:'ff7',onClick:e=>e.stopPropagation(),style:{padding:22,maxWidth:360,width:'100%',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#1a2a80 60%,#fff 100%) 1',boxShadow:'0 0 32px rgba(255,215,0,.5)'}},
