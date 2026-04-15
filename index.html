@@ -604,28 +604,41 @@ function genGround(scene){
  }
  scene.textures.addCanvas('ground',c);
 }
-// Helper: draw a warehouse base at the bottom of the canvas (loading dock style)
-function drawWarehouseBase(x,w,h,wallC,roofC,doorC){
- // Ground shadow
- x.fillStyle='rgba(0,0,0,.4)';x.beginPath();x.ellipse(w/2,h-3,w/2-4,4,0,0,Math.PI*2);x.fill();
+// Helper: lighten a #rrggbb hex by mixing toward white by `amt` (0..1)
+function lighten(hex,amt){
+ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+ const nr=Math.round(r+(255-r)*amt),ng=Math.round(g+(255-g)*amt),nb=Math.round(b+(255-b)*amt);
+ return '#'+[nr,ng,nb].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+// Helper: draw a stone pedestal / monument plinth at the bottom of the canvas.
+// Each landmark now rises from a proper pixel-art platform instead of a warehouse.
+// Signature kept compatible with the old warehouse helper — the second and
+// third colors are interpreted as the shadow tone (roof → dark seam) and the
+// decorative trim accent (door → emblem fill), and a lighter tone is derived
+// from `stoneC` at runtime for highlights.
+function drawWarehouseBase(x,w,h,stoneC,darkC,accentC){
+ const light=lighten(stoneC,.35);
+ // Soft ground shadow
+ x.fillStyle='rgba(0,0,0,.42)';x.beginPath();x.ellipse(w/2,h-2,w/2-2,4,0,0,Math.PI*2);x.fill();
  const by=h-20;
- // Warehouse walls
- x.fillStyle=wallC;x.fillRect(4,by,w-8,17);
- x.fillStyle='#000';x.fillRect(4,by,w-8,1);x.fillRect(4,by,1,17);x.fillRect(w-5,by,1,17);x.fillRect(4,h-4,w-8,1);
- // Roof strip
- x.fillStyle=roofC;x.fillRect(2,by-2,w-4,2);
- x.fillStyle='#000';x.fillRect(2,by-2,w-4,1);
- // Loading-dock door (wide)
- const dw=Math.min(24,w-16),dx=Math.round(w/2-dw/2);
- x.fillStyle=doorC;x.fillRect(dx,by+3,dw,13);
- x.fillStyle='#000';x.strokeStyle='#000';x.fillRect(dx,by+3,dw,1);x.fillRect(dx,by+15,dw,1);x.fillRect(dx,by+3,1,13);x.fillRect(dx+dw-1,by+3,1,13);
- // Roll-up door lines
- x.fillStyle='#555';
- for(let i=1;i<4;i++)x.fillRect(dx+1,by+3+i*3,dw-2,1);
- // Warehouse windows (left + right of door)
- x.fillStyle='#87ceeb';
- x.fillRect(6,by+4,6,4);x.fillRect(w-12,by+4,6,4);
- x.fillStyle='#000';x.strokeRect(6,by+4,6,4);x.strokeRect(w-12,by+4,6,4);
+ // Three-step tapered plinth (wider at bottom, narrower at top)
+ const steps=[[4,by+14,w-8,6],[6,by+8,w-12,6],[9,by+2,w-18,6]];
+ steps.forEach(([sx,sy,sw,sh])=>{
+  x.fillStyle=stoneC;x.fillRect(sx,sy,sw,sh);
+  // Light top edge
+  x.fillStyle=light;x.fillRect(sx,sy,sw,1);x.fillRect(sx,sy+1,1,sh-2);
+  // Dark bottom / right edge
+  x.fillStyle=darkC;x.fillRect(sx,sy+sh-1,sw,1);x.fillRect(sx+sw-1,sy+1,1,sh-1);
+  // Vertical stone seams every 8 px
+  for(let i=sx+6;i<sx+sw-2;i+=8){x.fillStyle=darkC;x.fillRect(i,sy+1,1,sh-2)}
+ });
+ // Engraved plaque across the middle step
+ const pw=Math.min(28,w-30),px=Math.round(w/2-pw/2);
+ x.fillStyle=darkC;x.fillRect(px,by+10,pw,3);
+ x.fillStyle=accentC;x.fillRect(px+2,by+11,pw-4,1);
+ // Two small lanterns flanking the top step
+ x.fillStyle=darkC;x.fillRect(10,by-1,2,3);x.fillRect(w-12,by-1,2,3);
+ x.fillStyle='#ffd27a';x.fillRect(10,by-2,2,1);x.fillRect(w-12,by-2,2,1);
 }
 
 // ── PARIS: Eiffel Tower ──
@@ -740,38 +753,46 @@ function drawBrussels(x,w,h){
  sphere(below.x,below.y,6);
 }
 
-// ── STOCKHOLM: Nordic red cabin ──
+// ── STOCKHOLM: Gamla Stan colorful rowhouses (ochre, red, teal, cream) ──
 function drawStockholm(x,w,h){
  drawWarehouseBase(x,w,h,'#e8d8a0','#8b4513','#4a2a10');
- const cx=w/2,baseY=h-22;
- // Steep triangular red roof
- x.fillStyle='#8a1a10';
- for(let i=0;i<18;i++){
-  const hw=i*1.2;
-  x.fillRect(cx-hw,baseY-36+i,hw*2,1);
- }
- x.fillStyle='#aa2a20';// highlight
- for(let i=0;i<18;i++){
-  x.fillRect(cx-i*1.2,baseY-36+i,2,1);
- }
- // Roof trim
- x.fillStyle='#fff';x.fillRect(cx-22,baseY-18,44,1);
- // Walls (red with white trim)
- x.fillStyle='#a01810';x.fillRect(cx-20,baseY-18,40,14);
- x.fillStyle='#c02820';x.fillRect(cx-20,baseY-18,40,3);
- // White window frames
- x.fillStyle='#fff';
- x.fillRect(cx-16,baseY-12,8,8);x.fillRect(cx+8,baseY-12,8,8);
- x.fillStyle='#87ceeb';x.fillRect(cx-15,baseY-11,6,6);x.fillRect(cx+9,baseY-11,6,6);
- x.fillStyle='#fff';x.fillRect(cx-12,baseY-11,1,6);x.fillRect(cx+12,baseY-11,1,6);x.fillRect(cx-15,baseY-8,6,1);x.fillRect(cx+9,baseY-8,6,1);
- // Central door
- x.fillStyle='#4a2a10';x.fillRect(cx-3,baseY-8,6,8);
- x.fillStyle='#FFD700';x.fillRect(cx+2,baseY-5,1,1);
- // Chimney
- x.fillStyle='#8a8a8a';x.fillRect(cx+8,baseY-34,4,8);
- x.fillStyle='#aaaaaa';x.fillRect(cx+8,baseY-34,1,8);
- // Smoke
- x.fillStyle='rgba(255,255,255,0.6)';x.beginPath();x.arc(cx+10,baseY-38,3,0,Math.PI*2);x.fill();
+ const baseY=h-22;
+ // Four narrow townhouses side-by-side, Stortorget style
+ const houses=[
+  {c:'#d89050',hi:'#f0b870',x:4,  hh:42}, // ochre
+  {c:'#a82020',hi:'#d04030',x:16, hh:46}, // red
+  {c:'#2a8a90',hi:'#40a8b0',x:28, hh:44}, // teal
+  {c:'#e8d8a0',hi:'#fff0c0',x:40, hh:40}, // cream
+  {c:'#7a4a2a',hi:'#a06840',x:52, hh:42}, // brown (only if w allows)
+ ];
+ houses.forEach(ho=>{
+  if(ho.x+12>w-4)return;
+  const hy=baseY-ho.hh,hw=12;
+  // Wall
+  x.fillStyle=ho.c;x.fillRect(ho.x,hy,hw,ho.hh);
+  // Light side highlight
+  x.fillStyle=ho.hi;x.fillRect(ho.x,hy,hw,1);x.fillRect(ho.x,hy+1,1,ho.hh-1);
+  // Dark right edge
+  x.fillStyle='#1a0a00';x.fillRect(ho.x+hw-1,hy,1,ho.hh);
+  // Pitched roof (dark red tiles)
+  x.fillStyle='#4a1010';
+  for(let i=0;i<6;i++)x.fillRect(ho.x-1+i,hy-6+i,hw+2-i*2,1);
+  x.fillStyle='#6a2020';
+  for(let i=0;i<6;i++)x.fillRect(ho.x-1+i,hy-6+i,1,1);
+  // Two rows of small windows
+  for(let row=0;row<Math.floor(ho.hh/10);row++){
+   const wy=hy+4+row*8;
+   x.fillStyle='#fff';x.fillRect(ho.x+2,wy,3,3);x.fillRect(ho.x+7,wy,3,3);
+   x.fillStyle='#6aa4d8';x.fillRect(ho.x+2,wy,3,1);x.fillRect(ho.x+7,wy,3,1);
+   x.fillStyle='#1a2a4a';x.fillRect(ho.x+3,wy+1,1,2);x.fillRect(ho.x+8,wy+1,1,2);
+  }
+  // Ground-level door
+  x.fillStyle='#2a1010';x.fillRect(ho.x+4,hy+ho.hh-6,4,6);
+  x.fillStyle='#FFD700';x.fillRect(ho.x+7,hy+ho.hh-3,1,1);
+ });
+ // Small chimney on the red house
+ x.fillStyle='#2a2a2a';x.fillRect(22,baseY-52,2,4);
+ x.fillStyle='rgba(255,255,255,0.5)';x.beginPath();x.arc(23,baseY-55,2,0,Math.PI*2);x.fill();
 }
 
 // ── WARSAW: Palace of Culture (stepped skyscraper) ──
@@ -798,70 +819,110 @@ function drawWarsaw(x,w,h){
  x.fillStyle='#FFD700';x.fillRect(cx-2,topY,4,2);
 }
 
-// ── FRANKFURT: Römer (three gabled townhouses) ──
+// ── FRANKFURT: Römer — three iconic stepped-gable townhouses ──
 function drawFrankfurt(x,w,h){
  drawWarehouseBase(x,w,h,'#d0c0a0','#5a3a20','#2a1a10');
  const baseY=h-22;
- // Three houses side by side
- const houses=[[8,24],[w/2-12,24],[w-32,24]];
- const wallC='#f0e0c8',beam='#5a3a20',roofC='#8a2010',roofH='#aa3020';
- houses.forEach(([hx,hw])=>{
-  const hy=baseY-34,hh=34;
-  // Walls (cream with dark beams)
+ const wallC='#f0e0c8',wallH='#fff2d8',beam='#4a2a10',beamD='#1a0a00',roofC='#8a2010',roofH='#c8382a';
+ // Three townhouses at fixed positions
+ const houses=[[4,22,40],[w/2-11,22,44],[w-26,22,40]];
+ houses.forEach(([hx,hw,hh])=>{
+  const hy=baseY-hh;
+  // Wall
   x.fillStyle=wallC;x.fillRect(hx,hy+10,hw,hh-10);
-  // Vertical beams
+  x.fillStyle=wallH;x.fillRect(hx,hy+10,hw,1);x.fillRect(hx,hy+10,1,hh-10);
+  // Half-timbered X beams
   x.fillStyle=beam;
+  // Outer frame
+  x.fillRect(hx,hy+10,hw,1);x.fillRect(hx,hy+hh-1,hw,1);
   x.fillRect(hx,hy+10,1,hh-10);x.fillRect(hx+hw-1,hy+10,1,hh-10);
-  x.fillRect(hx+Math.floor(hw/2),hy+10,1,hh-10);
-  // Horizontal beams
-  x.fillRect(hx,hy+10,hw,1);x.fillRect(hx,hy+18,hw,1);x.fillRect(hx,hy+26,hw,1);
-  // Pointed gable roof
+  // Horizontal bands
+  x.fillRect(hx,hy+19,hw,1);x.fillRect(hx,hy+28,hw,1);
+  // Diagonal beams between bands (signature Fachwerk look)
+  for(let i=0;i<9;i++){
+   x.fillRect(hx+1+i,hy+11+i,1,1);
+   x.fillRect(hx+hw-2-i,hy+11+i,1,1);
+   x.fillRect(hx+1+i,hy+20+i,1,1);
+   x.fillRect(hx+hw-2-i,hy+20+i,1,1);
+  }
+  // Stepped gable roof (Römer's signature!)
+  const rh=10;
   x.fillStyle=roofC;
-  for(let i=0;i<10;i++){
-   x.fillRect(hx-1+i,hy+i,hw+2-i*2,1);
-  }
+  // Step pattern: wide → narrower in discrete steps
+  [0,3,5,7,9].forEach((off,i)=>{
+   const sw=hw-off*2;
+   x.fillRect(hx+off,hy-rh+i*2,sw,2);
+  });
   x.fillStyle=roofH;
-  for(let i=0;i<10;i++){
-   x.fillRect(hx-1+i,hy+i,1,1);
-  }
-  // Window
-  x.fillStyle='#6080a0';x.fillRect(hx+hw/2-2,hy+12,4,4);
-  x.fillRect(hx+hw/2-2,hy+20,4,4);
+  [0,3,5,7,9].forEach((off,i)=>{
+   x.fillRect(hx+off,hy-rh+i*2,sw=hw-off*2,1);
+  });
+  // Small round top finial
+  x.fillStyle='#FFD700';x.fillRect(hx+Math.floor(hw/2),hy-rh-1,1,2);
+  // Windows (4 small ones in a grid)
+  x.fillStyle='#1a2a4a';
+  x.fillRect(hx+4,hy+13,hw-12,4);
+  x.fillStyle='#6aa4d8';x.fillRect(hx+4,hy+13,hw-12,1);
+  x.fillStyle=beam;x.fillRect(hx+Math.floor(hw/2)-1,hy+13,1,4);x.fillRect(hx+4,hy+15,hw-12,1);
+  // Second-row window
+  x.fillStyle='#1a2a4a';x.fillRect(hx+4,hy+22,hw-12,4);
+  x.fillStyle='#6aa4d8';x.fillRect(hx+4,hy+22,hw-12,1);
+  x.fillStyle=beam;x.fillRect(hx+Math.floor(hw/2)-1,hy+22,1,4);x.fillRect(hx+4,hy+24,hw-12,1);
  });
 }
 
-// ── MADRID: Puerta de Alcalá (triumphal arch) ──
+// ── MADRID: Puerta de Alcalá — 5-arch neoclassical gate ──
 function drawMadrid(x,w,h){
  drawWarehouseBase(x,w,h,'#e8d8a8','#8a5a2a','#4a2a10');
  const cx=w/2,baseY=h-22;
- const st='#f0e0b8',stH='#fff0d0',stL='#c8a878';
- // Main rectangular body
- x.fillStyle=st;x.fillRect(cx-24,baseY-32,48,32);
- x.fillStyle=stH;x.fillRect(cx-24,baseY-32,48,1);
- x.fillStyle=stL;x.fillRect(cx+22,baseY-32,2,32);
- // Entablature (decorative top)
- x.fillStyle=stL;x.fillRect(cx-26,baseY-36,52,4);
- x.fillStyle=st;x.fillRect(cx-24,baseY-34,48,2);
- // Spanish flag on top (red-yellow-red)
- x.fillStyle='#8a8a8a';x.fillRect(cx-1,baseY-42,2,6);
- x.fillStyle='#c00';x.fillRect(cx+1,baseY-42,6,1);
- x.fillStyle='#ffcc00';x.fillRect(cx+1,baseY-41,6,2);
- x.fillStyle='#c00';x.fillRect(cx+1,baseY-39,6,1);
- // Three archways
- const archX=[cx-18,cx-4,cx+10];
- archX.forEach(ax=>{
-  // Arched opening
-  x.fillStyle='#2a1810';
-  x.fillRect(ax,baseY-22,8,22);
-  // Arch curve top
-  x.beginPath();x.arc(ax+4,baseY-22,4,Math.PI,Math.PI*2);x.fill();
- });
- // Central arch is taller
- x.fillStyle='#2a1810';x.fillRect(cx-4,baseY-26,8,4);
- x.beginPath();x.arc(cx,baseY-26,4,Math.PI,Math.PI*2);x.fill();
- // Columns between arches
+ const st='#f0e0b8',stH='#fff0d0',stL='#c8a878',stD='#a87848';
+ // Main body (wider than before)
+ const bw=Math.min(56,w-8),bx=cx-bw/2;
+ x.fillStyle=st;x.fillRect(bx,baseY-32,bw,32);
+ x.fillStyle=stH;x.fillRect(bx,baseY-32,bw,1);
+ x.fillStyle=stD;x.fillRect(bx+bw-1,baseY-32,1,32);
+ // Stepped pediment (triangular top)
  x.fillStyle=stL;
- x.fillRect(cx-10,baseY-22,2,22);x.fillRect(cx+8,baseY-22,2,22);
+ for(let i=0;i<6;i++)x.fillRect(cx-14+i,baseY-38-i,28-i*2,1);
+ x.fillStyle=stH;x.fillRect(cx-14,baseY-38,28,1);
+ // Entablature frieze with relief bumps
+ x.fillStyle=stL;x.fillRect(bx-1,baseY-34,bw+2,3);
+ x.fillStyle=stD;x.fillRect(bx-1,baseY-32,bw+2,1);
+ x.fillStyle=stH;
+ for(let i=2;i<bw;i+=4)x.fillRect(bx+i,baseY-33,1,1);
+ // Sculpture atop pediment (laurel-crown statue)
+ x.fillStyle='#b8986a';x.fillRect(cx-2,baseY-46,4,6);
+ x.fillStyle='#d8b880';x.fillRect(cx-2,baseY-46,1,6);
+ x.fillStyle='#FFD700';x.fillRect(cx-3,baseY-47,6,1);
+ // Spanish flag pole off to the side
+ x.fillStyle='#8a8a8a';x.fillRect(cx+12,baseY-46,1,8);
+ x.fillStyle='#c00';x.fillRect(cx+13,baseY-46,5,1);
+ x.fillStyle='#ffcc00';x.fillRect(cx+13,baseY-45,5,2);
+ x.fillStyle='#c00';x.fillRect(cx+13,baseY-43,5,1);
+ // FIVE archways — tall central + 2 medium + 2 narrow
+ const arches=[
+  {ax:cx-26,aw:6,ah:18},
+  {ax:cx-16,aw:8,ah:22},
+  {ax:cx-5, aw:10,ah:26}, // central, taller
+  {ax:cx+7, aw:8,ah:22},
+  {ax:cx+19,aw:6,ah:18},
+ ];
+ arches.forEach(({ax,aw,ah})=>{
+  if(ax<bx+1||ax+aw>bx+bw-1)return;
+  // Black opening
+  x.fillStyle='#1a0a04';x.fillRect(ax,baseY-ah,aw,ah);
+  // Rounded top
+  x.beginPath();x.arc(ax+aw/2,baseY-ah,aw/2,Math.PI,Math.PI*2);x.fill();
+  // Keystone + archivolt outline
+  x.fillStyle=stL;x.fillRect(ax-1,baseY-ah-2,aw+2,2);
+  x.fillStyle=stH;x.fillRect(ax+Math.floor(aw/2)-1,baseY-ah-3,2,3);
+ });
+ // Column pilasters between the arches
+ x.fillStyle=stL;
+ [cx-20,cx-10,cx+8,cx+18].forEach(px=>{x.fillRect(px,baseY-24,2,24);x.fillStyle=stD;x.fillRect(px+1,baseY-24,1,24);x.fillStyle=stL});
+ // Base step
+ x.fillStyle=stL;x.fillRect(bx-2,baseY-2,bw+4,2);
+ x.fillStyle=stD;x.fillRect(bx-2,baseY,bw+4,1);
 }
 
 // ── DUBAI: Burj Khalifa ──
@@ -983,27 +1044,55 @@ function genCarTex(scene){
  scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
 }
 // Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
-// Delivery van — small 14x10 top-down sprite, single frame (tint applied per building)
+// Delivery van — 20x14 top-down sprite, single frame (tint applied per building).
+// Drawn facing NORTH so Phaser rotation matches velocity direction.
 function genVanTex(scene){
- const FW=14,FH=10;
+ const FW=20,FH=14;
  const c=document.createElement('canvas');c.width=FW;c.height=FH;
  const x=c.getContext('2d');
- // Shadow
- x.fillStyle='rgba(0,0,0,.35)';x.fillRect(1,9,12,1);
- // Van body (white base, will be tinted)
- x.fillStyle='#ffffff';x.fillRect(2,1,10,8);
- // Outline
- x.fillStyle='#1a1a1a';
- x.fillRect(2,0,10,1);x.fillRect(2,9,10,1);x.fillRect(1,1,1,8);x.fillRect(12,1,1,8);
- // Cab separator
- x.fillRect(2,3,10,1);
- // Windshield (blue, front)
- x.fillStyle='#6aaacc';x.fillRect(3,1,8,2);
- // Back door
- x.fillStyle='#cccccc';x.fillRect(3,5,8,4);
- x.fillStyle='#888';x.fillRect(7,5,1,4);
- // Wheels (dark pixels)
- x.fillStyle='#111';x.fillRect(0,2,1,2);x.fillRect(13,2,1,2);x.fillRect(0,6,1,2);x.fillRect(13,6,1,2);
+ const cx=FW/2;
+ // Drop shadow (anti-aliased via two rects)
+ x.fillStyle='rgba(0,0,0,.25)';x.fillRect(2,FH-1,FW-4,1);
+ x.fillStyle='rgba(0,0,0,.4)';x.fillRect(3,FH-2,FW-6,1);
+ // Outer chassis outline
+ x.fillStyle='#0a0a0a';x.fillRect(2,1,FW-4,FH-3);
+ // --- CAB (front third) ---
+ // Bonnet (white base, tintable)
+ x.fillStyle='#ffffff';x.fillRect(3,2,FW-6,3);
+ // Grille strip
+ x.fillStyle='#2a2a2a';x.fillRect(4,2,FW-8,1);
+ // Headlights
+ x.fillStyle='#ffe680';x.fillRect(3,2,2,1);x.fillRect(FW-5,2,2,1);
+ // Windshield (wide blue strip)
+ x.fillStyle='#4a78a8';x.fillRect(3,3,FW-6,2);
+ x.fillStyle='#6fa4d4';x.fillRect(3,3,FW-6,1); // sky reflection band
+ x.fillStyle='#cfe4f8';x.fillRect(4,3,3,1);    // bright glare
+ // Cab roof divider
+ x.fillStyle='#0a0a0a';x.fillRect(2,5,FW-4,1);
+ // --- CARGO BOX (rear two-thirds) ---
+ x.fillStyle='#ffffff';x.fillRect(3,6,FW-6,FH-9);
+ // Top panel highlight
+ x.fillStyle='#f2f2f2';x.fillRect(3,6,FW-6,1);
+ // Left / right chrome rails
+ x.fillStyle='#cfcfcf';x.fillRect(3,7,1,FH-11);x.fillRect(FW-4,7,1,FH-11);
+ // Rear door split
+ x.fillStyle='#0a0a0a';x.fillRect(cx,6,1,FH-9);
+ // Rear door handle dots
+ x.fillStyle='#4a4a4a';x.fillRect(cx-2,8,1,1);x.fillRect(cx+2,8,1,1);
+ // Wolf-Oil side logo: yellow band with a red accent square
+ x.fillStyle='#FFD700';x.fillRect(4,9,FW-8,1);
+ x.fillStyle='#c02020';x.fillRect(cx-1,9,2,1);
+ // Rear bumper + tail lights
+ x.fillStyle='#2a2a2a';x.fillRect(3,FH-3,FW-6,1);
+ x.fillStyle='#ff3030';x.fillRect(3,FH-4,2,1);x.fillRect(FW-5,FH-4,2,1);
+ // --- WHEELS (4 wheels, black sidewalls that stick out slightly) ---
+ x.fillStyle='#0a0a0a';
+ x.fillRect(1,3,2,3);x.fillRect(FW-3,3,2,3);  // front pair
+ x.fillRect(1,FH-6,2,3);x.fillRect(FW-3,FH-6,2,3); // rear pair
+ // Tire hub highlights
+ x.fillStyle='#4a4a4a';
+ x.fillRect(1,4,2,1);x.fillRect(FW-3,4,2,1);
+ x.fillRect(1,FH-5,2,1);x.fillRect(FW-3,FH-5,2,1);
  scene.textures.addCanvas('van',c);
 }
 function genBikeTex(scene){
