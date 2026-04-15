@@ -105,8 +105,8 @@ const TUNIC_OPTS=[
  {nm:'Purple',hi:'#8a3aca',mid:'#5a1a8a',lo:'#3a0a5a',acc:'#aa5ada'},
 ];
 const CHAR={hair:1,skin:0,tunic:0,gender:0};
-// ── MINIMAP: path connections between buildings (matches carveLine calls in genMapData) ──
-const PATH_LINKS=[[22,22,22,42],[22,42,22,68],[50,14,40,42],[78,22,60,42],[22,42,40,42],[40,42,60,42],[60,42,78,58],[22,68,50,84],[78,58,50,84],[50,84,50,92]];
+// PATH_LINKS is built AFTER the ENC/REGIONS block is defined (see below).
+let PATH_LINKS=[];
 
 // ── ACHIEVEMENTS: unlocked once and remembered for the session ──
 const ACHIEVEMENTS=[
@@ -372,8 +372,18 @@ const SHOP=[
 ];
 
 // ── ENCOUNTERS ──
+// ── CONTINENTAL REGIONS (5 total) ──
+// Each region is a rectangle (mx/my percent). Distributors and one airport
+// live inside. Airports fast-travel the hero to any other region's airport.
+const REGIONS={
+ AM: {nm:'Americas',           col:'#c85a2a', x:[2,20],  y:[10,90], ax:15, ay:52},
+ EU: {nm:'Europe',              col:'#3a7a2f', x:[22,42], y:[8,62],  ax:20, ay:34},
+ MEA:{nm:'Middle East & Africa',col:'#d4a24a', x:[22,42], y:[62,96], ax:22, ay:74},
+ CIS:{nm:'CIS',                 col:'#4a7a9a', x:[44,62], y:[10,48], ax:44, ay:30},
+ AP: {nm:'Asia Pacific',        col:'#a83a3a', x:[64,98], y:[10,92], ax:66, ay:48},
+};
 const ENC=[
-  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:14,my:38,bld:'BRUSSELS',
+  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:30,my:14,bld:'BRUSSELS',region:'EU',
     intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
     dia:{q:`Marc is losing €8,000/month to returns. You have one discovery question before the pitch — make it count.`,opts:[
       {t:`When your counter staff get a vehicle they're not sure about, walk me through exactly what happens today.`,buff:'reduceHp',correct:true,fb:`Marc: "They check the printed guide. If it's not listed, they call the hotline or just pick the closest match." — That's the gap. The outdated guide is shipping wrong products.`},
@@ -385,19 +395,18 @@ const ENC=[
       {t:`"We already have TecDoc through our parts platform. How is yours different?"`,hp:34,w:['tecdoc'],r:['marketing_portal','promo_calendar'],p:'CONNECT'},
       {t:`"How do I know this actually reduces returns? I need proof, not promises."`,hp:26,w:['tecdoc','reco_tool'],r:['co_visits','design_studio'],p:'CONNECT'},
     ],rw:{xp:120,gold:50}},
-  {id:2,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:50,my:9,bld:'STOCKHOLM',
-    intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
-    dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
-      {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
-      {t:`Could your reps win more tenders if you sharpened their pricing and negotiation?`,buff:'boostEnemy',correct:false,fb:`Erik: "Pricing? My reps are great negotiators. That's not the gap." — You framed his problem as commercial weakness. He's insulted.`},
-      {t:`Have you considered giving your reps more product brochures and TDS documents?`,buff:null,correct:false,fb:`Erik: "We have plenty of docs. They don't replace live technical credibility." — A surface-level probe. Missed the real issue.`},
+  {id:2,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:34,my:26,bld:'PARIS',region:'EU',
+    intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
+    dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
+      {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
+      {t:`Is Wolf shipping the wrong products to your branches?`,buff:'boostEnemy',correct:false,fb:`Philippe: "No — the errors are in MY process, not yours." — You accused the supplier before listening. He's now defending his own ops.`},
+      {t:`Are your branches sending unclear requests that confuse your team?`,buff:null,correct:false,fb:`Philippe: "Branches are fine. Errors happen during consolidation and re-entry." — Partial signal. You missed the bottleneck.`},
     ]},
     objs:[
-      {t:`"Training takes my people off the road. We did a day last year — nothing changed."`,hp:36,w:['physical_training','academy'],r:['promo_templates','edi'],p:'ENABLE'},
-      {t:`"We've been burned before. Two days in a classroom, forgotten in a month."`,hp:40,w:['co_visits'],r:['marketing_portal','custom_label'],p:'ENABLE'},
-      {t:`"Fleet managers want lab data — not a sales rep reading from a product sheet."`,hp:36,w:['oil_analysis','co_visits'],r:['promo_calendar','retail_kits'],p:'ENABLE'},
-    ],rw:{xp:180,gold:75}},
-  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:14,my:66,bld:'MADRID',
+      {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
+      {t:`"No IT department. We're a distribution company, not a tech company."`,hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
+    ],rw:{xp:100,gold:45}},
+  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:24,my:42,bld:'MADRID',region:'EU',
     intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
     dia:{q:`Alejandra says garages see every supplier as interchangeable. She has no designer, no marketing budget, and zero campaigns. What do you probe?`,opts:[
       {t:`Have you ever tried running your own promotion to stand out — and what happened?`,buff:'reduceHp',correct:true,fb:`Alejandra: "I made a flyer in PowerPoint once. It looked terrible. Zero response." — Her instinct is right; the tools are missing. That's your opening.`},
@@ -408,7 +417,7 @@ const ENC=[
       {t:`"I don't have a single person who can create marketing materials."`,hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
       {t:`"Zero budget. Every euro goes to inventory and logistics."`,hp:30,w:['promo_templates','content_kits'],r:['oil_analysis','connectivity'],p:'GROW'},
     ],rw:{xp:100,gold:45}},
-  {id:4,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:84,my:14,bld:'WARSAW',
+  {id:5,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:38,my:18,bld:'WARSAW',region:'EU',
     intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
     dia:{q:`Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?`,opts:[
       {t:`When a product turns out to be backordered, what's the downstream impact on your workshops?`,buff:'reduceHp',correct:true,fb:`Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.`},
@@ -420,7 +429,7 @@ const ENC=[
       {t:`"How can I plan if I can't see Wolf stock before ordering?"`,hp:35,w:['stock_visibility','e_ordering'],r:['promo_templates','co_visits'],p:'DELIVER'},
       {t:`"My workshops want to know exactly when. So do I."`,hp:32,w:['order_tracker','lead_time'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
     ],rw:{xp:180,gold:75}},
-  {id:5,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:84,my:62,bld:'DUBAI',
+  {id:6,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:36,my:74,bld:'DUBAI',region:'MEA',
     intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
     dia:{q:`Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?`,opts:[
       {t:`If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?`,buff:'reduceHp',correct:true,fb:`Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.`},
@@ -432,18 +441,29 @@ const ENC=[
       {t:`"Even with equipment — what stops them filling it with competitor oil?"`,hp:36,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'GROW'},
       {t:`"Big investment. Show me the ROI numbers."`,hp:32,w:['lubricant_mgmt','oil_monitoring'],r:['push_a_button','goods_loading'],p:'GROW'},
     ],rw:{xp:200,gold:90}},
-  {id:6,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:42,my:40,bld:'PARIS',
-    intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
-    dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
-      {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
-      {t:`Is Wolf shipping the wrong products to your branches?`,buff:'boostEnemy',correct:false,fb:`Philippe: "No — the errors are in MY process, not yours." — You accused the supplier before listening. He's now defending his own ops.`},
-      {t:`Are your branches sending unclear requests that confuse your team?`,buff:null,correct:false,fb:`Philippe: "Branches are fine. Errors happen during consolidation and re-entry." — Partial signal. You missed the bottleneck.`},
+  {id:7,loc:'Casablanca',co:'Morocco',npc:'Youssef El-Amrani',rl:'Sales Manager',company:'Atlas Lubrifiants',v:0,ch:'140 garages across Morocco',seg:'C',mx:26,my:64,bld:'CASABLANCA',region:'MEA',
+    intro:`TODO: Morocco is a fast-growing market but I can't find technical training in French for my counter staff. Competitors ship generic Arabic manuals — useless for daily work.`,
+    dia:{q:`TODO: Ask the question that uncovers Youssef's real bottleneck.`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Youssef: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe (boosts enemy)`,buff:'boostEnemy',correct:false,fb:`Youssef: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Youssef: "TODO: shallow feedback."`},
     ]},
     objs:[
-      {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
-      {t:`"No IT department. We're a distribution company, not a tech company."`,hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
-    ],rw:{xp:100,gold:45}},
-  {id:7,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:14,my:14,bld:'LONDON',
+      {t:`TODO: objection 1`,hp:32,w:['physical_training','academy'],r:['edi','palletization'],p:'ENABLE'},
+      {t:`TODO: objection 2`,hp:30,w:['tech_inbox'],r:['marketing_portal','promo_calendar'],p:'ENABLE'},
+    ],rw:{xp:120,gold:50}},
+  {id:8,loc:'Johannesburg',co:'South Africa',npc:'Thandiwe Nkosi',rl:'Operations Director',company:'Veldt Oils',v:1,ch:'2 warehouses → 90 mine fleets',seg:'B',mx:30,my:86,bld:'JOHANNESBURG',region:'MEA',
+    intro:`TODO: Mining fleets want guaranteed drain intervals to cut downtime. My reps don't have the lab data to back it up.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Thandiwe: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Thandiwe: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Thandiwe: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:36,w:['oil_analysis','co_visits'],r:['promo_templates','custom_label'],p:'ENABLE'},
+      {t:`TODO: objection 2`,hp:32,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'ENABLE'},
+    ],rw:{xp:180,gold:75}},
+  {id:4,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:22,my:14,bld:'LONDON',region:'EU',
     intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
     dia:{q:`James lost a 200-truck account because competitors brought oil analysis data and he had nothing. What question cracks this open?`,opts:[
       {t:`What specifically made your competitors' oil analysis data compelling to that fleet manager?`,buff:'reduceHp',correct:true,fb:`James: "Lab reports with real wear trends and drain recommendations tailored to that fleet." — That's your capability gap in exact detail. Now you can propose it.`},
@@ -455,22 +475,109 @@ const ENC=[
       {t:`"Even with data, my reps can't present it to a fleet engineering manager."`,hp:36,w:['co_visits'],r:['marketing_portal','palletization'],p:'ENABLE'},
       {t:`"We're 12 months behind competitors. How do we catch up?"`,hp:32,w:['oil_analysis','co_visits'],r:['promo_calendar','goods_loading'],p:'ENABLE'},
     ],rw:{xp:200,gold:90}},
-  {id:8,loc:'Frankfurt',co:'Germany',npc:'Klaus Weber',rl:'CEO',company:'Petrol-Parts GmbH',v:7,ch:'€5M+ annual. 400 garages, 60 fleets.',seg:'A',mx:68,my:38,bld:'FRANKFURT',
-    intro:`Petrol-Parts is the regional market leader. Mature sales force, professional logistics, strong marketing. I'm not looking for basic services. I want a strategic brand partnership. Joint visibility at Automechanika. Exclusive WRC hospitality for my top 50 customers. Co-branded campaigns. Shell offered something similar — the execution was poor. Generic materials with their logo next to ours. If Wolf can deliver a true partnership, I'll commit significant volume.`,
-    dia:{q:`Klaus rejected Shell's partnership and won't settle for basic services. He's testing whether you're a strategic peer. What do you ask?`,opts:[
-      {t:`When Shell's execution fell short, what specifically disappointed you about the way they showed up?`,buff:'reduceHp',correct:true,fb:`Klaus: "Generic materials with a logo swap. It felt like a template, not a partnership." — He just told you exactly what bespoke looks like. Now you can position Partnership Activation.`},
-      {t:`Was Shell's pricing the real issue — would better terms have saved the deal?`,buff:'boostEnemy',correct:false,fb:`Klaus: "Price? I'm offering significant volume. I care about execution." — You flagged yourself as a transactional vendor. He's disengaging.`},
-      {t:`Was it Shell's product quality that didn't match their premium positioning?`,buff:null,correct:false,fb:`Klaus: "Quality wasn't the problem — the partnership execution was." — You missed the real signal and burned a turn.`},
+  {id:9,loc:'Detroit',co:'United States',npc:'Sarah Johnson',rl:'VP Sales',company:'Midwest Parts Co.',v:2,ch:'5 DCs → 700 fast-fit centres',seg:'C',mx:10,my:22,bld:'USA',region:'AM',
+    intro:`TODO: We're losing share to Amazon auto-parts. Garages order from a phone, not from my reps. I need to reinvent the channel.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Sarah: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Sarah: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Sarah: "TODO: shallow feedback."`},
     ]},
     objs:[
-      {t:`"Show me what's exclusive to a Wolf strategic partner. Not basic stuff."`,hp:45,w:['partnership_activation'],r:['tecdoc','e_ordering'],p:'GROW'},
-      {t:`"Shell promised co-branded events and sent generic banners. Can you actually deliver?"`,hp:42,w:['partnership_activation','trade_fairs'],r:['push_a_button','palletization'],p:'GROW'},
-      {t:`"My top customers are CEOs. They expect motorsport hospitality, not a conference room."`,hp:38,w:['partnership_activation','trade_fairs'],r:['stock_visibility','academy'],p:'GROW'},
+      {t:`TODO: objection 1`,hp:30,w:['order_portal','e_ordering'],r:['content_kits','oil_analysis'],p:'CONNECT'},
+      {t:`TODO: objection 2`,hp:32,w:['reco_tool','tecdoc'],r:['goods_loading','custom_label'],p:'CONNECT'},
+    ],rw:{xp:130,gold:55}},
+  {id:10,loc:'Mexico City',co:'Mexico',npc:'Carlos Hernández',rl:'Commercial Director',company:'Lubricantes del Bajío',v:3,ch:'300 garages + 50 fleets',seg:'B',mx:8,my:50,bld:'MEXICO',region:'AM',
+    intro:`TODO: Cross-border trade with the US is booming but my logistics can't keep up. Stockouts every week.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Carlos: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Carlos: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Carlos: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:34,w:['stock_visibility','lead_time'],r:['promo_templates','co_visits'],p:'DELIVER'},
+      {t:`TODO: objection 2`,hp:32,w:['order_tracker'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
+    ],rw:{xp:170,gold:70}},
+  {id:11,loc:'Bogotá',co:'Colombia',npc:'Valentina Ortiz',rl:'Purchasing Manager',company:'Andes Auto Supply',v:4,ch:'180 independent garages',seg:'B',mx:10,my:76,bld:'COLOMBIA',region:'AM',
+    intro:`TODO: Coffee growers' co-ops run fleets of 4×4 pickups and need a partner who understands agricultural duty cycles.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Valentina: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Valentina: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Valentina: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:32,w:['oil_analysis','co_visits'],r:['edi','goods_loading'],p:'ENABLE'},
+      {t:`TODO: objection 2`,hp:30,w:['academy','physical_training'],r:['marketing_portal','promo_calendar'],p:'ENABLE'},
+    ],rw:{xp:180,gold:75}},
+  {id:12,loc:'Kyiv',co:'Ukraine',npc:'Olena Kovalenko',rl:'Key Account Mgr',company:'Carpathian Oils',v:5,ch:'95 workshops + 20 agri-fleets',seg:'C',mx:46,my:22,bld:'UKRAINE',region:'CIS',
+    intro:`TODO: Rebuilding post-conflict. Every garage cuts costs first. I need to sell value not volume.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Olena: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Olena: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Olena: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:28,w:['content_kits','promo_templates'],r:['edi','palletization'],p:'GROW'},
+      {t:`TODO: objection 2`,hp:30,w:['marketing_portal'],r:['oil_analysis','connectivity'],p:'GROW'},
+    ],rw:{xp:110,gold:45}},
+  {id:13,loc:'Almaty',co:'Kazakhstan',npc:'Nurlan Abenov',rl:'Operations Director',company:'Steppe Logistics',v:6,ch:'2 warehouses → 60 mining fleets',seg:'A',mx:56,my:32,bld:'KAZAKHSTAN',region:'CIS',
+    intro:`TODO: Long distances, brutal winters, dust. Mining fleets need a lubricant partner who understands the conditions.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Nurlan: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Nurlan: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Nurlan: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:42,w:['oil_monitoring','lubricant_mgmt'],r:['push_a_button','goods_loading'],p:'GROW'},
+      {t:`TODO: objection 2`,hp:38,w:['network_concept','partnership_activation'],r:['academy','regulatory_label'],p:'GROW'},
+    ],rw:{xp:260,gold:120}},
+  {id:14,loc:'Shanghai',co:'China',npc:'Li Wei',rl:'Strategic Accounts',company:'Jinlong Lubricants',v:7,ch:'6 DCs → 1,200 workshops',seg:'A',mx:72,my:32,bld:'CHINA',region:'AP',
+    intro:`TODO: Local champion wants premium imported brand positioning. Zero tolerance for generic execution.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Li Wei: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Li Wei: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Li Wei: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:46,w:['partnership_activation','network_concept'],r:['push_a_button','custom_label'],p:'GROW'},
+      {t:`TODO: objection 2`,hp:42,w:['design_studio','trade_fairs'],r:['goods_loading','palletization'],p:'GROW'},
     ],rw:{xp:300,gold:150}},
+  {id:15,loc:'Ho Chi Minh',co:'Vietnam',npc:'Nguyễn Minh',rl:'Sales Manager',company:'Mekong Auto Parts',v:0,ch:'220 scooter + 60 tuk-tuk workshops',seg:'C',mx:74,my:62,bld:'VIETNAM',region:'AP',
+    intro:`TODO: Scooter workshops change oil weekly. High-volume low-margin. Competitors flood with cheap products.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Nguyễn: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Nguyễn: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Nguyễn: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:30,w:['reco_tool','tecdoc'],r:['oil_analysis','trade_fairs'],p:'CONNECT'},
+      {t:`TODO: objection 2`,hp:28,w:['push_a_button','content_kits'],r:['design_studio','promo_calendar'],p:'CONNECT'},
+    ],rw:{xp:120,gold:50}},
+  {id:16,loc:'Tokyo',co:'Japan',npc:'Takashi Yamamoto',rl:'General Manager',company:'Nihon Lubricants KK',v:1,ch:'140 dealerships + 40 JDM tuners',seg:'A',mx:90,my:24,bld:'JAPAN',region:'AP',
+    intro:`TODO: Japanese OEMs demand flawless documentation, zero defects, and lifetime partnership loyalty.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Takashi: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Takashi: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Takashi: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:44,w:['regulatory_label','custom_label'],r:['marketing_portal','promo_templates'],p:'DELIVER'},
+      {t:`TODO: objection 2`,hp:42,w:['connectivity','lead_time'],r:['push_a_button','academy'],p:'DELIVER'},
+    ],rw:{xp:300,gold:150}},
+  {id:17,loc:'Sydney',co:'Australia',npc:'Jack Wilson',rl:'Fleet Accounts',company:'Southern Cross Oils',v:2,ch:'3 hubs → 60 mining + fleet accounts',seg:'A',mx:92,my:82,bld:'AUSTRALIA',region:'AP',
+    intro:`TODO: Outback mining fleets. Extreme heat. Massive drain intervals. I need lab-backed claims or I lose the contract.`,
+    dia:{q:`TODO: What do you probe?`,opts:[
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Jack: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Jack: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Jack: "TODO: shallow feedback."`},
+    ]},
+    objs:[
+      {t:`TODO: objection 1`,hp:42,w:['oil_analysis','oil_monitoring'],r:['content_kits','promo_templates'],p:'ENABLE'},
+      {t:`TODO: objection 2`,hp:40,w:['co_visits','physical_training'],r:['custom_label','regulatory_label'],p:'ENABLE'},
+    ],rw:{xp:280,gold:130}},
 ];
 
 // ── BOSS ──
-const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:50,my:88,bld:'AUTOMECHANIKA',isBoss:true,
+const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:32,my:50,bld:'AUTOMECHANIKA',region:'EU',isBoss:true,
   intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
   dia:{q:`The Board has already heard Shell, Castrol, Fuchs and Motul this week. They're cynical. You have ONE question to prove you understand partnership differently.`,opts:[
     {t:`What would a true 360° partnership need to do DIFFERENTLY from your current suppliers to be worth switching volume?`,buff:'reduceHp',correct:true,fb:`Board: "Wrap data, knowledge, and operational tools around OUR business — not bolt your logo on top of ours." — You led with THEIR business. They're leaning in. This is your opening.`},
@@ -487,16 +594,43 @@ const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global 
 };
 
 const ALL=[...ENC,BOSS];
+// Build minimap path links: each distributor connects to its region's airport,
+// and airports are linked to each other via curved legs.
+PATH_LINKS=(()=>{
+ const lk=[];
+ Object.keys(REGIONS).forEach(k=>{
+  const r=REGIONS[k];
+  ALL.filter(e=>e.region===k).forEach(e=>{lk.push([r.ax,r.ay,e.mx,e.my])});
+ });
+ // Airport ↔ airport spine (Americas → Europe → CIS → AsiaPacific; MEA hangs off Europe)
+ const a=REGIONS;
+ lk.push([a.AM.ax,a.AM.ay,a.EU.ax,a.EU.ay]);
+ lk.push([a.EU.ax,a.EU.ay,a.MEA.ax,a.MEA.ay]);
+ lk.push([a.EU.ax,a.EU.ay,a.CIS.ax,a.CIS.ay]);
+ lk.push([a.CIS.ax,a.CIS.ay,a.AP.ax,a.AP.ay]);
+ return lk;
+})();
 
 // ═══════════════════════════════════════
 // PHASER OVERWORLD ENGINE
 // ═══════════════════════════════════════
-const MW=100,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
+const MW=150,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
 const p2x=p=>Math.round(p*MPX/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
 // ── LANDMARK BUILDINGS: each distributor gets a city-themed silhouette atop a warehouse base ──
 // Dimensions returned from each draw fn (so physics bodies can size themselves correctly)
-const BLD_DIMS={PARIS:[64,88],LONDON:[64,84],BRUSSELS:[72,80],STOCKHOLM:[64,72],WARSAW:[64,88],FRANKFURT:[80,72],MADRID:[72,68],DUBAI:[56,96],AUTOMECHANIKA:[96,72]};
+const BLD_DIMS={
+ PARIS:[64,88],LONDON:[64,84],BRUSSELS:[72,80],WARSAW:[64,88],MADRID:[72,68],
+ DUBAI:[56,96],AUTOMECHANIKA:[96,72],
+ // New landmark stubs — sized generously; drawGenericLandmark handles them
+ USA:[72,84],MEXICO:[72,68],COLOMBIA:[72,72],
+ CASABLANCA:[72,72],JOHANNESBURG:[72,68],
+ UKRAINE:[64,80],KAZAKHSTAN:[56,88],
+ CHINA:[80,76],VIETNAM:[64,68],JAPAN:[64,92],AUSTRALIA:[80,68],
+ AIRPORT:[72,64],
+ // Legacy landmarks kept for save-game compatibility (no longer placed)
+ STOCKHOLM:[64,72],FRANKFURT:[80,72],
+};
 let MAP_DATA=null;
 function genMapData(){
  const m=Array.from({length:MH},()=>Array(MW).fill(0));
@@ -512,22 +646,17 @@ function genMapData(){
    }
   }
  }
- const bt=e=>[Math.round(e.mx*MW/100),Math.round(e.my*MH/100)];
- const b=ALL.map(bt);
- carveLine(b[6][0],b[6][1],b[0][0],b[0][1]);
- carveLine(b[0][0],b[0][1],b[2][0],b[2][1]);
- carveLine(b[1][0],b[1][1],b[5][0],b[5][1]);
- carveLine(b[3][0],b[3][1],b[7][0],b[7][1]);
- carveLine(b[0][0],b[0][1],b[5][0],b[5][1]);
- carveLine(b[5][0],b[5][1],b[7][0],b[7][1]);
- carveLine(b[7][0],b[7][1],b[4][0],b[4][1]);
- carveLine(b[2][0],b[2][1],b[8][0],b[8][1]);
- carveLine(b[4][0],b[4][1],b[8][0],b[8][1]);
- carveLine(b[8][0],b[8][1],Math.round(50*MW/100),MH-3);
- // Hedge ring removed: it was creating maze-like corridors and dead ends
- // around buildings. The carved stone paths are enough structure on their own.
- // Decorative water ponds positioned off the path network
- const ponds=[[3,55,9,7],[85,10,10,6],[3,8,8,5],[85,78,9,6]];
+ const bt=(mx,my)=>[Math.round(mx*MW/100),Math.round(my*MH/100)];
+ // Carve a path from every distributor to its region's airport
+ Object.keys(REGIONS).forEach(k=>{
+  const r=REGIONS[k];const[ax,ay]=bt(r.ax,r.ay);
+  ALL.filter(e=>e.region===k).forEach(e=>{
+   const[bx,by]=bt(e.mx,e.my);
+   carveLine(ax,ay,bx,by);
+  });
+ });
+ // Decorative water ponds positioned off the path network (3 across wider map)
+ const ponds=[[3,55,9,7],[85,10,10,6],[3,8,8,5],[85,78,9,6],[120,30,10,6],[128,82,9,6]];
  for(const[px,py,pw,ph] of ponds){
   for(let dy=0;dy<ph;dy++)for(let dx=0;dx<pw;dx++){
    const nx=px+dx,ny=py+dy;
@@ -982,7 +1111,116 @@ function drawAutomechanika(x,w,h){
  x.fillStyle='#00aa00';x.fillRect(cx+33,baseY-44,5,2);
 }
 
-const BLD_FNS={PARIS:drawParis,LONDON:drawLondon,BRUSSELS:drawBrussels,STOCKHOLM:drawStockholm,WARSAW:drawWarsaw,FRANKFURT:drawFrankfurt,MADRID:drawMadrid,DUBAI:drawDubai,AUTOMECHANIKA:drawAutomechanika};
+// ── Generic flag-building drawer: used as placeholder landmark for each of
+// the 11 new distributor countries. Takes a palette + 3 vertical/horizontal
+// flag stripes. A single-file deploy means keeping these compact. Each
+// country gets a distinct silhouette tweak via the `shape` param.
+function drawFlagBuilding(x,w,h,stoneC,wallC,wallH,flagDef,shape){
+ drawWarehouseBase(x,w,h,stoneC,'#4a2a10','#2a1000');
+ const cx=w/2,baseY=h-22;
+ // Building silhouette
+ const bh=shape==='tall'?56:shape==='wide'?32:shape==='pyramid'?44:shape==='dome'?46:40;
+ const bw=shape==='wide'?w-16:shape==='pyramid'?0:w-24;
+ if(shape==='pyramid'){
+  // Stepped pyramid (Mexico/Egypt style)
+  for(let i=0;i<11;i++){
+   x.fillStyle=i%2===0?wallC:wallH;
+   const pw=w-16-i*4;
+   x.fillRect(cx-pw/2,baseY-4-i*4,pw,4);
+  }
+  x.fillStyle='#4a2a10';x.fillRect(cx-2,baseY-48,4,4); // small top shrine
+ }else if(shape==='dome'){
+  // Rectangle body + half-dome top (Casablanca/Kyiv/Istanbul style)
+  x.fillStyle=wallC;x.fillRect(cx-bw/2,baseY-bh,bw,bh);
+  x.fillStyle=wallH;x.fillRect(cx-bw/2,baseY-bh,bw,2);
+  x.fillStyle=wallC;x.beginPath();x.arc(cx,baseY-bh,bw*0.4,Math.PI,Math.PI*2);x.fill();
+  x.fillStyle=wallH;x.beginPath();x.arc(cx-1,baseY-bh-2,bw*0.3,Math.PI,Math.PI*2);x.fill();
+  // Window row
+  x.fillStyle='#2a2a5a';
+  for(let i=0;i<4;i++)x.fillRect(cx-bw/2+4+i*(bw/5),baseY-20,4,6);
+ }else if(shape==='tall'){
+  // Skyscraper (USA/Shanghai/Tokyo)
+  x.fillStyle=wallC;x.fillRect(cx-bw/2,baseY-bh,bw,bh);
+  x.fillStyle=wallH;x.fillRect(cx-bw/2,baseY-bh,bw,2);x.fillRect(cx-bw/2,baseY-bh,2,bh);
+  x.fillStyle='#2a2a10';x.fillRect(cx+bw/2-2,baseY-bh,2,bh);
+  // Window grid
+  x.fillStyle='#88aaee';
+  for(let r=3;r<bh-4;r+=4)for(let c=3;c<bw-4;c+=4)x.fillRect(cx-bw/2+c,baseY-bh+r,2,2);
+  // Pointed top
+  x.fillStyle=wallC;
+  for(let i=0;i<6;i++){const pw=bw-i*2;if(pw>0)x.fillRect(cx-pw/2,baseY-bh-i,pw,1)}
+ }else{
+  // Default wide warehouse with pitched roof (Bogotá/Johannesburg/Ho Chi Minh)
+  x.fillStyle=wallC;x.fillRect(cx-bw/2,baseY-bh,bw,bh);
+  x.fillStyle=wallH;x.fillRect(cx-bw/2,baseY-bh,bw,2);
+  x.fillStyle='#6a2010';
+  for(let i=0;i<8;i++){const pw=bw+4-i*2;x.fillRect(cx-pw/2,baseY-bh-i,pw,1)}
+  x.fillStyle='#88aaee';
+  for(let c=0;c<3;c++){x.fillRect(cx-bw/2+6+c*(bw/3),baseY-bh+8,5,5)}
+  x.fillStyle='#4a2a10';x.fillRect(cx-3,baseY-12,6,12);
+ }
+ // National flagpole + 3-stripe flag on top-right of the building
+ const fx=cx+bw/4,fy=baseY-bh-14;
+ x.fillStyle='#3a3a3a';x.fillRect(fx,fy,1,16);
+ x.fillStyle=flagDef[0];x.fillRect(fx+1,fy,9,3);
+ x.fillStyle=flagDef[1];x.fillRect(fx+1,fy+3,9,3);
+ x.fillStyle=flagDef[2];x.fillRect(fx+1,fy+6,9,3);
+}
+// Individual wrappers wire palette + flag colours per country.
+const drawUSA=(x,w,h)=>drawFlagBuilding(x,w,h,'#b8b8c0','#dcdcdc','#ffffff',['#b22234','#ffffff','#3c3b6e'],'tall');
+const drawMexico=(x,w,h)=>drawFlagBuilding(x,w,h,'#a87040','#c89060','#e8b888',['#006341','#ffffff','#ce1126'],'pyramid');
+const drawColombia=(x,w,h)=>drawFlagBuilding(x,w,h,'#a08060','#d0a878','#e8c89a',['#fcd116','#003893','#ce1126'],'wide');
+const drawCasablanca=(x,w,h)=>drawFlagBuilding(x,w,h,'#d8c090','#e8d0a0','#fff0c0',['#c1272d','#ffffff','#006233'],'dome');
+const drawJohannesburg=(x,w,h)=>drawFlagBuilding(x,w,h,'#b89060','#d0a878','#f0c898',['#007847','#ffd700','#001489'],'wide');
+const drawUkraine=(x,w,h)=>drawFlagBuilding(x,w,h,'#d0c8b0','#e8e0c0','#fff8d0',['#0057b8','#0057b8','#ffd700'],'dome');
+const drawKazakhstan=(x,w,h)=>drawFlagBuilding(x,w,h,'#c0d0d8','#d8e8f0','#f0f8ff',['#00afca','#ffd700','#00afca'],'tall');
+const drawChina=(x,w,h)=>drawFlagBuilding(x,w,h,'#e0c0a0','#f0d8b8','#fff0d0',['#ee1c25','#ee1c25','#ffff00'],'wide');
+const drawVietnam=(x,w,h)=>drawFlagBuilding(x,w,h,'#a0c090','#c0d0a0','#e0f0c0',['#da251d','#ffff00','#da251d'],'wide');
+const drawJapan=(x,w,h)=>drawFlagBuilding(x,w,h,'#f0e0c8','#fff0d8','#fff8e8',['#ffffff','#bc002d','#ffffff'],'tall');
+const drawAustralia=(x,w,h)=>drawFlagBuilding(x,w,h,'#d8b090','#e8c8a0','#f8d8b8',['#00008b','#ffffff','#ff0000'],'wide');
+// ── AIRPORT: shared silhouette for all 5 regional airports ──
+function drawAirport(x,w,h){
+ drawWarehouseBase(x,w,h,'#c8c8d0','#4a4a5a','#1a1a2a');
+ const cx=w/2,baseY=h-22;
+ // Terminal building (wide, low)
+ x.fillStyle='#e8e8f0';x.fillRect(cx-28,baseY-18,56,18);
+ x.fillStyle='#ffffff';x.fillRect(cx-28,baseY-18,56,2);
+ x.fillStyle='#2a2a4a';x.fillRect(cx-28,baseY-2,56,2);
+ // Glass facade
+ x.fillStyle='#6aa4d8';
+ for(let i=0;i<6;i++)x.fillRect(cx-24+i*9,baseY-14,6,10);
+ // Control tower
+ x.fillStyle='#d8d8e0';x.fillRect(cx-3,baseY-38,6,20);
+ x.fillStyle='#f0f0f8';x.fillRect(cx-3,baseY-38,1,20);
+ // Tower cab
+ x.fillStyle='#2a2a4a';x.fillRect(cx-6,baseY-44,12,6);
+ x.fillStyle='#6aa4d8';x.fillRect(cx-5,baseY-43,10,3);
+ x.fillStyle='#fff';x.fillRect(cx-5,baseY-43,2,1);
+ // Tower antenna
+ x.fillStyle='#8a8a8a';x.fillRect(cx,baseY-50,1,6);
+ x.fillStyle='#ff0000';x.fillRect(cx,baseY-51,1,1);
+ // Runway stripes left of building
+ x.fillStyle='#4a4a5a';x.fillRect(3,baseY-4,cx-30,3);
+ x.fillStyle='#ffff00';
+ for(let i=0;i<4;i++)x.fillRect(6+i*8,baseY-3,3,1);
+ // Small plane silhouette on the runway
+ x.fillStyle='#ffffff';x.fillRect(12,baseY-8,10,3);
+ x.fillStyle='#3a3a3a';x.fillRect(10,baseY-7,2,1);x.fillRect(22,baseY-7,2,1);
+ x.fillStyle='#ffffff';x.fillRect(15,baseY-10,3,2);
+ // Large "AIRPORT" sign accent on terminal
+ x.fillStyle='#FFD700';x.fillRect(cx-10,baseY-18,20,2);
+}
+const BLD_FNS={
+ PARIS:drawParis,LONDON:drawLondon,BRUSSELS:drawBrussels,WARSAW:drawWarsaw,MADRID:drawMadrid,
+ DUBAI:drawDubai,AUTOMECHANIKA:drawAutomechanika,
+ USA:drawUSA,MEXICO:drawMexico,COLOMBIA:drawColombia,
+ CASABLANCA:drawCasablanca,JOHANNESBURG:drawJohannesburg,
+ UKRAINE:drawUkraine,KAZAKHSTAN:drawKazakhstan,
+ CHINA:drawChina,VIETNAM:drawVietnam,JAPAN:drawJapan,AUSTRALIA:drawAustralia,
+ AIRPORT:drawAirport,
+ // Legacy kept so save loading doesn't crash on old bld refs
+ STOCKHOLM:drawStockholm,FRANKFURT:drawFrankfurt,
+};
 
 function genBldTex(scene){
  Object.entries(BLD_DIMS).forEach(([type,[w,h]])=>{
@@ -1447,7 +1685,7 @@ class OverworldScene extends Phaser.Scene {
   this.bldSprites={};this.bldBodies=this.physics.add.staticGroup();
   this.labels={};this.vans=[];
   // Tint palette per distributor (applied to the white van body texture)
-  const VAN_TINT={1:0xff4a30,2:0xffd700,3:0xff1a1a,4:0xffffff,5:0xf0c040,6:0x3060f0,7:0xd42020,8:0x1a1a1a,99:0xffa000};
+  const VAN_TINT={1:0xff4a30,2:0x3060f0,3:0xf0c040,4:0xffffff,5:0xd42020,6:0xffa040,7:0xd08040,8:0x60a060,9:0x3060f0,10:0x40a040,11:0xffd700,12:0x40a0ff,13:0x80c0ff,14:0xff3030,15:0xff6060,16:0xf0f0f0,17:0x1060c0,99:0xffa000};
   ALL.forEach(enc=>{
    const sx=p2x(enc.mx),sy=p2x(enc.my);
    const tex='bld_'+(enc.bld||'BRUSSELS');
@@ -1481,9 +1719,31 @@ class OverworldScene extends Phaser.Scene {
     this.vans.push(van);
    }
   });
+  // ── AIRPORTS: one per populated region, triggers fast-travel modal ──
+  this.airportSprites={};
+  this.airportGroup=this.physics.add.group({allowGravity:false,immovable:true});
+  Object.keys(REGIONS).forEach(k=>{
+   const r=REGIONS[k];const sx=p2x(r.ax),sy=p2x(r.ay);
+   const ap=this.add.image(sx,sy,'bld_AIRPORT');
+   ap.setOrigin(0.5,0.7);
+   this.airportSprites[k]=ap;
+   // Collision body (walking INTO opens the modal)
+   const body=this.physics.add.staticImage(sx,sy+6,'bld_AIRPORT');
+   body.setAlpha(0);
+   body.body.setSize(ap.width*0.5,ap.height*0.2);
+   body.body.setOffset(ap.width*0.25,ap.height*0.65);
+   body.regionKey=k;
+   this.airportGroup.add(body);
+   // Label
+   const lbl=this.add.text(sx,sy+ap.height*0.35,'✈ '+r.nm,{
+    fontSize:'8px',fontFamily:'"Press Start 2P",monospace',color:'#FFD700',
+    stroke:'#000000',strokeThickness:3
+   }).setOrigin(0.5,0);
+   lbl.setDepth(sy+1000);
+  });
   // Hero
-  // Spawn from saved position (if returning from battle) or default spawn point
-  const sp=Bridge._lastPos||{x:p2x(50),y:p2x(92)};
+  // Spawn from saved position (if returning from battle) or default spawn point — default is Europe airport
+  const defEU=REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(defEU.ax+2),y:p2x(defEU.ay+2)};
   this.hero=this.physics.add.sprite(sp.x,sp.y,'hero');
   this.hero.setCollideWorldBounds(true);
   this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);
@@ -1525,6 +1785,15 @@ class OverworldScene extends Phaser.Scene {
   this.physics.add.collider(this.hero,this.hedgeGroup);
   const allNpcs=Object.values(this.npcSprites).filter(Boolean);
   this.physics.add.overlap(this.hero,allNpcs,(h,npc)=>this.onNpcCollide(npc));
+  // Airport overlap: opens the fast-travel modal, with a short cooldown so
+  // re-spawning at the destination airport doesn't immediately re-open it.
+  this.airportCooldown=0;
+  this.physics.add.overlap(this.hero,this.airportGroup,(h,ap)=>{
+   if(this.airportCooldown>0)return;
+   this.airportCooldown=1500;
+   Bridge._lastPos={x:this.hero.x,y:this.hero.y};
+   Bridge.emit('airport-open',{from:ap.regionKey});
+  });
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
   this.cameras.main.setBounds(0,0,MPX,MPY);
@@ -1544,7 +1813,7 @@ class OverworldScene extends Phaser.Scene {
   });
   // Bridge
   Bridge.on('return-to-map',()=>{
-   this.hero.setPosition(p2x(50),p2x(92));this.hero.setVelocity(0,0);
+   const euR=REGIONS.EU;this.hero.setPosition(p2x(euR.ax+2),p2x(euR.ay+2));this.hero.setVelocity(0,0);
    this.hero.anims.play('hero-idle-down',true);
   });
   Bridge.on('game-state-sync',(d)=>{
@@ -1552,6 +1821,13 @@ class OverworldScene extends Phaser.Scene {
    this.syncVisibility();
   });
   Bridge.on('dpad',(d)=>{this.dpadDir=d||{x:0,y:0}});
+  Bridge.on('airport-travel',(d)=>{
+   const r=REGIONS[d?.to];if(!r||!this.hero)return;
+   this.hero.setPosition(p2x(r.ax+2),p2x(r.ay+2));
+   this.hero.setVelocity(0,0);
+   this.cameras.main.centerOn(this.hero.x,this.hero.y);
+   this.airportCooldown=1500;
+  });
   this.syncVisibility();
  }
  syncVisibility(){
@@ -1588,6 +1864,7 @@ class OverworldScene extends Phaser.Scene {
   // Stream hero position to React for the minimap (throttled ~4fps)
   this.posTimer=(this.posTimer||0)+delta;
   if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
+  if(this.airportCooldown>0)this.airportCooldown-=delta;
   const sp=this.vehicle==='car'?260:this.vehicle==='bike'?200:130;
   let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
@@ -1777,6 +2054,7 @@ function App(){
   const [heroMapPos,setHeroMapPos]=useState({x:50,y:92});
   const [mapOpen,setMapOpen]=useState(false);
   const [paused,setPaused]=useState(false);
+  const [airport,setAirport]=useState(null);
   const [hasCar,setHasCar]=useState(false);
   const [hasBike,setHasBike]=useState(false);
   const [vehicle,setVehicle]=useState(null);
@@ -1877,6 +2155,8 @@ function App(){
   },[]);
   // ── PHASER: encounter trigger listener ──
   useEffect(()=>{const f=(d)=>{const e=ALL.find(x=>x.id===d.encounterId);if(e)go(e)};Bridge.on('npc-collide',f);return()=>Bridge.off('npc-collide',f)},[]);
+  // ── PHASER: airport fast-travel ──
+  useEffect(()=>{const f=(d)=>{snd('blip');setAirport(d.from)};Bridge.on('airport-open',f);return()=>Bridge.off('airport-open',f)},[]);
   // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
   useEffect(()=>{
    const destroy=()=>{
@@ -2357,6 +2637,19 @@ function App(){
     // WORLD MAP (Phaser overworld)
     tab==='map'&&h(React.Fragment,null,
       h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:10,fontStyle:'italic'}},'Walk the town · Arrow keys / WASD / D-pad · Step into a distributor to engage'),
+      // ── AIRPORT fast-travel modal ──
+      airport&&h('div',{onClick:()=>setAirport(null),style:{position:'fixed',inset:0,background:'rgba(0,0,0,.88)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
+        h('div',{className:'ff7',onClick:e=>e.stopPropagation(),style:{padding:22,maxWidth:360,width:'100%',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#1a2a80 60%,#fff 100%) 1',boxShadow:'0 0 32px rgba(255,215,0,.5)'}},
+          h('div',{className:'pf',style:{fontSize:13,color:'#FFD700',textAlign:'center',marginBottom:6,letterSpacing:2,textShadow:'2px 2px 0 #000'}},'✈ FAST TRAVEL'),
+          h('div',{className:'fs-xs',style:{color:C.mu,textAlign:'center',marginBottom:14,fontStyle:'italic'}},'Currently at '+(REGIONS[airport]?.nm||airport)+' airport'),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+            Object.keys(REGIONS).filter(k=>k!==airport).map(k=>{
+              const r=REGIONS[k];const cnt=ENC.filter(e=>e.region===k&&done.includes(e.id)).length;const tot=ENC.filter(e=>e.region===k).length;
+              return h('button',{key:k,className:'ff7',onClick:()=>{Bridge.emit('airport-travel',{to:k});setAirport(null);snd('sel')},style:{padding:'14px',fontSize:14,color:C.tx,fontWeight:700,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}},
+                h('span',null,'✈ '+r.nm),
+                h('span',{className:'fs-xs',style:{color:C.mu}},cnt+'/'+tot))
+            })),
+          h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:14,fontStyle:'italic'}},'Step away from the airport to close'))),
       // ── PAUSE modal ──
       paused&&h('div',{onClick:()=>setPaused(false),style:{position:'fixed',inset:0,background:'rgba(0,0,0,.88)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20}},
         h('div',{className:'ff7',onClick:e=>e.stopPropagation(),style:{padding:22,maxWidth:320,width:'100%',borderImage:'linear-gradient(135deg,#fff 0%,#FFD700 30%,#1a2a80 60%,#fff 100%) 1',boxShadow:'0 0 32px rgba(255,215,0,.5)'}},
