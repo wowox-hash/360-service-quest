@@ -626,7 +626,9 @@ PATH_LINKS=(()=>{
 // ═══════════════════════════════════════
 // PHASER OVERWORLD ENGINE
 // ═══════════════════════════════════════
-const MW=150,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
+// NOTE: MW * TS must stay ≤ 2048 so the ground canvas uploads cleanly to
+// WebGL on devices with a 2048-texture limit. 120 tiles × 16 px = 1920.
+const MW=120,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
 const p2x=p=>Math.round(p*MPX/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
 // ── LANDMARK BUILDINGS: each distributor gets a city-themed silhouette atop a warehouse base ──
