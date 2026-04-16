@@ -434,14 +434,14 @@ const SHOP=[
 // Each region is a rectangle (mx/my percent). Distributors and one airport
 // live inside. Airports fast-travel the hero to any other region's airport.
 const REGIONS={
- AM: {nm:'Americas',           col:'#c85a2a', x:[2,20],  y:[10,90], ax:15, ay:52},
- EU: {nm:'Europe',              col:'#3a7a2f', x:[22,42], y:[8,62],  ax:20, ay:34},
- MEA:{nm:'Middle East & Africa',col:'#d4a24a', x:[22,42], y:[62,96], ax:22, ay:74},
- CIS:{nm:'CIS',                 col:'#4a7a9a', x:[44,62], y:[10,48], ax:44, ay:30},
- AP: {nm:'Asia Pacific',        col:'#a83a3a', x:[64,98], y:[10,92], ax:66, ay:48},
+ AM: {nm:'Americas',           col:'#c85a2a', x:[1,19],  y:[3,97], ax:10, ay:50},
+ EU: {nm:'Europe',              col:'#3a7a2f', x:[21,43], y:[3,60], ax:32, ay:50},
+ MEA:{nm:'Middle East & Africa',col:'#d4a24a', x:[21,43], y:[61,97],ax:32, ay:78},
+ CIS:{nm:'CIS',                 col:'#4a7a9a', x:[44,62], y:[3,50], ax:53, ay:40},
+ AP: {nm:'Asia Pacific',        col:'#a83a3a', x:[63,99], y:[3,97], ax:80, ay:50},
 };
 const ENC=[
-  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:30,my:14,bld:'BRUSSELS',region:'EU',
+  {id:1,loc:'Brussels',co:'Belgium',npc:'Marc Peeters',rl:'Purchasing Manager',company:'AutoParts Benelux',v:0,ch:'220 garages + 15 fast-fit centres',seg:'C',mx:28,my:10,bld:'BRUSSELS',region:'EU',
     intro:`Thank you for coming. We have a serious problem with product recommendations. Our 15 counter staff use printed guides last updated six months ago. Hybrids, Euro 7, Chinese imports — our team is guessing. Garages are sending products back. We're losing €8,000/month in reverse logistics. Three garages told us last month they're considering switching. I need a solution that works at the counter, every day.`,
     dia:{q:`Marc is losing €8,000/month to returns. You have one discovery question before the pitch — make it count.`,opts:[
       {t:`When your counter staff get a vehicle they're not sure about, walk me through exactly what happens today.`,buff:'reduceHp',correct:true,fb:`Marc: "They check the printed guide. If it's not listed, they call the hotline or just pick the closest match." — That's the gap. The outdated guide is shipping wrong products.`},
@@ -453,7 +453,7 @@ const ENC=[
       {t:`"We already have TecDoc through our parts platform. How is yours different?"`,hp:34,w:['tecdoc'],r:['marketing_portal','promo_calendar'],p:'CONNECT'},
       {t:`"How do I know this actually reduces returns? I need proof, not promises."`,hp:26,w:['tecdoc','reco_tool'],r:['co_visits','design_studio'],p:'CONNECT'},
     ],rw:{xp:120,gold:50}},
-  {id:2,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:34,my:26,bld:'PARIS',region:'EU',
+  {id:2,loc:'Paris',co:'France',npc:'Philippe Moreau',rl:'Purchasing Director',company:'AutoDistri France',v:5,ch:'3 branches → 180 garages',seg:'C',mx:25,my:24,bld:'PARIS',region:'EU',
     intro:`Every Wolf order: receive branch requests by email, consolidate in spreadsheet, type into email to your support, wait for confirmation, manually enter into our ERP. My team of four spends 60% of time on this. Error rate: 8%. One in twelve orders wrong. Each triggers a credit note and an angry branch manager.`,
     dia:{q:`Philippe's four-person team burns 60% of their time on orders, with an 8% error rate. Where do you dig?`,opts:[
       {t:`Walk me through exactly where in the process those 8% errors originate.`,buff:'reduceHp',correct:true,fb:`Philippe: "Manual re-keying between email and ERP — keystroke errors on references." — Now you've got the ROI hook: eliminate the manual chain entirely.`},
@@ -464,7 +464,7 @@ const ENC=[
       {t:`"We've ordered by email for 15 years. Why change what works?"`,hp:30,w:['edi'],r:['content_kits','oil_analysis'],p:'CONNECT'},
       {t:`"No IT department. We're a distribution company, not a tech company."`,hp:30,w:['e_ordering'],r:['co_visits','trade_fairs'],p:'DELIVER'},
     ],rw:{xp:100,gold:45}},
-  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:24,my:42,bld:'MADRID',region:'EU',
+  {id:3,loc:'Madrid',co:'Spain',npc:'Alejandra Ruiz',rl:'General Manager',company:'Distribución Ibérica',v:2,ch:'300 garages + 40 tyre shops',seg:'C',mx:24,my:38,bld:'MADRID',region:'EU',
     intro:`We're growing 12% yearly, but garages see us as interchangeable. "You all deliver the same thing — whoever's cheapest this month wins." Zero marketing, no POS, no campaigns. I don't have a designer or budget for agencies. But I watch competitors show up with professional displays and we look amateur.`,
     dia:{q:`Alejandra says garages see every supplier as interchangeable. She has no designer, no marketing budget, and zero campaigns. What do you probe?`,opts:[
       {t:`Have you ever tried running your own promotion to stand out — and what happened?`,buff:'reduceHp',correct:true,fb:`Alejandra: "I made a flyer in PowerPoint once. It looked terrible. Zero response." — Her instinct is right; the tools are missing. That's your opening.`},
@@ -475,7 +475,7 @@ const ENC=[
       {t:`"I don't have a single person who can create marketing materials."`,hp:30,w:['marketing_portal','content_kits'],r:['edi','palletization'],p:'GROW'},
       {t:`"Zero budget. Every euro goes to inventory and logistics."`,hp:30,w:['promo_templates','content_kits'],r:['oil_analysis','connectivity'],p:'GROW'},
     ],rw:{xp:100,gold:45}},
-  {id:5,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:38,my:18,bld:'WARSAW',region:'EU',
+  {id:5,loc:'Warsaw',co:'Poland',npc:'Tomasz Kowalski',rl:'Supply Chain Mgr',company:'Trans-Cargo Logistics',v:3,ch:'3 warehouses → 350 workshops',seg:'B',mx:40,my:14,bld:'WARSAW',region:'EU',
     intro:`I manage our entire supply chain from Wolf's factory. The ordering experience is painful. We order by email, zero visibility on your stock, and then half is backordered. My team of four spends 2 hours daily calling "where is my order?" Three stock-outs this quarter on critical SKUs. Workshops are losing patience — it reflects badly on us, not Wolf.`,
     dia:{q:`Tomasz's team spends 2 hours/day calling about orders. Three stock-outs last quarter. What do you want to uncover first?`,opts:[
       {t:`When a product turns out to be backordered, what's the downstream impact on your workshops?`,buff:'reduceHp',correct:true,fb:`Tomasz: "We can't fulfil our own customers. Workshops order from competitors as backup." — Wolf's opacity is cascading into HIS customer promises. That's the real cost.`},
@@ -487,7 +487,7 @@ const ENC=[
       {t:`"How can I plan if I can't see Wolf stock before ordering?"`,hp:35,w:['stock_visibility','e_ordering'],r:['promo_templates','co_visits'],p:'DELIVER'},
       {t:`"My workshops want to know exactly when. So do I."`,hp:32,w:['order_tracker','lead_time'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
     ],rw:{xp:180,gold:75}},
-  {id:6,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:36,my:74,bld:'DUBAI',region:'MEA',
+  {id:6,loc:'Dubai',co:'UAE',npc:'Ahmed Al-Rashidi',rl:'Operations Director',company:'Gulf Auto Supplies',v:4,ch:'80 garages + 30 fleet workshops',seg:'B',mx:38,my:68,bld:'DUBAI',region:'MEA',
     intro:`Top 30 workshops consume 2,000+ litres monthly. Delivered in 200L drums. Oil storage areas are a mess — drums stacked, spills everywhere. And my real problem: nothing stops a competitor walking in tomorrow with a lower price. Zero switching barriers. The relationship is purely transactional.`,
     dia:{q:`Ahmed admits his relationships are purely transactional — zero switching barriers. What question exposes the stakes?`,opts:[
       {t:`If a competitor walked in tomorrow with a lower price, what would keep your top garages with you?`,buff:'reduceHp',correct:true,fb:`Ahmed: "Honestly — nothing. We'd have to match or lose the account." — He just told you he has no structural defense. Now you can sell him the barriers.`},
@@ -499,7 +499,7 @@ const ENC=[
       {t:`"Even with equipment — what stops them filling it with competitor oil?"`,hp:36,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'GROW'},
       {t:`"Big investment. Show me the ROI numbers."`,hp:32,w:['lubricant_mgmt','oil_monitoring'],r:['push_a_button','goods_loading'],p:'GROW'},
     ],rw:{xp:200,gold:90}},
-  {id:7,loc:'Casablanca',co:'Morocco',npc:'Youssef El-Amrani',rl:'Sales Manager',company:'Atlas Lubrifiants',v:0,ch:'140 garages across Morocco',seg:'C',mx:26,my:64,bld:'CASABLANCA',region:'MEA',
+  {id:7,loc:'Casablanca',co:'Morocco',npc:'Youssef El-Amrani',rl:'Sales Manager',company:'Atlas Lubrifiants',v:0,ch:'140 garages across Morocco',seg:'C',mx:26,my:65,bld:'CASABLANCA',region:'MEA',
     intro:`TODO: Morocco is a fast-growing market but I can't find technical training in French for my counter staff. Competitors ship generic Arabic manuals — useless for daily work.`,
     dia:{q:`TODO: Ask the question that uncovers Youssef's real bottleneck.`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Youssef: "TODO: correct feedback."`},
@@ -510,7 +510,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:32,w:['physical_training','academy'],r:['edi','palletization'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:30,w:['tech_inbox'],r:['marketing_portal','promo_calendar'],p:'ENABLE'},
     ],rw:{xp:120,gold:50}},
-  {id:8,loc:'Johannesburg',co:'South Africa',npc:'Thandiwe Nkosi',rl:'Operations Director',company:'Veldt Oils',v:1,ch:'2 warehouses → 90 mine fleets',seg:'B',mx:30,my:86,bld:'JOHANNESBURG',region:'MEA',
+  {id:8,loc:'Johannesburg',co:'South Africa',npc:'Thandiwe Nkosi',rl:'Operations Director',company:'Veldt Oils',v:1,ch:'2 warehouses → 90 mine fleets',seg:'B',mx:30,my:92,bld:'JOHANNESBURG',region:'MEA',
     intro:`TODO: Mining fleets want guaranteed drain intervals to cut downtime. My reps don't have the lab data to back it up.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Thandiwe: "TODO: correct feedback."`},
@@ -521,7 +521,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:36,w:['oil_analysis','co_visits'],r:['promo_templates','custom_label'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:32,w:['oil_monitoring'],r:['academy','regulatory_label'],p:'ENABLE'},
     ],rw:{xp:180,gold:75}},
-  {id:4,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:22,my:14,bld:'LONDON',region:'EU',
+  {id:4,loc:'London',co:'United Kingdom',npc:'James Hartley',rl:'Key Account Mgr, Fleet',company:'FleetServ UK',v:6,ch:'40+ fleet accounts across the Midlands',seg:'B',mx:36,my:28,bld:'LONDON',region:'EU',
     intro:`Three competitors now offer oil condition monitoring. They send sample kits, run lab analysis, present reports with wear metals and drain intervals. One convinced my biggest account — 200 trucks — that their oil was performing better. I lost that account. Now fleet managers ask "what data can you show me?" and all I have is verbal assurances.`,
     dia:{q:`James lost a 200-truck account because competitors brought oil analysis data and he had nothing. What question cracks this open?`,opts:[
       {t:`What specifically made your competitors' oil analysis data compelling to that fleet manager?`,buff:'reduceHp',correct:true,fb:`James: "Lab reports with real wear trends and drain recommendations tailored to that fleet." — That's your capability gap in exact detail. Now you can propose it.`},
@@ -533,7 +533,7 @@ const ENC=[
       {t:`"Even with data, my reps can't present it to a fleet engineering manager."`,hp:36,w:['co_visits'],r:['marketing_portal','palletization'],p:'ENABLE'},
       {t:`"We're 12 months behind competitors. How do we catch up?"`,hp:32,w:['oil_analysis','co_visits'],r:['promo_calendar','goods_loading'],p:'ENABLE'},
     ],rw:{xp:200,gold:90}},
-  {id:9,loc:'Detroit',co:'United States',npc:'Sarah Johnson',rl:'VP Sales',company:'Midwest Parts Co.',v:2,ch:'5 DCs → 700 fast-fit centres',seg:'C',mx:10,my:22,bld:'USA',region:'AM',
+  {id:9,loc:'Detroit',co:'United States',npc:'Sarah Johnson',rl:'VP Sales',company:'Midwest Parts Co.',v:2,ch:'5 DCs → 700 fast-fit centres',seg:'C',mx:10,my:16,bld:'USA',region:'AM',
     intro:`TODO: We're losing share to Amazon auto-parts. Garages order from a phone, not from my reps. I need to reinvent the channel.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Sarah: "TODO: correct feedback."`},
@@ -555,7 +555,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:34,w:['stock_visibility','lead_time'],r:['promo_templates','co_visits'],p:'DELIVER'},
       {t:`TODO: objection 2`,hp:32,w:['order_tracker'],r:['design_studio','oil_monitoring'],p:'DELIVER'},
     ],rw:{xp:170,gold:70}},
-  {id:11,loc:'Bogotá',co:'Colombia',npc:'Valentina Ortiz',rl:'Purchasing Manager',company:'Andes Auto Supply',v:4,ch:'180 independent garages',seg:'B',mx:10,my:76,bld:'COLOMBIA',region:'AM',
+  {id:11,loc:'Bogotá',co:'Colombia',npc:'Valentina Ortiz',rl:'Purchasing Manager',company:'Andes Auto Supply',v:4,ch:'180 independent garages',seg:'B',mx:12,my:82,bld:'COLOMBIA',region:'AM',
     intro:`TODO: Coffee growers' co-ops run fleets of 4×4 pickups and need a partner who understands agricultural duty cycles.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Valentina: "TODO: correct feedback."`},
@@ -566,7 +566,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:32,w:['oil_analysis','co_visits'],r:['edi','goods_loading'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:30,w:['academy','physical_training'],r:['marketing_portal','promo_calendar'],p:'ENABLE'},
     ],rw:{xp:180,gold:75}},
-  {id:12,loc:'Kyiv',co:'Ukraine',npc:'Olena Kovalenko',rl:'Key Account Mgr',company:'Carpathian Oils',v:5,ch:'95 workshops + 20 agri-fleets',seg:'C',mx:46,my:22,bld:'UKRAINE',region:'CIS',
+  {id:12,loc:'Kyiv',co:'Ukraine',npc:'Olena Kovalenko',rl:'Key Account Mgr',company:'Carpathian Oils',v:5,ch:'95 workshops + 20 agri-fleets',seg:'C',mx:48,my:12,bld:'UKRAINE',region:'CIS',
     intro:`TODO: Rebuilding post-conflict. Every garage cuts costs first. I need to sell value not volume.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Olena: "TODO: correct feedback."`},
@@ -577,7 +577,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:28,w:['content_kits','promo_templates'],r:['edi','palletization'],p:'GROW'},
       {t:`TODO: objection 2`,hp:30,w:['marketing_portal'],r:['oil_analysis','connectivity'],p:'GROW'},
     ],rw:{xp:110,gold:45}},
-  {id:13,loc:'Almaty',co:'Kazakhstan',npc:'Nurlan Abenov',rl:'Operations Director',company:'Steppe Logistics',v:6,ch:'2 warehouses → 60 mining fleets',seg:'A',mx:56,my:32,bld:'KAZAKHSTAN',region:'CIS',
+  {id:13,loc:'Almaty',co:'Kazakhstan',npc:'Nurlan Abenov',rl:'Operations Director',company:'Steppe Logistics',v:6,ch:'2 warehouses → 60 mining fleets',seg:'A',mx:58,my:28,bld:'KAZAKHSTAN',region:'CIS',
     intro:`TODO: Long distances, brutal winters, dust. Mining fleets need a lubricant partner who understands the conditions.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Nurlan: "TODO: correct feedback."`},
@@ -588,7 +588,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:42,w:['oil_monitoring','lubricant_mgmt'],r:['push_a_button','goods_loading'],p:'GROW'},
       {t:`TODO: objection 2`,hp:38,w:['network_concept','partnership_activation'],r:['academy','regulatory_label'],p:'GROW'},
     ],rw:{xp:260,gold:120}},
-  {id:14,loc:'Shanghai',co:'China',npc:'Li Wei',rl:'Strategic Accounts',company:'Jinlong Lubricants',v:7,ch:'6 DCs → 1,200 workshops',seg:'A',mx:72,my:32,bld:'CHINA',region:'AP',
+  {id:14,loc:'Shanghai',co:'China',npc:'Li Wei',rl:'Strategic Accounts',company:'Jinlong Lubricants',v:7,ch:'6 DCs → 1,200 workshops',seg:'A',mx:70,my:18,bld:'CHINA',region:'AP',
     intro:`TODO: Local champion wants premium imported brand positioning. Zero tolerance for generic execution.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Li Wei: "TODO: correct feedback."`},
@@ -599,7 +599,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:46,w:['partnership_activation','network_concept'],r:['push_a_button','custom_label'],p:'GROW'},
       {t:`TODO: objection 2`,hp:42,w:['design_studio','trade_fairs'],r:['goods_loading','palletization'],p:'GROW'},
     ],rw:{xp:300,gold:150}},
-  {id:15,loc:'Ho Chi Minh',co:'Vietnam',npc:'Nguyễn Minh',rl:'Sales Manager',company:'Mekong Auto Parts',v:0,ch:'220 scooter + 60 tuk-tuk workshops',seg:'C',mx:74,my:62,bld:'VIETNAM',region:'AP',
+  {id:15,loc:'Ho Chi Minh',co:'Vietnam',npc:'Nguyễn Minh',rl:'Sales Manager',company:'Mekong Auto Parts',v:0,ch:'220 scooter + 60 tuk-tuk workshops',seg:'C',mx:72,my:60,bld:'VIETNAM',region:'AP',
     intro:`TODO: Scooter workshops change oil weekly. High-volume low-margin. Competitors flood with cheap products.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Nguyễn: "TODO: correct feedback."`},
@@ -610,7 +610,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:30,w:['reco_tool','tecdoc'],r:['oil_analysis','trade_fairs'],p:'CONNECT'},
       {t:`TODO: objection 2`,hp:28,w:['push_a_button','content_kits'],r:['design_studio','promo_calendar'],p:'CONNECT'},
     ],rw:{xp:120,gold:50}},
-  {id:16,loc:'Tokyo',co:'Japan',npc:'Takashi Yamamoto',rl:'General Manager',company:'Nihon Lubricants KK',v:1,ch:'140 dealerships + 40 JDM tuners',seg:'A',mx:90,my:24,bld:'JAPAN',region:'AP',
+  {id:16,loc:'Tokyo',co:'Japan',npc:'Takashi Yamamoto',rl:'General Manager',company:'Nihon Lubricants KK',v:1,ch:'140 dealerships + 40 JDM tuners',seg:'A',mx:94,my:12,bld:'JAPAN',region:'AP',
     intro:`TODO: Japanese OEMs demand flawless documentation, zero defects, and lifetime partnership loyalty.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Takashi: "TODO: correct feedback."`},
@@ -621,7 +621,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:44,w:['regulatory_label','custom_label'],r:['marketing_portal','promo_templates'],p:'DELIVER'},
       {t:`TODO: objection 2`,hp:42,w:['connectivity','lead_time'],r:['push_a_button','academy'],p:'DELIVER'},
     ],rw:{xp:300,gold:150}},
-  {id:17,loc:'Sydney',co:'Australia',npc:'Jack Wilson',rl:'Fleet Accounts',company:'Southern Cross Oils',v:2,ch:'3 hubs → 60 mining + fleet accounts',seg:'A',mx:92,my:82,bld:'AUSTRALIA',region:'AP',
+  {id:17,loc:'Sydney',co:'Australia',npc:'Jack Wilson',rl:'Fleet Accounts',company:'Southern Cross Oils',v:2,ch:'3 hubs → 60 mining + fleet accounts',seg:'A',mx:92,my:86,bld:'AUSTRALIA',region:'AP',
     intro:`TODO: Outback mining fleets. Extreme heat. Massive drain intervals. I need lab-backed claims or I lose the contract.`,
     dia:{q:`TODO: What do you probe?`,opts:[
       {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Jack: "TODO: correct feedback."`},
@@ -632,7 +632,7 @@ const ENC=[
       {t:`TODO: objection 1`,hp:42,w:['oil_analysis','oil_monitoring'],r:['content_kits','promo_templates'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:40,w:['co_visits','physical_training'],r:['custom_label','regulatory_label'],p:'ENABLE'},
     ],rw:{xp:280,gold:130}},
-  {id:18,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:40,my:32,bld:'STOCKHOLM',region:'EU',
+  {id:18,loc:'Stockholm',co:'Sweden',npc:'Erik Lindqvist',rl:'Commercial Director',company:'Nordic Oil Distribution',v:1,ch:'80 fleet operators + 45 HD workshops',seg:'B',mx:42,my:8,bld:'STOCKHOLM',region:'EU',
     intro:`I manage 12 sales reps. Commercially excellent — great relationships, strong negotiators. But we're losing fleet tenders. When a fleet manager asks about drain intervals or TCO for 200 trucks, my reps go quiet. Last quarter, a competitor brought a lubricant engineer to the pitch and walked away with €400K in contracts. My reps had nothing to counter. I can't hire 12 engineers. I need my team to hold their ground.`,
     dia:{q:`Erik just lost €400K to a competitor who brought a lubricant engineer to the pitch. Ask the question that uncovers his real problem.`,opts:[
       {t:`When your reps face a deep technical question in a fleet meeting, what actually happens in the room?`,buff:'reduceHp',correct:true,fb:`Erik: "They say 'I'll get back to you' — but by then the competitor has already answered live." — That confidence gap in the moment IS the problem. Now you can position co-visits.`},
@@ -647,7 +647,7 @@ const ENC=[
 ];
 
 // ── BOSS ──
-const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:32,my:50,bld:'AUTOMECHANIKA',region:'EU',isBoss:true,
+const BOSS={id:99,loc:'Frankfurt',co:'AUTOMECHANIKA',npc:'THE BOARD',rl:'Global Buying Alliance',company:'Automechanika 2026',v:11,ch:'Pan-European, 3,000+ garages',seg:'S',mx:32,my:55,bld:'AUTOMECHANIKA',region:'EU',isBoss:true,
   intro:`We represent 12 European countries, 3,000 garages, 200 fleet operators. Shell, Castrol, Fuchs, and Motul already presented this week. Each promised to be a "growth partner." Five challenges. Address them with capabilities, or this meeting ends in 10 minutes.`,
   dia:{q:`The Board has already heard Shell, Castrol, Fuchs and Motul this week. They're cynical. You have ONE question to prove you understand partnership differently.`,opts:[
     {t:`What would a true 360° partnership need to do DIFFERENTLY from your current suppliers to be worth switching volume?`,buff:'reduceHp',correct:true,fb:`Board: "Wrap data, knowledge, and operational tools around OUR business — not bolt your logo on top of ours." — You led with THEIR business. They're leaning in. This is your opening.`},
@@ -2492,7 +2492,11 @@ class OverworldScene extends Phaser.Scene {
  // bounding box so the player only sees one continent at a time.
  applyRegionBounds(){
   const r=REGIONS[this.currentRegion||'EU'];if(!r)return;
-  const x0=p2x(r.x[0]),y0=p2x(r.y[0]),x1=p2x(r.x[1]),y1=p2x(r.y[1]);
+  // Add generous padding (5 tiles = 80px) around the region box so buildings
+  // and airports at the edges aren't clipped by the camera.
+  const pad=TS*5;
+  const x0=Math.max(0,p2x(r.x[0])-pad),y0=Math.max(0,p2x(r.y[0])-pad);
+  const x1=Math.min(MPX,p2x(r.x[1])+pad),y1=Math.min(MPY,p2x(r.y[1])+pad);
   const bw=x1-x0,bh=y1-y0;
   if(this.physics&&this.physics.world)this.physics.world.setBounds(x0,y0,bw,bh);
   if(this.cameras&&this.cameras.main)this.cameras.main.setBounds(x0,y0,bw,bh);
