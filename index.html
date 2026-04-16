@@ -804,14 +804,24 @@ function drawHedge(x,ox,oy){
  x.fillStyle='#0a2a0a';
  x.fillRect(ox+4,oy+4,1,1);x.fillRect(ox+10,oy+5,1,1);x.fillRect(ox+5,oy+9,1,1);x.fillRect(ox+11,oy+10,1,1);
 }
-function drawWater(x,ox,oy){
- x.fillStyle='#1a3a7a';x.fillRect(ox,oy,16,16);
- x.fillStyle='#2a4a9a';x.fillRect(ox+1,oy+1,14,14);
- x.fillStyle='#3a5ab8';
+// Regional water palettes: [base, fill, wave, highlight, sparkle]
+const WATER_PAL={
+ EU : ['#1a3a7a','#2a4a9a','#3a5ab8','#6a8ad8','#e0e8ff'],
+ AM : ['#1a4a6a','#2a5a8a','#3a6aa8','#6a9ac8','#d0e8ff'],
+ MEA: ['#2a5a6a','#3a7a88','#4a9aa0','#7ac0c8','#d0f0f8'], // turquoise oasis
+ CIS: ['#8aa0b8','#a0b8d0','#b8d0e0','#d0e0f0','#f0f4ff'], // icy pale
+ AP : ['#0a3040','#1a4050','#2a5a6a','#4a8890','#80c0c8'], // dark tropical
+ _  : ['#1a3a7a','#2a4a9a','#3a5ab8','#6a8ad8','#e0e8ff'],
+};
+function drawWater(x,ox,oy,pal){
+ const p=pal||WATER_PAL._;
+ x.fillStyle=p[0];x.fillRect(ox,oy,16,16);
+ x.fillStyle=p[1];x.fillRect(ox+1,oy+1,14,14);
+ x.fillStyle=p[2];
  x.fillRect(ox+2,oy+3,5,1);x.fillRect(ox+9,oy+6,4,1);x.fillRect(ox+4,oy+10,5,1);x.fillRect(ox+10,oy+12,3,1);
- x.fillStyle='#6a8ad8';
+ x.fillStyle=p[3];
  x.fillRect(ox+2,oy+3,2,1);x.fillRect(ox+9,oy+6,2,1);x.fillRect(ox+4,oy+10,2,1);
- x.fillStyle='#e0e8ff';
+ x.fillStyle=p[4];
  x.fillRect(ox+2,oy+3,1,1);x.fillRect(ox+9,oy+6,1,1);x.fillRect(ox+4,oy+10,1,1);
 }
 function genGround(scene){
@@ -823,10 +833,24 @@ function genGround(scene){
   const px=(ix/MW)*100,py=(iy/MH)*100;
   const rk=regionAt(px,py);
   if(t===3)drawPath(x,ox,oy,rk?PATH_PAL[rk]:PATH_PAL._);
-  else if(t===4)drawWater(x,ox,oy);
+  else if(t===4)drawWater(x,ox,oy,rk?WATER_PAL[rk]:WATER_PAL._);
   else if(t===5)drawHedge(x,ox,oy);
   else drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
  }
+ // Paint airport runway pads — small asphalt strips baked into the ground
+ Object.keys(REGIONS).forEach(k=>{
+  const r=REGIONS[k];
+  const ax=Math.round(r.ax*MW/100)*TS,ay=Math.round(r.ay*MH/100)*TS;
+  // Tarmac rectangle
+  x.fillStyle='#2a2a30';x.fillRect(ax-40,ay+10,80,14);
+  x.fillStyle='#3a3a42';x.fillRect(ax-40,ay+10,80,1);
+  // Centre line dashes
+  x.fillStyle='#e8e020';
+  for(let i=0;i<9;i++)x.fillRect(ax-36+i*9,ay+16,5,2);
+  // Threshold bars at each end
+  x.fillStyle='#ffffff';
+  for(let i=0;i<3;i++){x.fillRect(ax-38,ay+11+i*4,3,2);x.fillRect(ax+35,ay+11+i*4,3,2)}
+ });
  scene.textures.addCanvas('ground',c);
 }
 // Helper: lighten a #rrggbb hex by mixing toward white by `amt` (0..1)
@@ -3440,10 +3464,11 @@ function App(){
           h('button',{style:btn,onPointerDown:press({x:-1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'◀'),h('div'),h('button',{style:btn,onPointerDown:press({x:1,y:0}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▶'),
           h('div'),h('button',{style:btn,onPointerDown:press({x:0,y:1}),onPointerUp:rel,onPointerLeave:rel,onPointerCancel:rel},'▼'),h('div'))})()),
       // Stats
-      h('div',{className:'ff7 fs-xs',style:{display:'flex',justifyContent:'space-between',marginTop:10,padding:'10px 14px',color:C.mu}},
-        h('span',null,'🏢 '+done.length+'/'+(ENC.length+1)),
+      (()=>{const regEnc=ENC.filter(e=>e.region===currentRegion);const regDone=regEnc.filter(e=>done.includes(e.id)).length;
+       return h('div',{className:'ff7 fs-xs',style:{display:'flex',justifyContent:'space-between',marginTop:10,padding:'10px 14px',color:C.mu}},
+        h('span',null,'🌍 '+regDone+'/'+regEnc.length+' '+((REGIONS[currentRegion]?.nm||'').split(' ')[0])),
         h('span',null,'🎒 '+inv.length+'/33'),
-        h('span',null,'🛒 '+items.length+' items'))));
+        h('span',null,'🛒 '+items.length+' items'))})()));
 }
 
 ReactDOM.createRoot(document.getElementById('R')).render(h(App));
