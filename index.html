@@ -776,6 +776,7 @@ PATH_LINKS=(()=>{
 // WebGL on devices with a 2048-texture limit. 120 tiles × 16 px = 1920.
 const MW=120,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
 const p2x=p=>Math.round(p*MPX/100);
+const p2y=p=>Math.round(p*MPY/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
 // ── LANDMARK BUILDINGS: each distributor gets a city-themed silhouette atop a warehouse base ──
 // Dimensions returned from each draw fn (so physics bodies can size themselves correctly)
@@ -2630,7 +2631,7 @@ class OverworldScene extends Phaser.Scene {
   const ROCK_TINT={EU:[0x555555,0x7a7a7a,0x9a9a9a],AM:[0x705040,0x98745a,0xc09678],MEA:[0x806030,0xa87840,0xd0a060],CIS:[0x8098b0,0xa8c0d8,0xd0e0f0],AP:[0x3a5040,0x588568,0x80b090]};
   const FLWR_TINT={EU:[0xff6eb0,0xffd700,0xff6eb0],AM:[0xf0a020,0xffe060,0xffa040],MEA:[0xff4020,0xffa020,0xff6020],CIS:[0xe0f0ff,0xffffff,0xc0d8f0],AP:[0xff2080,0xffe040,0xff40c0]};
   TREES.forEach(([px,py,rk])=>{
-   const sx=p2x(px),sy=p2x(py);
+   const sx=p2x(px),sy=p2y(py);
    const tree=this.add.image(sx,sy,'tree');
    tree.setOrigin(0.5,0.8);
    tree.setDepth(sy+30);
@@ -2650,7 +2651,7 @@ class OverworldScene extends Phaser.Scene {
    g.fillStyle(c[0],1);g.fillEllipse(0,1,14,5);
    g.fillStyle(c[1],1);g.fillEllipse(0,0,12,4);
    g.fillStyle(c[2],1);g.fillEllipse(-2,-1,4,2);
-   g.setPosition(p2x(px),p2x(py));g.setDepth(p2x(py));
+   g.setPosition(p2x(px),p2y(py));g.setDepth(p2y(py));
    g.regionKey=rk;
    this.decoObjs.push(g);
   });
@@ -2660,7 +2661,7 @@ class OverworldScene extends Phaser.Scene {
    g.fillStyle(c[0],1);g.fillCircle(0,0,3);
    g.fillStyle(c[1],1);g.fillCircle(5,-2,2.5);
    g.fillStyle(c[2],1);g.fillCircle(-4,2,2.5);
-   g.setPosition(p2x(px),p2x(py));g.setDepth(p2x(py));
+   g.setPosition(p2x(px),p2y(py));g.setDepth(p2y(py));
    g.regionKey=rk;
    this.decoObjs.push(g);
   });
@@ -2675,7 +2676,7 @@ class OverworldScene extends Phaser.Scene {
    const nbill=4+Math.floor(prng()*3);
    for(let i=0;i<nbill;i++){
     const tex=i%2===0?'billboard_wolf':'billboard_champ';
-    const bx=p2x(rr(rx0,rx1)),by=p2x(rr(ry0,ry1));
+    const bx=p2x(rr(rx0,rx1)),by=p2y(rr(ry0,ry1));
     const bb=this.add.image(bx,by,tex);
     bb.setOrigin(0.5,0.9);bb.setDepth(by+2);
     bb.regionKey=rk;this.decoObjs.push(bb);
@@ -2685,7 +2686,7 @@ class OverworldScene extends Phaser.Scene {
     for(let d=0;d<2;d++){
      const tex=d===0?'drums_wolf':'drums_champ';
      const ox=p2x(e.mx)+(d===0?-22:22)+Math.round(prng()*6-3);
-     const oy=p2x(e.my)+14+Math.round(prng()*6);
+     const oy=p2y(e.my)+14+Math.round(prng()*6);
      const dr=this.add.image(ox,oy,tex);
      dr.setOrigin(0.5,0.9);dr.setDepth(oy+1);
      dr.regionKey=rk;this.decoObjs.push(dr);
@@ -2695,7 +2696,7 @@ class OverworldScene extends Phaser.Scene {
    const nban=3+Math.floor(prng()*3);
    for(let i=0;i<nban;i++){
     const tex=i%2===0?'banner_wolf':'banner_champ';
-    const bx=p2x(rr(rx0,rx1)),by=p2x(rr(ry0,ry1));
+    const bx=p2x(rr(rx0,rx1)),by=p2y(rr(ry0,ry1));
     const bn=this.add.image(bx,by,tex);
     bn.setOrigin(0.5,0.95);bn.setDepth(by+1);
     bn.regionKey=rk;this.decoObjs.push(bn);
@@ -2703,7 +2704,7 @@ class OverworldScene extends Phaser.Scene {
    // ── Streetlights along paths (4-6 per region) ──
    const nlamp=4+Math.floor(prng()*3);
    for(let i=0;i<nlamp;i++){
-    const lx=p2x(rr(rx0,rx1)),ly=p2x(rr(ry0,ry1));
+    const lx=p2x(rr(rx0,rx1)),ly=p2y(rr(ry0,ry1));
     const lm=this.add.image(lx,ly,'streetlight');
     lm.setOrigin(0.5,0.95);lm.setDepth(ly+1);
     lm.regionKey=rk;this.decoObjs.push(lm);
@@ -2712,7 +2713,7 @@ class OverworldScene extends Phaser.Scene {
    const CAR_TINTS=[0xaa2020,0x2020aa,0x208020,0x808080,0x202020,0xd0d0d0,0xc0a020];
    ENC.filter(e=>e.region===rk).forEach(e=>{
     const cx=p2x(e.mx)+Math.round(prng()*30-15);
-    const cy=p2x(e.my)+20+Math.round(prng()*10);
+    const cy=p2y(e.my)+20+Math.round(prng()*10);
     const pc=this.add.image(cx,cy,'car');
     pc.setFrame(0);
     pc.setTint(CAR_TINTS[Math.floor(prng()*CAR_TINTS.length)]);
@@ -2727,7 +2728,7 @@ class OverworldScene extends Phaser.Scene {
   // Tint palette per distributor (applied to the white van body texture)
   const VAN_TINT={1:0xff4a30,2:0x3060f0,3:0xf0c040,4:0xffffff,5:0xd42020,6:0xffa040,7:0xd08040,8:0x60a060,9:0x3060f0,10:0x40a040,11:0xffd700,12:0x40a0ff,13:0x80c0ff,14:0xff3030,15:0xff6060,16:0xf0f0f0,17:0x1060c0,18:0xc0d8ff,19:0x00a040,20:0xff2020,21:0x008040,22:0xd0a030,23:0x2040c0,24:0x40c0c0,25:0xa04040,26:0xff8020,99:0xffa000};
   ALL.forEach(enc=>{
-   const sx=p2x(enc.mx),sy=p2x(enc.my);
+   const sx=p2x(enc.mx),sy=p2y(enc.my);
    const tex='bld_'+(enc.bld||'BRUSSELS');
    const bld=this.add.image(sx,sy,tex);
    bld.setOrigin(0.5,0.7);
@@ -2763,7 +2764,7 @@ class OverworldScene extends Phaser.Scene {
   this.airportSprites={};
   this.airportBodies=this.physics.add.staticGroup();
   Object.keys(REGIONS).forEach(k=>{
-   const r=REGIONS[k];const sx=p2x(r.ax),sy=p2x(r.ay);
+   const r=REGIONS[k];const sx=p2x(r.ax),sy=p2y(r.ay);
    const ap=this.add.image(sx,sy,'bld_AIRPORT');
    ap.setOrigin(0.5,0.7);
    ap.setData('regionKey',k);
@@ -2796,7 +2797,7 @@ class OverworldScene extends Phaser.Scene {
   });
   // Hero
   // Spawn from saved position (if returning from battle) or default spawn point — default is Europe airport
-  const spawnR=REGIONS[this.currentRegion]||REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(spawnR.ax+2),y:p2x(spawnR.ay+2)};
+  const spawnR=REGIONS[this.currentRegion]||REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(spawnR.ax+2),y:p2y(spawnR.ay+2)};
   this.hero=this.physics.add.sprite(sp.x,sp.y,'hero');
   this.hero.setCollideWorldBounds(true);
   this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);
@@ -2813,7 +2814,7 @@ class OverworldScene extends Phaser.Scene {
   // NPCs
   this.npcSprites={};this.npcState={};
   ENC.forEach(enc=>{
-   const sx=p2x(enc.mx),sy=p2x(enc.my);
+   const sx=p2x(enc.mx),sy=p2y(enc.my);
    const npc=this.physics.add.sprite(sx+15,sy+20,'npc_'+enc.v);
    npc.setData('encId',enc.id);
    npc.body.setSize(10,8);npc.body.setOffset(3,16);
@@ -2825,7 +2826,7 @@ class OverworldScene extends Phaser.Scene {
    this.npcState[enc.id]={hx:sx+15,hy:sy+20,ang:Math.random()*Math.PI*2,t:0,iv:2000+Math.random()*1500};
   });
   // Boss NPC
-  const bsx=p2x(BOSS.mx),bsy=p2x(BOSS.my);
+  const bsx=p2x(BOSS.mx),bsy=p2y(BOSS.my);
   const bn=this.physics.add.sprite(bsx+15,bsy+25,'boss');
   bn.setData('encId',99);
   bn.body.setSize(18,10);bn.body.setOffset(3,12);
@@ -2869,7 +2870,7 @@ class OverworldScene extends Phaser.Scene {
    // Respawn in the region the player was in when they entered battle (stored in Bridge._lastPos)
    const sp=Bridge._lastPos;
    if(sp){this.hero.setPosition(sp.x,sp.y)}
-   else{const rr=REGIONS[this.currentRegion]||REGIONS.EU;this.hero.setPosition(p2x(rr.ax+2),p2x(rr.ay+2))}
+   else{const rr=REGIONS[this.currentRegion]||REGIONS.EU;this.hero.setPosition(p2x(rr.ax+2),p2y(rr.ay+2))}
    this.hero.setVelocity(0,0);
    this.hero.anims.play('hero-idle-down',true);
   });
@@ -2887,7 +2888,7 @@ class OverworldScene extends Phaser.Scene {
    this.cameras.main.fade(220,2,6,23,false);
    this.time.delayedCall(240,()=>{
     // Drop the hero slightly south-east of the airport so they don't re-trigger it
-    this.hero.setPosition(p2x(r.ax+3),p2x(r.ay+3));
+    this.hero.setPosition(p2x(r.ax+3),p2y(r.ay+3));
     this.hero.setVelocity(0,0);
     this.applyRegionBounds();
     this.syncVisibility();
@@ -2905,8 +2906,8 @@ class OverworldScene extends Phaser.Scene {
   // Add generous padding (5 tiles = 80px) around the region box so buildings
   // and airports at the edges aren't clipped by the camera.
   const pad=TS*5;
-  const x0=Math.max(0,p2x(r.x[0])-pad),y0=Math.max(0,p2x(r.y[0])-pad);
-  const x1=Math.min(MPX,p2x(r.x[1])+pad),y1=Math.min(MPY,p2x(r.y[1])+pad);
+  const x0=Math.max(0,p2x(r.x[0])-pad),y0=Math.max(0,p2y(r.y[0])-pad);
+  const x1=Math.min(MPX,p2x(r.x[1])+pad),y1=Math.min(MPY,p2y(r.y[1])+pad);
   const bw=x1-x0,bh=y1-y0;
   if(this.physics&&this.physics.world)this.physics.world.setBounds(x0,y0,bw,bh);
   if(this.cameras&&this.cameras.main)this.cameras.main.setBounds(x0,y0,bw,bh);
@@ -3080,7 +3081,7 @@ class OverworldScene extends Phaser.Scene {
     const dHero=Phaser.Math.Distance.Between(ex,ey,this.hero.x,this.hero.y);
     if(dHero<60)continue;
     let tooNear=false;
-    for(const enc of ALL){const dB=Phaser.Math.Distance.Between(ex,ey,p2x(enc.mx),p2x(enc.my));if(dB<48){tooNear=true;break}}
+    for(const enc of ALL){const dB=Phaser.Math.Distance.Between(ex,ey,p2x(enc.mx),p2y(enc.my));if(dB<48){tooNear=true;break}}
     if(tooNear)continue;
     const ev=this.physics.add.sprite(ex,ey,'ev_'+t);
     ev.setData('type',t);
