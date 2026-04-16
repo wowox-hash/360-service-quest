@@ -768,17 +768,23 @@ function regionAt(px,py){
  for(const k in REGIONS){const r=REGIONS[k];if(px>=r.x[0]&&px<=r.x[1]&&py>=r.y[0]&&py<=r.y[1])return k}
  return null;
 }
-function drawPath(x,ox,oy){
- // Smooth dirt path — soft brown ground, no brick lines
- x.fillStyle='#a07a4a';x.fillRect(ox,oy,16,16);
- // Subtle darker patches (worn-down dirt)
- x.fillStyle='#8a6238';
+// Regional path palettes: [base, dark patch, light patch, pebble]
+const PATH_PAL={
+ EU : ['#808890','#606870','#a0a8b0','#3a3a40'], // cobblestone grey
+ AM : ['#a07a4a','#8a6238','#b89060','#4a2e10'], // dirt trail (default)
+ MEA: ['#d8b870','#b8984a','#f0d898','#8a6a2a'], // desert sand path
+ CIS: ['#c0c8d0','#98a0b0','#e8ecf0','#606878'], // icy gravel
+ AP : ['#887060','#604838','#a88878','#2a1808'], // jungle mud
+ _  : ['#a07a4a','#8a6238','#b89060','#4a2e10'], // fallback
+};
+function drawPath(x,ox,oy,pal){
+ const p=pal||PATH_PAL._;
+ x.fillStyle=p[0];x.fillRect(ox,oy,16,16);
+ x.fillStyle=p[1];
  x.fillRect(ox+2,oy+5,3,1);x.fillRect(ox+9,oy+9,4,1);x.fillRect(ox+4,oy+13,2,1);x.fillRect(ox+11,oy+3,2,1);
- // Lighter sandy spots
- x.fillStyle='#b89060';
+ x.fillStyle=p[2];
  x.fillRect(ox+7,oy+2,2,1);x.fillRect(ox+12,oy+7,2,1);x.fillRect(ox+1,oy+10,2,1);x.fillRect(ox+6,oy+11,1,1);
- // Tiny dark pebbles for texture
- x.fillStyle='#4a2e10';
+ x.fillStyle=p[3];
  x.fillRect(ox+5,oy+7,1,1);x.fillRect(ox+11,oy+13,1,1);x.fillRect(ox+13,oy+5,1,1);x.fillRect(ox+3,oy+3,1,1);
 }
 function drawHedge(x,ox,oy){
@@ -814,15 +820,12 @@ function genGround(scene){
  const x=c.getContext('2d');
  for(let iy=0;iy<MH;iy++)for(let ix=0;ix<MW;ix++){
   const t=m[iy][ix],ox=ix*TS,oy=iy*TS;
-  if(t===3)drawPath(x,ox,oy);
+  const px=(ix/MW)*100,py=(iy/MH)*100;
+  const rk=regionAt(px,py);
+  if(t===3)drawPath(x,ox,oy,rk?PATH_PAL[rk]:PATH_PAL._);
   else if(t===4)drawWater(x,ox,oy);
   else if(t===5)drawHedge(x,ox,oy);
-  else {
-   // Regional tinting: look up which continent this tile belongs to.
-   const px=(ix/MW)*100,py=(iy/MH)*100;
-   const rk=regionAt(px,py);
-   drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
-  }
+  else drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
  }
  scene.textures.addCanvas('ground',c);
 }
@@ -2429,7 +2432,11 @@ class OverworldScene extends Phaser.Scene {
   });
   // Bridge
   Bridge.on('return-to-map',()=>{
-   const euR=REGIONS.EU;this.hero.setPosition(p2x(euR.ax+2),p2x(euR.ay+2));this.hero.setVelocity(0,0);
+   // Respawn in the region the player was in when they entered battle (stored in Bridge._lastPos)
+   const sp=Bridge._lastPos;
+   if(sp){this.hero.setPosition(sp.x,sp.y)}
+   else{const rr=REGIONS[this.currentRegion]||REGIONS.EU;this.hero.setPosition(p2x(rr.ax+2),p2x(rr.ay+2))}
+   this.hero.setVelocity(0,0);
    this.hero.anims.play('hero-idle-down',true);
   });
   Bridge.on('game-state-sync',(d)=>{
@@ -3262,11 +3269,14 @@ function App(){
       h('div',{className:'fs-sm',style:{fontWeight:600,color:C.tx,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},nm),
       h('div',{className:'pf',style:{color:C.gold,fontSize:12}},'💰'+gold),
       h('button',{onClick:()=>setSndOn(!sndOn),style:{background:'none',border:'none',fontSize:18,cursor:'pointer',padding:4}},sndOn?'🔊':'🔇')),
-    // Quest log line
-    h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:4,padding:'2px 8px'}},
+    // Quest log line (region-aware)
+    (()=>{
+      const rg=REGIONS[currentRegion];const regEnc=ENC.filter(e=>e.region===currentRegion);const regDone=regEnc.filter(e=>done.includes(e.id)).length;
+      return h('div',{className:'fs-xs',style:{textAlign:'center',color:C.mu,marginTop:4,padding:'2px 8px'}},
       done.includes(99)?'👑 You are the 360° Sales Champion!':
-      done.length>=ENC.length?'⚠ Boss unlocked at the south arena':
-      '📋 Cleared '+done.length+'/'+ENC.length+' distributors · '+(ENC.length-done.length)+' until boss'),
+      done.length>=ENC.length?'⚠ Boss unlocked! Find Automechanika in Europe':
+      (rg?.nm||'?')+': '+regDone+'/'+regEnc.length+' cleared · Global: '+done.length+'/'+ENC.length+' · '+(ENC.length-done.length)+' until boss')
+    })(),
     // Vehicle selector (only shown if player owns at least one vehicle)
     (hasCar||hasBike)&&h('div',{style:{display:'flex',gap:6,justifyContent:'center',marginTop:6}},
       h('button',{onClick:()=>setVehicle(null),disabled:vehicle===null,style:{background:vehicle===null?'rgba(255,215,0,.2)':'rgba(12,24,96,.6)',border:vehicle===null?'2px solid #FFD700':'1px solid #7a96ff',borderRadius:6,padding:'4px 10px',fontSize:16,cursor:vehicle===null?'default':'pointer',color:C.tx}},'🚶'),
@@ -3395,6 +3405,9 @@ function App(){
           h('div',{className:'fs-sm',style:{color:'#fff'}},evPopup.msg))),
       h('div',{className:'ff7',style:{position:'relative',height:460,marginTop:8,overflow:'hidden'}},
         h('div',{id:'phaser-map',style:{position:'absolute',inset:0}}),
+        // ── Region name badge (top-center) ──
+        (()=>{const rg=REGIONS[currentRegion];return h('div',{style:{position:'absolute',top:8,left:'50%',transform:'translateX(-50%)',zIndex:15,pointerEvents:'none'}},
+          h('div',{className:'pf',style:{fontSize:8,color:'#fff',textAlign:'center',letterSpacing:2,textShadow:'2px 2px 0 #000, 0 0 8px '+(rg?.col||'#FFD700'),padding:'4px 12px',background:'rgba(2,6,23,.65)',borderRadius:6,border:'1px solid '+(rg?.col||'#7a96ff')+'88'}},rg?.nm||''))})(),
         // ── PAUSE button (top-left) ──
         h('button',{onClick:()=>{setPaused(true);snd('blip')},className:'btn-press',title:'Pause (ESC)',style:{position:'absolute',top:8,left:8,width:42,height:42,background:'linear-gradient(180deg,rgba(26,42,128,.9),rgba(6,16,48,.95))',border:'2px solid #7a96ff',borderRadius:8,color:'#e8f0ff',cursor:'pointer',zIndex:15,fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 0 0 1px rgba(122,150,255,.4),0 8px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)'}},'⏸'),
         // ── MINIMAP overlay (top-right of overworld) ──
