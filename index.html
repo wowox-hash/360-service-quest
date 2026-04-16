@@ -2019,6 +2019,118 @@ function genTreeTex(scene){
  x.beginPath();x.arc(19,14,3,0,Math.PI*2);x.fill();
  scene.textures.addCanvas('tree',c);
 }
+// ── WOLF billboard (24×18 navy sign on a wooden pole) ──
+function genBillboardWolfTex(scene){
+ const c=document.createElement('canvas');c.width=24;c.height=28;
+ const x=c.getContext('2d');
+ // Pole
+ x.fillStyle='#5a3a1a';x.fillRect(11,14,2,14);
+ x.fillStyle='#7a5a2a';x.fillRect(11,14,1,14);
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.3)';x.fillRect(8,27,8,1);
+ // Sign board (navy)
+ x.fillStyle='#0a1a3a';x.fillRect(1,1,22,14);
+ x.fillStyle='#1a3a6a';x.fillRect(2,2,20,12);
+ // Simplified "W" logo in white
+ x.fillStyle='#ffffff';
+ x.fillRect(4,4,1,6);x.fillRect(5,9,1,1);x.fillRect(6,7,1,2);x.fillRect(7,9,1,1);x.fillRect(8,4,1,6);
+ // "WOLF" pixel text (tiny)
+ x.fillStyle='#d0d8ff';
+ x.fillRect(11,5,1,5);x.fillRect(12,9,1,1);x.fillRect(13,7,1,1);x.fillRect(14,9,1,1);x.fillRect(15,5,1,5);// W
+ x.fillRect(17,5,3,1);x.fillRect(17,5,1,5);x.fillRect(17,9,3,1);x.fillRect(19,5,1,5);// O shape hint
+ // Top-left gold corner accent
+ x.fillStyle='#FFD700';x.fillRect(1,1,3,1);x.fillRect(1,1,1,3);
+ scene.textures.addCanvas('billboard_wolf',c);
+}
+// ── CHAMPION billboard (24×18 red sign on pole) ──
+function genBillboardChampTex(scene){
+ const c=document.createElement('canvas');c.width=24;c.height=28;
+ const x=c.getContext('2d');
+ // Pole
+ x.fillStyle='#5a3a1a';x.fillRect(11,14,2,14);
+ x.fillStyle='#7a5a2a';x.fillRect(11,14,1,14);
+ x.fillStyle='rgba(0,0,0,.3)';x.fillRect(8,27,8,1);
+ // Sign board (red)
+ x.fillStyle='#1a0000';x.fillRect(1,1,22,14);
+ x.fillStyle='#d02020';x.fillRect(2,2,20,12);
+ // "CHAMP" pixel text in white (abbreviated to fit)
+ x.fillStyle='#ffffff';
+ // C
+ x.fillRect(3,4,1,6);x.fillRect(4,4,2,1);x.fillRect(4,9,2,1);
+ // H
+ x.fillRect(7,4,1,6);x.fillRect(8,7,1,1);x.fillRect(9,4,1,6);
+ // A
+ x.fillRect(11,4,1,6);x.fillRect(12,4,1,1);x.fillRect(13,4,1,6);x.fillRect(12,7,1,1);
+ // M
+ x.fillRect(15,4,1,6);x.fillRect(16,5,1,1);x.fillRect(17,4,1,6);
+ // P
+ x.fillRect(19,4,1,6);x.fillRect(20,4,1,1);x.fillRect(20,6,1,1);x.fillRect(21,4,1,3);
+ // Gold corner
+ x.fillStyle='#FFD700';x.fillRect(1,1,3,1);x.fillRect(1,1,1,3);
+ scene.textures.addCanvas('billboard_champ',c);
+}
+// ── Oil drums (16×12 cluster: 3 barrels with brand color stripe) ──
+function genDrumTex(scene,key,stripeC){
+ const c=document.createElement('canvas');c.width=16;c.height=14;
+ const x=c.getContext('2d');
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.3)';x.fillRect(1,13,14,1);
+ // 3 drum cylinders side by side
+ [0,5,10].forEach(ox=>{
+  x.fillStyle='#3a3a3a';x.fillRect(ox+1,3,4,10);
+  x.fillStyle='#5a5a5a';x.fillRect(ox+1,3,4,1); // rim
+  x.fillStyle='#4a4a4a';x.fillRect(ox+1,12,4,1); // bottom
+  x.fillStyle=stripeC;x.fillRect(ox+1,6,4,3); // brand stripe
+  x.fillStyle='#6a6a6a';x.fillRect(ox+2,3,1,1); // highlight
+ });
+ scene.textures.addCanvas(key,c);
+}
+// ── Banner pole (8×24 thin pole + triangular pennant) ──
+function genBannerTex(scene,key,flagC){
+ const c=document.createElement('canvas');c.width=12;c.height=28;
+ const x=c.getContext('2d');
+ // Pole
+ x.fillStyle='#6a6a6a';x.fillRect(5,4,2,24);
+ x.fillStyle='#8a8a8a';x.fillRect(5,4,1,24);
+ // Ball finial
+ x.fillStyle='#FFD700';x.fillRect(4,2,4,3);x.fillRect(5,1,2,1);
+ // Triangular pennant (blowing right)
+ x.fillStyle=flagC;
+ x.fillRect(7,5,4,1);x.fillRect(7,6,3,1);x.fillRect(7,7,2,1);x.fillRect(7,8,1,1);
+ // Small logo dot on flag
+ x.fillStyle='#ffffff';x.fillRect(8,6,1,1);
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.25)';x.fillRect(3,27,6,1);
+ scene.textures.addCanvas(key,c);
+}
+// ── Streetlight (8×28 lamp post with glow circle) ──
+function genLightTex(scene){
+ const c=document.createElement('canvas');c.width=16;c.height=32;
+ const x=c.getContext('2d');
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.25)';x.fillRect(5,30,6,2);
+ // Pole
+ x.fillStyle='#3a3a3a';x.fillRect(7,8,2,24);
+ x.fillStyle='#5a5a5a';x.fillRect(7,8,1,24);
+ // Base
+ x.fillStyle='#2a2a2a';x.fillRect(5,30,6,2);
+ x.fillStyle='#4a4a4a';x.fillRect(5,30,6,1);
+ // Lamp housing
+ x.fillStyle='#2a2a2a';x.fillRect(4,4,8,5);
+ x.fillStyle='#3a3a3a';x.fillRect(4,4,8,1);
+ // Glowing bulb
+ x.fillStyle='#ffe880';x.fillRect(5,5,6,3);
+ x.fillStyle='#fff8c0';x.fillRect(6,5,4,2);
+ // Glow halo (radial soft)
+ x.fillStyle='rgba(255,240,160,.2)';x.beginPath();x.arc(8,6,7,0,Math.PI*2);x.fill();
+ x.fillStyle='rgba(255,240,160,.1)';x.beginPath();x.arc(8,6,10,0,Math.PI*2);x.fill();
+ // Cap
+ x.fillStyle='#1a1a1a';x.fillRect(5,3,6,2);
+ scene.textures.addCanvas('streetlight',c);
+}
+// ── Parked car (reuses car texture but static, no anim) — just register alias ──
+// (We'll reuse the existing 'car' spritesheet frame 0 for parked cars.)
+
 function genHeroTex(scene){
  const FW=16,FH=24;
  const c=document.createElement('canvas');c.width=FW*3;c.height=FH*4;
@@ -2246,6 +2358,10 @@ class BootScene extends Phaser.Scene {
  create(){
   try{
    genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);genPlaneTex(this);
+  genBillboardWolfTex(this);genBillboardChampTex(this);
+  genDrumTex(this,'drums_wolf','#1a3a6a');genDrumTex(this,'drums_champ','#d02020');
+  genBannerTex(this,'banner_wolf','#1a3a6a');genBannerTex(this,'banner_champ','#d02020');
+  genLightTex(this);
    this.scene.start('Overworld');
   }catch(e){Bridge.emit('phaser-error',{msg:'Boot: '+(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}
  }
@@ -2310,6 +2426,63 @@ class OverworldScene extends Phaser.Scene {
    g.setPosition(p2x(px),p2x(py));g.setDepth(p2x(py));
    g.regionKey=rk;
    this.decoObjs.push(g);
+  });
+  // ── WORLD PROPS: billboards, drums, banners, streetlights, parked cars ──
+  // Use a deterministic RNG seeded per region for consistent placement.
+  const prng=(s=>()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff})(1337);
+  Object.keys(REGIONS).forEach(rk=>{
+   const r=REGIONS[rk];
+   const rx0=r.x[0]+2,rx1=r.x[1]-2,ry0=r.y[0]+3,ry1=r.y[1]-3;
+   const rr=(lo,hi)=>lo+prng()*(hi-lo);
+   // ── Billboards (alternating Wolf / Champion, 4-6 per region) ──
+   const nbill=4+Math.floor(prng()*3);
+   for(let i=0;i<nbill;i++){
+    const tex=i%2===0?'billboard_wolf':'billboard_champ';
+    const bx=p2x(rr(rx0,rx1)),by=p2x(rr(ry0,ry1));
+    const bb=this.add.image(bx,by,tex);
+    bb.setOrigin(0.5,0.9);bb.setDepth(by+2);
+    bb.regionKey=rk;this.decoObjs.push(bb);
+   }
+   // ── Oil drums near each distributor building (2 clusters per building) ──
+   ENC.filter(e=>e.region===rk).forEach(e=>{
+    for(let d=0;d<2;d++){
+     const tex=d===0?'drums_wolf':'drums_champ';
+     const ox=p2x(e.mx)+(d===0?-22:22)+Math.round(prng()*6-3);
+     const oy=p2x(e.my)+14+Math.round(prng()*6);
+     const dr=this.add.image(ox,oy,tex);
+     dr.setOrigin(0.5,0.9);dr.setDepth(oy+1);
+     dr.regionKey=rk;this.decoObjs.push(dr);
+    }
+   });
+   // ── Banner poles along path midpoints (3-5 per region) ──
+   const nban=3+Math.floor(prng()*3);
+   for(let i=0;i<nban;i++){
+    const tex=i%2===0?'banner_wolf':'banner_champ';
+    const bx=p2x(rr(rx0,rx1)),by=p2x(rr(ry0,ry1));
+    const bn=this.add.image(bx,by,tex);
+    bn.setOrigin(0.5,0.95);bn.setDepth(by+1);
+    bn.regionKey=rk;this.decoObjs.push(bn);
+   }
+   // ── Streetlights along paths (4-6 per region) ──
+   const nlamp=4+Math.floor(prng()*3);
+   for(let i=0;i<nlamp;i++){
+    const lx=p2x(rr(rx0,rx1)),ly=p2x(rr(ry0,ry1));
+    const lm=this.add.image(lx,ly,'streetlight');
+    lm.setOrigin(0.5,0.95);lm.setDepth(ly+1);
+    lm.regionKey=rk;this.decoObjs.push(lm);
+   }
+   // ── Parked cars near buildings (1 per distributor, random tint) ──
+   const CAR_TINTS=[0xaa2020,0x2020aa,0x208020,0x808080,0x202020,0xd0d0d0,0xc0a020];
+   ENC.filter(e=>e.region===rk).forEach(e=>{
+    const cx=p2x(e.mx)+Math.round(prng()*30-15);
+    const cy=p2x(e.my)+20+Math.round(prng()*10);
+    const pc=this.add.image(cx,cy,'car');
+    pc.setFrame(0);
+    pc.setTint(CAR_TINTS[Math.floor(prng()*CAR_TINTS.length)]);
+    pc.setRotation(prng()*Math.PI*2);
+    pc.setOrigin(0.5,0.5);pc.setDepth(cy);
+    pc.regionKey=rk;this.decoObjs.push(pc);
+   });
   });
   // Buildings
   this.bldSprites={};this.bldBodies=this.physics.add.staticGroup();
