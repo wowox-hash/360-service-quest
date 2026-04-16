@@ -2289,68 +2289,55 @@ function genTreeTex(scene){
  scene.textures.addCanvas('tree',c);
 }
 // ── WOLF billboard (24×18 navy sign on a wooden pole) ──
-// ── WOLF billboard (48×40 — large enough to read at zoom 1.6) ──
+// ── WOLF billboard (64×56 — navy sign with big WOLF text on wooden frame) ──
 function genBillboardWolfTex(scene){
- const c=document.createElement('canvas');c.width=48;c.height=48;
+ const c=document.createElement('canvas');c.width=64;c.height=56;
  const x=c.getContext('2d');
  // Two wooden poles
- x.fillStyle='#5a3a1a';x.fillRect(10,24,3,24);x.fillRect(35,24,3,24);
- x.fillStyle='#7a5a2a';x.fillRect(10,24,1,24);x.fillRect(35,24,1,24);
- // Shadow
- x.fillStyle='rgba(0,0,0,.3)';x.fillRect(6,46,36,2);
- // Sign board (navy with gold border)
- x.fillStyle='#FFD700';x.fillRect(2,2,44,24);
- x.fillStyle='#0a1a3a';x.fillRect(3,3,42,22);
- x.fillStyle='#1a3a6a';x.fillRect(4,4,40,20);
- // "WOLF" text — larger pixel letters (each ~6px wide, 7px tall)
+ x.fillStyle='#5a3a1a';x.fillRect(14,32,3,24);x.fillRect(47,32,3,24);
+ x.fillStyle='#7a5a2a';x.fillRect(14,32,1,24);x.fillRect(47,32,1,24);
+ x.fillStyle='rgba(0,0,0,.3)';x.fillRect(10,54,44,2);
+ // Sign board — gold outer frame, navy fill
+ x.fillStyle='#FFD700';x.fillRect(2,2,60,32);
+ x.fillStyle='#0a1a3a';x.fillRect(4,4,56,28);
+ x.fillStyle='#1a3a6a';x.fillRect(5,5,54,26);
+ // "WOLF" in big bold pixel letters (each ~10px wide, 12px tall)
  x.fillStyle='#ffffff';
+ const ly=9,lh=12;
  // W
- x.fillRect(6,7,2,8);x.fillRect(8,13,1,2);x.fillRect(9,11,2,2);x.fillRect(11,13,1,2);x.fillRect(12,7,2,8);
+ x.fillRect(7,ly,2,lh);x.fillRect(9,ly+lh-2,2,2);x.fillRect(11,ly+lh-4,2,2);x.fillRect(13,ly+lh-2,2,2);x.fillRect(15,ly,2,lh);
  // O
- x.fillRect(16,7,1,8);x.fillRect(22,7,1,8);x.fillRect(17,7,5,1);x.fillRect(17,14,5,1);
+ x.fillRect(19,ly,2,lh);x.fillRect(27,ly,2,lh);x.fillRect(21,ly,6,2);x.fillRect(21,ly+lh-2,6,2);
  // L
- x.fillRect(25,7,1,8);x.fillRect(26,14,5,1);
+ x.fillRect(31,ly,2,lh);x.fillRect(33,ly+lh-2,8,2);
  // F
- x.fillRect(32,7,1,8);x.fillRect(33,7,5,1);x.fillRect(33,11,4,1);
- // Small "LUBRICANTS" text below (very tiny, just dots pattern)
- x.fillStyle='#8090c0';
- for(let i=0;i<18;i++){x.fillRect(8+i*2,18,1,1)}
- // Glowing edge highlight
- x.fillStyle='#FFD700';x.fillRect(2,2,44,1);x.fillRect(2,2,1,24);
+ x.fillRect(43,ly,2,lh);x.fillRect(45,ly,8,2);x.fillRect(45,ly+5,6,2);
+ // "LUBRICANTS" text below in smaller dots
+ x.fillStyle='#8090c0';x.font='5px sans-serif';x.fillText('LUBRICANTS',12,28);
+ // Edge highlight
+ x.fillStyle='#FFD700';x.fillRect(2,2,60,1);x.fillRect(2,33,60,1);
  scene.textures.addCanvas('billboard_wolf',c);
 }
-// ── CHAMPION billboard (48×40 — red panel, white text) ──
+// ── CHAMPION billboard (64×56 — red sign with big CHAMPION text) ──
 function genBillboardChampTex(scene){
- const c=document.createElement('canvas');c.width=48;c.height=48;
+ const c=document.createElement('canvas');c.width=64;c.height=56;
  const x=c.getContext('2d');
  // Two wooden poles
- x.fillStyle='#5a3a1a';x.fillRect(10,24,3,24);x.fillRect(35,24,3,24);
- x.fillStyle='#7a5a2a';x.fillRect(10,24,1,24);x.fillRect(35,24,1,24);
- x.fillStyle='rgba(0,0,0,.3)';x.fillRect(6,46,36,2);
- // Sign board (red with white border)
- x.fillStyle='#ffffff';x.fillRect(2,2,44,24);
- x.fillStyle='#a01010';x.fillRect(3,3,42,22);
- x.fillStyle='#d02020';x.fillRect(4,4,40,20);
- // "CHAMP" in large white pixel letters
- x.fillStyle='#ffffff';
- // C
- x.fillRect(5,7,1,8);x.fillRect(6,7,4,1);x.fillRect(6,14,4,1);
- // H
- x.fillRect(11,7,1,8);x.fillRect(12,11,3,1);x.fillRect(15,7,1,8);
- // A
- x.fillRect(18,7,1,8);x.fillRect(19,7,3,1);x.fillRect(22,7,1,8);x.fillRect(19,11,3,1);
- // M
- x.fillRect(25,7,1,8);x.fillRect(26,8,1,1);x.fillRect(27,9,1,1);x.fillRect(28,8,1,1);x.fillRect(29,7,1,8);
- // ION text smaller
- x.fillStyle='#ffcccc';
- x.fillRect(32,8,1,6);// I
- x.fillRect(34,8,1,6);x.fillRect(35,8,3,1);x.fillRect(35,13,3,1);x.fillRect(37,8,1,6);// O
- x.fillRect(39,8,1,6);x.fillRect(40,8,1,1);x.fillRect(41,8,1,6);// N
- // "LUBRICANTS" dots below
- x.fillStyle='#ff8080';
- for(let i=0;i<18;i++){x.fillRect(8+i*2,18,1,1)}
- // Top highlight
- x.fillStyle='#ffffff';x.fillRect(2,2,44,1);x.fillRect(2,2,1,24);
+ x.fillStyle='#5a3a1a';x.fillRect(14,32,3,24);x.fillRect(47,32,3,24);
+ x.fillStyle='#7a5a2a';x.fillRect(14,32,1,24);x.fillRect(47,32,1,24);
+ x.fillStyle='rgba(0,0,0,.3)';x.fillRect(10,54,44,2);
+ // Sign board — white outer frame, red fill
+ x.fillStyle='#ffffff';x.fillRect(2,2,60,32);
+ x.fillStyle='#b01010';x.fillRect(4,4,56,28);
+ x.fillStyle='#d02020';x.fillRect(5,5,54,26);
+ // "CHAMPION" using ctx.fillText for readability
+ x.fillStyle='#ffffff';x.font='bold 10px sans-serif';x.textAlign='center';
+ x.fillText('CHAMPION',32,18);
+ // "LUBRICANTS" below
+ x.fillStyle='#ffcccc';x.font='5px sans-serif';
+ x.fillText('LUBRICANTS',32,27);
+ // Edge highlights
+ x.fillStyle='#ffffff';x.fillRect(2,2,60,1);x.fillRect(2,33,60,1);
  scene.textures.addCanvas('billboard_champ',c);
 }
 // ── Oil drums (16×12 cluster: 3 barrels with brand color stripe) ──
@@ -2654,8 +2641,10 @@ class OverworldScene extends Phaser.Scene {
  constructor(){super('Overworld')}
  create(){try{this._create()}catch(e){Bridge.emit('phaser-error',{msg:String(e&&e.message||e),stack:String(e&&e.stack||'').split('\n').slice(0,5).join(' | ')})}}
  _create(){
-  this.doneIds=[];this.playerLv=1;this.bossReady=false;this.vehicle=null;this.dpadDir={x:0,y:0};this.lastDir='down';
-  this.currentRegion='EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
+  // Read initial state from Bridge (set synchronously by React before Phaser starts)
+  const init=Bridge._initState||{};
+  this.doneIds=init.done||[];this.playerLv=init.lv||1;this.bossReady=init.bossReady||false;this.vehicle=init.vehicle||null;this.dpadDir={x:0,y:0};this.lastDir='down';
+  this.currentRegion=init.currentRegion||'EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
   for(let ci=0;ci<GROUND_COLS;ci++){const gx=ci*CHUNK_W+CHUNK_W/2;const g=this.add.image(gx,MPY/2,'ground_'+ci);g.setDepth(-1000)}
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
   // Hedge + water collision bodies (from MAP_DATA)
@@ -3367,7 +3356,10 @@ function App(){
     physics:{default:'arcade',arcade:{gravity:{y:0},debug:false}},
     scene:[BootScene,OverworldScene]
    });
-   setTimeout(()=>Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion}),250);
+   // Store state on Bridge so the scene can read it synchronously in create()
+   Bridge._initState={done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion};
+   // Immediate sync so the scene picks up the correct region
+   Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion});
   },[ph,tab]);
   // ── PHASER: push game state to scene ──
   useEffect(()=>{Bridge.emit('game-state-sync',{done,lv,bossReady:done.length>=ENC.length,vehicle,currentRegion})},[done,lv,vehicle,currentRegion]);
