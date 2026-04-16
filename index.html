@@ -2884,7 +2884,7 @@ class OverworldScene extends Phaser.Scene {
   });
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
-  this.cameras.main.setZoom(1.2);
+  this.cameras.main.setZoom(1.5);
   this.applyRegionBounds();
   // Input
   this.cursors=this.input.keyboard.createCursorKeys();
@@ -2932,6 +2932,8 @@ class OverworldScene extends Phaser.Scene {
    });
   });
   this.syncVisibility();
+  // Emit initial hero position so the minimap is correct from frame 1
+  Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100});
  }
  // Constrain the physics world + camera bounds to the currently-active region's
  // bounding box so the player only sees one continent at a time.
@@ -3224,7 +3226,7 @@ function App(){
   const [achs,setAchs]=useState([]);
   const [achPop,setAchPop]=useState(null);
   const [evPopup,setEvPopup]=useState(null);
-  const [heroMapPos,setHeroMapPos]=useState({x:50,y:92});
+  const [heroMapPos,setHeroMapPos]=useState({x:REGIONS.EU.ax,y:REGIONS.EU.ay});
   const [mapOpen,setMapOpen]=useState(false);
   const [paused,setPaused]=useState(false);
   const [airport,setAirport]=useState(null);
@@ -3339,7 +3341,7 @@ function App(){
    const destroy=()=>{
     if(phaserRef.current){try{phaserRef.current.destroy(true)}catch(e){}phaserRef.current=null}
     // Clear stale Bridge listeners so they don't accumulate
-    delete Bridge._l['return-to-map'];delete Bridge._l['game-state-sync'];delete Bridge._l['dpad'];
+    delete Bridge._l['return-to-map'];delete Bridge._l['game-state-sync'];delete Bridge._l['dpad'];delete Bridge._l['airport-travel'];
    };
    const onMap=ph==='map'&&tab==='map';
    if(!onMap){destroy();return}
