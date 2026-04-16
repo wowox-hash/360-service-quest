@@ -774,9 +774,11 @@ PATH_LINKS=(()=>{
 // ═══════════════════════════════════════
 // NOTE: MW * TS must stay ≤ 2048 so the ground canvas uploads cleanly to
 // WebGL on devices with a 2048-texture limit. 120 tiles × 16 px = 1920.
-// Max tile dimensions: MW*TS ≤ 2048 for WebGL compat.
-// 128*16=2048 (exact limit). MH*16=1600 (well under).
-const MW=128,MH=100,TS=16,MPX=MW*TS,MPY=MH*TS;
+// Ground is split into horizontal chunks so each texture stays ≤ 2048px
+// for WebGL compatibility. This lets the world be much wider than 2048px.
+const MW=384,MH=120,TS=16,MPX=MW*TS,MPY=MH*TS;
+const GROUND_COLS=Math.ceil(MPX/2048); // number of horizontal chunks
+const CHUNK_W=Math.ceil(MPX/GROUND_COLS);
 const p2x=p=>Math.round(p*MPX/100);
 const p2y=p=>Math.round(p*MPY/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
@@ -919,10 +921,19 @@ function drawWater(x,ox,oy,pal){
 }
 function genGround(scene){
  const m=genMapData();MAP_DATA=m;
- const c=document.createElement('canvas');c.width=MPX;c.height=MPY;
- const x=c.getContext('2d');
+ // Render tiles onto per-chunk canvases (each ≤ 2048px wide) so the world
+ // can exceed the WebGL MAX_TEXTURE_SIZE limit.
+ const chunks=[];
+ for(let ci=0;ci<GROUND_COLS;ci++){
+  const cw=Math.min(CHUNK_W,MPX-ci*CHUNK_W);
+  const c=document.createElement('canvas');c.width=cw;c.height=MPY;
+  chunks.push(c);
+ }
  for(let iy=0;iy<MH;iy++)for(let ix=0;ix<MW;ix++){
-  const t=m[iy][ix],ox=ix*TS,oy=iy*TS;
+  const t=m[iy][ix],worldX=ix*TS,oy=iy*TS;
+  const ci=Math.min(Math.floor(worldX/CHUNK_W),GROUND_COLS-1);
+  const ox=worldX-ci*CHUNK_W;
+  const x=chunks[ci].getContext('2d');
   const px=(ix/MW)*100,py=(iy/MH)*100;
   const rk=regionAt(px,py);
   if(t===3)drawPath(x,ox,oy,rk?PATH_PAL[rk]:PATH_PAL._);
@@ -930,21 +941,23 @@ function genGround(scene){
   else if(t===5)drawHedge(x,ox,oy);
   else drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
  }
- // Paint airport runway pads — small asphalt strips baked into the ground
+ // Airport runway pads
  Object.keys(REGIONS).forEach(k=>{
   const r=REGIONS[k];
   const ax=Math.round(r.ax*MW/100)*TS,ay=Math.round(r.ay*MH/100)*TS;
-  // Tarmac rectangle
-  x.fillStyle='#2a2a30';x.fillRect(ax-40,ay+10,80,14);
-  x.fillStyle='#3a3a42';x.fillRect(ax-40,ay+10,80,1);
-  // Centre line dashes
+  const ci=Math.min(Math.floor(ax/CHUNK_W),GROUND_COLS-1);
+  const lx=ax-ci*CHUNK_W;
+  const x=chunks[ci].getContext('2d');
+  x.fillStyle='#2a2a30';x.fillRect(lx-40,ay+10,80,14);
+  x.fillStyle='#3a3a42';x.fillRect(lx-40,ay+10,80,1);
   x.fillStyle='#e8e020';
-  for(let i=0;i<9;i++)x.fillRect(ax-36+i*9,ay+16,5,2);
-  // Threshold bars at each end
+  for(let i=0;i<9;i++)x.fillRect(lx-36+i*9,ay+16,5,2);
   x.fillStyle='#ffffff';
-  for(let i=0;i<3;i++){x.fillRect(ax-38,ay+11+i*4,3,2);x.fillRect(ax+35,ay+11+i*4,3,2)}
+  for(let i=0;i<3;i++){x.fillRect(lx-38,ay+11+i*4,3,2);x.fillRect(lx+35,ay+11+i*4,3,2)}
  });
- scene.textures.addCanvas('ground',c);
+ for(let ci=0;ci<GROUND_COLS;ci++){
+  scene.textures.addCanvas('ground_'+ci,chunks[ci]);
+ }
 }
 // Helper: lighten a #rrggbb hex by mixing toward white by `amt` (0..1)
 function lighten(hex,amt){
@@ -2643,7 +2656,7 @@ class OverworldScene extends Phaser.Scene {
  _create(){
   this.doneIds=[];this.playerLv=1;this.bossReady=false;this.vehicle=null;this.dpadDir={x:0,y:0};this.lastDir='down';
   this.currentRegion='EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
-  const groundImg=this.add.image(MPX/2,MPY/2,'ground');groundImg.setDepth(-1000);
+  for(let ci=0;ci<GROUND_COLS;ci++){const gx=ci*CHUNK_W+CHUNK_W/2;const g=this.add.image(gx,MPY/2,'ground_'+ci);g.setDepth(-1000)}
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
   // Hedge + water collision bodies (from MAP_DATA)
   this.hedgeGroup=this.physics.add.staticGroup();
@@ -3002,7 +3015,7 @@ class OverworldScene extends Phaser.Scene {
   this.posTimer=(this.posTimer||0)+delta;
   if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
   if(this.airportCooldown>0)this.airportCooldown-=delta;
-  const sp=this.vehicle==='car'?160:this.vehicle==='bike'?100:42;
+  const sp=this.vehicle==='car'?320:this.vehicle==='bike'?200:80;
   let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
   else if(this.cursors.right.isDown||this.wasd.D.isDown||this.dpadDir.x>0)vx=sp;
