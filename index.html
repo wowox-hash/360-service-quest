@@ -666,12 +666,12 @@ const ENC=[
       {t:`TODO: objection 1`,hp:34,w:['physical_training','academy'],r:['promo_templates','custom_label'],p:'ENABLE'},
       {t:`TODO: objection 2`,hp:32,w:['co_visits','oil_analysis'],r:['marketing_portal','goods_loading'],p:'ENABLE'},
     ],rw:{xp:180,gold:75}},
-  {id:23,loc:'Moscow',co:'Russia',npc:'Dmitri Volkov',rl:'CEO',company:'RusOil Distribution',v:2,ch:'8 DCs → 600 workshops + 200 fleets',seg:'B',mx:52,my:8,bld:'MOSCOW',region:'CIS',
-    intro:`TODO: Largest distributor in CIS. Wants Wolf as a premium import brand to differentiate from local producers.`,
+  {id:23,loc:'Baku',co:'Azerbaijan',npc:'Elchin Mammadov',rl:'CEO',company:'Caspian Petrol Group',v:2,ch:'4 DCs → 250 workshops + 80 fleets',seg:'B',mx:52,my:8,bld:'AZERBAIJAN',region:'CIS',
+    intro:`TODO: Oil-rich Azerbaijan wants premium European lubricant brands. Local competitors undercut on price — I need differentiation.`,
     dia:{q:`TODO: What do you probe?`,opts:[
-      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Dmitri: "TODO: correct feedback."`},
-      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Dmitri: "TODO: wrong feedback."`},
-      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Dmitri: "TODO: shallow feedback."`},
+      {t:`TODO: correct probe`,buff:'reduceHp',correct:true,fb:`Elchin: "TODO: correct feedback."`},
+      {t:`TODO: wrong probe`,buff:'boostEnemy',correct:false,fb:`Elchin: "TODO: wrong feedback."`},
+      {t:`TODO: shallow probe`,buff:null,correct:false,fb:`Elchin: "TODO: shallow feedback."`},
     ]},
     objs:[
       {t:`TODO: objection 1`,hp:36,w:['partnership_activation','trade_fairs'],r:['push_a_button','custom_label'],p:'GROW'},
@@ -788,7 +788,7 @@ const BLD_DIMS={
  UKRAINE:[64,80],KAZAKHSTAN:[56,88],
  CHINA:[80,76],VIETNAM:[64,68],JAPAN:[64,92],AUSTRALIA:[80,68],
  BRAZIL:[72,88],CANADA:[56,88],NIGERIA:[72,68],EGYPT:[72,80],
- MOSCOW:[72,84],UZBEKISTAN:[72,68],GEORGIA:[72,68],INDIA:[80,80],
+ AZERBAIJAN:[64,84],UZBEKISTAN:[72,68],GEORGIA:[72,68],INDIA:[80,80],
  AIRPORT:[72,64],
  // Legacy landmarks kept for save-game compatibility (no longer placed)
  STOCKHOLM:[64,72],FRANKFURT:[80,72],
@@ -1953,31 +1953,37 @@ function drawEgypt(x,w,h){
  x.fillStyle='#b89050';x.fillRect(cx-24,baseY-6,12,1);
  x.fillRect(cx-22,baseY-10,4,4);// head
 }
-// ── MOSCOW: St Basil's Cathedral (multi-colored onion domes) ──
-function drawMoscow(x,w,h){
- drawWarehouseBase(x,w,h,'#c8b898','#4a2a10','#1a0a00');
+// ── AZERBAIJAN: Flame Towers of Baku (3 curved glass towers) ──
+function drawAzerbaijan(x,w,h){
+ drawWarehouseBase(x,w,h,'#b0b8c0','#3a4a5a','#1a2030');
  const cx=w/2,baseY=h-22;
- // Main wall
- x.fillStyle='#e0c8a0';x.fillRect(cx-22,baseY-26,44,26);
- x.fillStyle='#f0d8b0';x.fillRect(cx-22,baseY-26,44,2);
- // Windows
- x.fillStyle='#3a5a8a';
- [cx-14,cx-4,cx+6,cx+16].forEach(wx=>x.fillRect(wx,baseY-16,4,6));
- // Arched entrance
- x.fillStyle='#2a1a10';x.fillRect(cx-3,baseY-12,6,12);
- x.beginPath();x.arc(cx,baseY-12,3,Math.PI,Math.PI*2);x.fill();
- // Colorful onion domes
- function colorDome(dcx,dcy,r,c1,c2){
-  x.fillStyle=c1;for(let i=0;i<r*2;i++){const dy=i-r;const dw=Math.round(Math.sqrt(r*r-dy*dy*0.8));x.fillRect(dcx-dw,dcy+dy,dw*2,1)}
-  x.fillStyle=c2;for(let i=0;i<r;i++){const dy=i-r;const dw=Math.round(Math.sqrt(r*r-dy*dy)*0.3);if(dw>0)x.fillRect(dcx-r*0.5,dcy+dy,2,1)}
-  x.fillStyle='#FFD700';x.fillRect(dcx,dcy-r-2,1,2);
-  x.fillStyle='#e0c8a0';x.fillRect(dcx-r+1,dcy+r,r*2-2,2);
+ const gl='#4080c0',glH='#60a8e8',glL='#2060a0',flame='#e06020',flH='#ffa040';
+ // 3 towers at different heights, curved flame silhouettes
+ function flameTower(tx,th,fw){
+  // Glass body (widens slightly then curves to a point)
+  for(let i=0;i<th;i++){
+   const t=i/th;
+   const hw=Math.round(fw*(1-t*t)*0.6+fw*0.4);
+   x.fillStyle=gl;x.fillRect(tx-hw,baseY-2-i,hw*2,1);
+   if(i%3===0){x.fillStyle=glH;x.fillRect(tx-hw,baseY-2-i,hw*2,1)}
+  }
+  // Flame tip glow
+  x.fillStyle=flame;x.fillRect(tx-1,baseY-2-th,2,4);
+  x.fillStyle=flH;x.fillRect(tx-1,baseY-4-th,2,2);
+  // Window grid
+  x.fillStyle='#80c0f0';
+  for(let r=4;r<th-4;r+=4)for(let c=-2;c<3;c++){x.fillRect(tx+c*2,baseY-2-r,1,2)}
  }
- colorDome(cx,baseY-32,8,'#e02020','#ff4040');
- colorDome(cx-14,baseY-30,5,'#2060c0','#40a0ff');
- colorDome(cx+14,baseY-30,5,'#20a040','#40d060');
- colorDome(cx-8,baseY-30,4,'#e0a020','#ffd040');
- colorDome(cx+8,baseY-30,4,'#8020a0','#c040e0');
+ flameTower(cx-10,52,6);  // left (tallest)
+ flameTower(cx,48,7);      // center
+ flameTower(cx+10,44,5);   // right (shortest)
+ // Azerbaijan flag on the base
+ x.fillStyle='#8a8a8a';x.fillRect(cx-22,baseY-10,1,10);
+ x.fillStyle='#00b5e2';x.fillRect(cx-21,baseY-10,7,2);
+ x.fillStyle='#e4002b';x.fillRect(cx-21,baseY-8,7,2);
+ x.fillStyle='#00b140';x.fillRect(cx-21,baseY-6,7,2);
+ // Crescent + star
+ x.fillStyle='#ffffff';x.fillRect(cx-18,baseY-9,1,1);
 }
 // ── UZBEKISTAN: Registan mosque (flag-building dome variant) ──
 const drawUzbekistan=(x,w,h)=>drawFlagBuilding(x,w,h,'#d8c888','#e8d898','#fff8c0',['#1e8449','#ffffff','#ce1126'],'dome');
@@ -2026,7 +2032,7 @@ const BLD_FNS={
  UKRAINE:drawUkraine,KAZAKHSTAN:drawKazakhstan,
  CHINA:drawChina,VIETNAM:drawVietnam,JAPAN:drawJapan,AUSTRALIA:drawAustralia,
  BRAZIL:drawBrazil,CANADA:drawCanada,NIGERIA:drawNigeria,EGYPT:drawEgypt,
- MOSCOW:drawMoscow,UZBEKISTAN:drawUzbekistan,GEORGIA:drawGeorgia,INDIA:drawIndia,
+ AZERBAIJAN:drawAzerbaijan,UZBEKISTAN:drawUzbekistan,GEORGIA:drawGeorgia,INDIA:drawIndia,
  AIRPORT:drawAirport,
  // Legacy kept so save loading doesn't crash on old bld refs
  STOCKHOLM:drawStockholm,FRANKFURT:drawFrankfurt,
@@ -3848,21 +3854,30 @@ function App(){
           const vbx=r.x[0]-1,vby=r.y[0]-1,vbw=r.x[1]-r.x[0]+2,vbh=r.y[1]-r.y[0]+2;
           const inR=e=>e.mx>=r.x[0]&&e.mx<=r.x[1]&&e.my>=r.y[0]&&e.my<=r.y[1];
           const bgFill={EU:'#3a7a2f',AM:'#6a8a3a',MEA:'#c89850',CIS:'#a8b8b8',AP:'#2a7a4a'}[currentRegion]||'#3d7a2c';
+          // Use the max dimension for consistent marker sizing
+          const vbMax=Math.max(vbw,vbh);const mk=vbMax*0.04;
           return h('div',{onClick:()=>setMapOpen(true),className:'card-lift',title:'Open world map',style:{position:'absolute',top:8,right:8,width:100,height:100,background:'linear-gradient(180deg,rgba(26,42,128,.9),rgba(6,16,48,.95))',border:'2px solid #7a96ff',borderRadius:8,cursor:'pointer',zIndex:15,overflow:'hidden',boxShadow:'0 0 0 1px rgba(122,150,255,.4),0 8px 20px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)'}},
-            h('svg',{viewBox:vbx+' '+vby+' '+vbw+' '+vbh,preserveAspectRatio:'xMidYMid slice',style:{width:'100%',height:'100%',display:'block'}},
+            h('svg',{viewBox:vbx+' '+vby+' '+vbw+' '+vbh,preserveAspectRatio:'xMidYMid meet',style:{width:'100%',height:'100%',display:'block'}},
               h('rect',{x:vbx,y:vby,width:vbw,height:vbh,fill:bgFill}),
               // Only render paths within the region
-              ...PATH_LINKS.filter(([x1,y1,x2,y2])=>x1>=r.x[0]&&x1<=r.x[1]&&x2>=r.x[0]&&x2<=r.x[1]&&y1>=r.y[0]&&y1<=r.y[1]&&y2>=r.y[0]&&y2<=r.y[1]).map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:vbw*0.022,strokeLinecap:'round'})),
-              // Distributor diamonds (rotated squares) — only current region
-              ...ENC.filter(e=>e.region===currentRegion&&inR(e)).map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);const sz=vbw*0.055;return h('rect',{key:'mb'+e.id,x:e.mx-sz/2,y:e.my-sz/2,width:sz,height:sz,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:vbw*0.004,transform:'rotate(45 '+e.mx+' '+e.my+')'})}),
-              // Boss, if in current region
-              BOSS.region===currentRegion&&h('rect',{key:'bs',x:BOSS.mx-vbw*0.032,y:BOSS.my-vbw*0.032,width:vbw*0.064,height:vbw*0.064,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:vbw*0.005,transform:'rotate(45 '+BOSS.mx+' '+BOSS.my+')'}),
-              // Airport — distinct circle + plane glyph
-              h('circle',{key:'apbg',cx:r.ax,cy:r.ay,r:vbw*0.06,fill:'rgba(255,215,0,.25)',stroke:'#FFD700',strokeWidth:vbw*0.006}),
-              h('text',{key:'apt',x:r.ax,y:r.ay+vbw*0.028,fontSize:vbw*0.09,fill:'#FFD700',textAnchor:'middle',style:{fontFamily:'sans-serif'}},'✈'),
-              // Player marker
-              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:vbw*0.04,fill:'#00ffff',stroke:'#fff',strokeWidth:vbw*0.005}),
-              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:vbw*0.06,fill:'none',stroke:'#00ffff',strokeWidth:vbw*0.006,opacity:.6})))
+              ...PATH_LINKS.filter(([x1,y1,x2,y2])=>x1>=r.x[0]&&x1<=r.x[1]&&x2>=r.x[0]&&x2<=r.x[1]&&y1>=r.y[0]&&y1<=r.y[1]&&y2>=r.y[0]&&y2<=r.y[1]).map(([x1,y1,x2,y2],i)=>h('line',{key:'pl'+i,x1,y1,x2,y2,stroke:'#a07a48',strokeWidth:mk*0.6,strokeLinecap:'round'})),
+              // Distributor markers — small filled circles with city initial
+              ...ENC.filter(e=>e.region===currentRegion&&inR(e)).map(e=>{const d=done.includes(e.id);const lk=(e.seg==='B'&&lv<3)||(e.seg==='A'&&lv<6);return h('g',{key:'mb'+e.id},
+                h('circle',{cx:e.mx,cy:e.my,r:mk,fill:d?'#FFD700':lk?'#555':'#EF4444',stroke:'#fff',strokeWidth:mk*0.15}),
+                h('text',{x:e.mx,y:e.my+mk*0.45,fontSize:mk*1.2,fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:mk*0.08,paintOrder:'stroke'},e.loc[0]))}),
+              // Boss marker (larger, purple glow)
+              BOSS.region===currentRegion&&h('g',{key:'bs'},
+                h('circle',{cx:BOSS.mx,cy:BOSS.my,r:mk*1.4,fill:done.includes(99)?'#FFD700':done.length>=ENC.length?'#ff00ff':'#555',stroke:'#fff',strokeWidth:mk*0.2}),
+                h('text',{x:BOSS.mx,y:BOSS.my+mk*0.5,fontSize:mk*1.4,fill:'#fff',textAnchor:'middle',fontFamily:'sans-serif',fontWeight:'bold',stroke:'#000',strokeWidth:mk*0.1,paintOrder:'stroke'},'★')),
+              // Airport — distinct RUNWAY shape (rectangle + stripes) so it reads differently from circles
+              h('g',{key:'ap'},
+                h('rect',{x:r.ax-mk*3,y:r.ay-mk*0.8,width:mk*6,height:mk*1.6,rx:mk*0.3,fill:'#3a3a42',stroke:'#FFD700',strokeWidth:mk*0.15}),
+                // Centre dashes
+                h('line',{x1:r.ax-mk*2.5,y1:r.ay,x2:r.ax+mk*2.5,y2:r.ay,stroke:'#e8e020',strokeWidth:mk*0.2,strokeDasharray:mk*0.6+' '+mk*0.3}),
+                h('text',{x:r.ax,y:r.ay-mk*1.2,fontSize:mk*1.6,fill:'#FFD700',textAnchor:'middle',style:{fontFamily:'sans-serif'}},'✈')),
+              // Player marker (cyan pulsing dot)
+              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:mk*0.8,fill:'#00ffff',stroke:'#fff',strokeWidth:mk*0.12}),
+              h('circle',{cx:heroMapPos.x,cy:heroMapPos.y,r:mk*1.2,fill:'none',stroke:'#00ffff',strokeWidth:mk*0.15,opacity:.5})))
         })(),
         // D-pad (React overlay → Bridge)
         (()=>{const btn={width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(12,24,96,.78)',border:'1px solid #7a96ff',borderRadius:8,color:'#e8f0ff',fontSize:20,cursor:'pointer',touchAction:'none',userSelect:'none'};const press=v=>e=>{e.preventDefault();Bridge.emit('dpad',v)};const rel=e=>{e.preventDefault();Bridge.emit('dpad',{x:0,y:0})};return h('div',{style:{position:'absolute',right:12,bottom:12,display:'grid',gridTemplateColumns:'44px 44px 44px',gridTemplateRows:'44px 44px 44px',gap:3,zIndex:20}},
