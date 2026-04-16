@@ -425,8 +425,8 @@ const SHOP=[
   {id:'shield',nm:'Thick Skin',ds:'Block next counter-attack',cost:35,ic:'🛡️'},
   {id:'combo_charm',nm:'Combo Charm',ds:'Double combo multiplier',cost:50,ic:'✨'},
   {id:'mega_heal',nm:'Energy Drink',ds:'Full HP restore',cost:80,ic:'⚡'},
-  {id:'motorcycle',nm:'Champion Motorcycle',ds:'2.4× walk speed · Champion red',cost:30,ic:'🏍️',upgrade:true},
-  {id:'rallycar',nm:'Wolf Rally Car',ds:'3.8× walk speed · Wolf blue',cost:75,ic:'🏁',upgrade:true},
+  {id:'motorcycle',nm:'Champion Motorcycle',ds:'6× walk speed · Champion red',cost:30,ic:'🏍️',upgrade:true},
+  {id:'rallycar',nm:'Wolf Rally Car',ds:'10× walk speed · Wolf blue',cost:75,ic:'🏁',upgrade:true},
 ];
 
 // ── ENCOUNTERS ──
@@ -774,11 +774,13 @@ PATH_LINKS=(()=>{
 // ═══════════════════════════════════════
 // NOTE: MW * TS must stay ≤ 2048 so the ground canvas uploads cleanly to
 // WebGL on devices with a 2048-texture limit. 120 tiles × 16 px = 1920.
-// Ground is split into horizontal chunks so each texture stays ≤ 2048px
-// for WebGL compatibility. This lets the world be much wider than 2048px.
-const MW=384,MH=120,TS=16,MPX=MW*TS,MPY=MH*TS;
-const GROUND_COLS=Math.ceil(MPX/2048); // number of horizontal chunks
+// Ground is split into a 2D grid of chunks so each texture stays ≤ 2048px
+// for WebGL compatibility. This lets the world exceed 2048 in both axes.
+const MW=512,MH=160,TS=16,MPX=MW*TS,MPY=MH*TS;
+const GROUND_COLS=Math.ceil(MPX/2048);
+const GROUND_ROWS=Math.ceil(MPY/2048);
 const CHUNK_W=Math.ceil(MPX/GROUND_COLS);
+const CHUNK_H=Math.ceil(MPY/GROUND_ROWS);
 const p2x=p=>Math.round(p*MPX/100);
 const p2y=p=>Math.round(p*MPY/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
@@ -921,19 +923,25 @@ function drawWater(x,ox,oy,pal){
 }
 function genGround(scene){
  const m=genMapData();MAP_DATA=m;
- // Render tiles onto per-chunk canvases (each ≤ 2048px wide) so the world
- // can exceed the WebGL MAX_TEXTURE_SIZE limit.
+ // Render tiles onto a 2D grid of chunk canvases (each ≤ 2048px in both
+ // dimensions) so the world can exceed the WebGL MAX_TEXTURE_SIZE limit.
  const chunks=[];
- for(let ci=0;ci<GROUND_COLS;ci++){
-  const cw=Math.min(CHUNK_W,MPX-ci*CHUNK_W);
-  const c=document.createElement('canvas');c.width=cw;c.height=MPY;
-  chunks.push(c);
+ for(let ri=0;ri<GROUND_ROWS;ri++){
+  const row=[];
+  for(let ci=0;ci<GROUND_COLS;ci++){
+   const cw=Math.min(CHUNK_W,MPX-ci*CHUNK_W);
+   const ch=Math.min(CHUNK_H,MPY-ri*CHUNK_H);
+   const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
+   row.push(cv);
+  }
+  chunks.push(row);
  }
  for(let iy=0;iy<MH;iy++)for(let ix=0;ix<MW;ix++){
-  const t=m[iy][ix],worldX=ix*TS,oy=iy*TS;
+  const t=m[iy][ix],worldX=ix*TS,worldY=iy*TS;
   const ci=Math.min(Math.floor(worldX/CHUNK_W),GROUND_COLS-1);
-  const ox=worldX-ci*CHUNK_W;
-  const x=chunks[ci].getContext('2d');
+  const ri=Math.min(Math.floor(worldY/CHUNK_H),GROUND_ROWS-1);
+  const ox=worldX-ci*CHUNK_W,oy=worldY-ri*CHUNK_H;
+  const x=chunks[ri][ci].getContext('2d');
   const px=(ix/MW)*100,py=(iy/MH)*100;
   const rk=regionAt(px,py);
   if(t===3)drawPath(x,ox,oy,rk?PATH_PAL[rk]:PATH_PAL._);
@@ -946,17 +954,18 @@ function genGround(scene){
   const r=REGIONS[k];
   const ax=Math.round(r.ax*MW/100)*TS,ay=Math.round(r.ay*MH/100)*TS;
   const ci=Math.min(Math.floor(ax/CHUNK_W),GROUND_COLS-1);
-  const lx=ax-ci*CHUNK_W;
-  const x=chunks[ci].getContext('2d');
-  x.fillStyle='#2a2a30';x.fillRect(lx-40,ay+10,80,14);
-  x.fillStyle='#3a3a42';x.fillRect(lx-40,ay+10,80,1);
+  const ri=Math.min(Math.floor(ay/CHUNK_H),GROUND_ROWS-1);
+  const lx=ax-ci*CHUNK_W,ly=ay-ri*CHUNK_H;
+  const x=chunks[ri][ci].getContext('2d');
+  x.fillStyle='#2a2a30';x.fillRect(lx-40,ly+10,80,14);
+  x.fillStyle='#3a3a42';x.fillRect(lx-40,ly+10,80,1);
   x.fillStyle='#e8e020';
-  for(let i=0;i<9;i++)x.fillRect(lx-36+i*9,ay+16,5,2);
+  for(let i=0;i<9;i++)x.fillRect(lx-36+i*9,ly+16,5,2);
   x.fillStyle='#ffffff';
-  for(let i=0;i<3;i++){x.fillRect(lx-38,ay+11+i*4,3,2);x.fillRect(lx+35,ay+11+i*4,3,2)}
+  for(let i=0;i<3;i++){x.fillRect(lx-38,ly+11+i*4,3,2);x.fillRect(lx+35,ly+11+i*4,3,2)}
  });
- for(let ci=0;ci<GROUND_COLS;ci++){
-  scene.textures.addCanvas('ground_'+ci,chunks[ci]);
+ for(let ri=0;ri<GROUND_ROWS;ri++)for(let ci=0;ci<GROUND_COLS;ci++){
+  scene.textures.addCanvas('ground_'+ri+'_'+ci,chunks[ri][ci]);
  }
 }
 // Helper: lighten a #rrggbb hex by mixing toward white by `amt` (0..1)
@@ -2645,7 +2654,7 @@ class OverworldScene extends Phaser.Scene {
   const init=Bridge._initState||{};
   this.doneIds=init.done||[];this.playerLv=init.lv||1;this.bossReady=init.bossReady||false;this.vehicle=init.vehicle||null;this.dpadDir={x:0,y:0};this.lastDir='down';
   this.currentRegion=init.currentRegion||'EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
-  for(let ci=0;ci<GROUND_COLS;ci++){const gx=ci*CHUNK_W+CHUNK_W/2;const g=this.add.image(gx,MPY/2,'ground_'+ci);g.setDepth(-1000)}
+  for(let ri=0;ri<GROUND_ROWS;ri++)for(let ci=0;ci<GROUND_COLS;ci++){const gx=ci*CHUNK_W+CHUNK_W/2;const gy=ri*CHUNK_H+CHUNK_H/2;const g=this.add.image(gx,gy,'ground_'+ri+'_'+ci);g.setDepth(-1000)}
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
   // Hedge + water collision bodies (from MAP_DATA)
   this.hedgeGroup=this.physics.add.staticGroup();
@@ -2745,14 +2754,15 @@ class OverworldScene extends Phaser.Scene {
     lm.regionKey=rk;this.decoObjs.push(lm);
    }
    // ── Delivery vans parked near buildings (2 per distributor, Wolf blue + Champion red) ──
-   const VAN_PARK_TINTS=[0x1a3a6a,0xd02020]; // Wolf navy, Champion red
+   const VAN_PARK_TINTS=[0x1a3a6a,0xd02020];
    ENC.filter(e=>e.region===rk).forEach(e=>{
     for(let vi=0;vi<2;vi++){
-     const vx=p2x(e.mx)+(vi===0?-26:26)+Math.round(prng()*8-4);
-     const vy=p2y(e.my)+18+Math.round(prng()*8);
+     const vx=p2x(e.mx)+(vi===0?-34:34)+Math.round(prng()*10-5);
+     const vy=p2y(e.my)+24+Math.round(prng()*10);
      const pv=this.add.image(vx,vy,'van');
      pv.setTint(VAN_PARK_TINTS[vi]);
-     pv.setRotation(vi===0?-0.3+prng()*0.2:0.3+prng()*0.2);
+     pv.setScale(2.5);
+     pv.setRotation(vi===0?-0.2+prng()*0.15:0.2+prng()*0.15);
      pv.setOrigin(0.5,0.5);pv.setDepth(vy);
      pv.regionKey=rk;this.decoObjs.push(pv);
     }
@@ -3004,7 +3014,7 @@ class OverworldScene extends Phaser.Scene {
   this.posTimer=(this.posTimer||0)+delta;
   if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
   if(this.airportCooldown>0)this.airportCooldown-=delta;
-  const sp=this.vehicle==='car'?320:this.vehicle==='bike'?200:80;
+  const sp=this.vehicle==='car'?480:this.vehicle==='bike'?280:48;
   let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
   else if(this.cursors.right.isDown||this.wasd.D.isDown||this.dpadDir.x>0)vx=sp;
