@@ -56,8 +56,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 @keyframes materiaPulse{0%,100%{box-shadow:0 0 10px currentColor,inset 0 0 14px rgba(255,255,255,.45),inset 0 -6px 10px rgba(0,0,0,.35)}50%{box-shadow:0 0 24px currentColor,0 0 40px currentColor,inset 0 0 18px rgba(255,255,255,.65),inset 0 -6px 10px rgba(0,0,0,.35)}}
 @keyframes screenShake{0%,100%{transform:translate(0,0)}10%{transform:translate(-8px,3px)}25%{transform:translate(7px,-3px)}40%{transform:translate(-5px,2px)}55%{transform:translate(6px,-2px)}70%{transform:translate(-3px,1px)}85%{transform:translate(2px,-1px)}}
 .shake{animation:screenShake .4s ease}
-@keyframes flashGold{0%,100%{background:transparent}50%{background:rgba(255,215,0,.45)}}
-@keyframes flashRed{0%,100%{background:transparent}50%{background:rgba(239,68,68,.4)}}
+@keyframes flashGold{0%,100%{background:transparent}50%{background:rgba(255,215,0,.7)}}
+@keyframes flashRed{0%,100%{background:transparent}50%{background:rgba(239,68,68,.65)}}
 .flash-g{animation:flashGold .25s ease}.flash-r{animation:flashRed .25s ease}
 @keyframes calloutPop{0%{transform:translate(-50%,-50%) scale(.2) rotate(-12deg);opacity:0}15%{transform:translate(-50%,-50%) scale(1.5) rotate(6deg);opacity:1}40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}80%{opacity:1}100%{transform:translate(-50%,-90%) scale(1.1);opacity:0}}
 .callout{animation:calloutPop 1.2s ease forwards}
@@ -2963,6 +2963,24 @@ class OverworldScene extends Phaser.Scene {
    Bridge._lastPos={x:this.hero.x,y:this.hero.y};
    Bridge.emit('airport-open',{from:ap.getData('regionKey')});
   });
+  // ── Drop shadows (ellipses positioned beneath each sprite in update) ──
+  this.heroShadow=this.add.ellipse(0,0,24,8,0x000000,0.25).setDepth(-1);
+  this.npcShadows={};
+  ALL.forEach(enc=>{
+   const sh=this.add.ellipse(0,0,22,7,0x000000,0.2).setDepth(-1).setVisible(false);
+   this.npcShadows[enc.id]=sh;
+  });
+  // ── Cloud shadows (drift slowly across the map for atmosphere) ──
+  this.cloudShadows=[];
+  for(let i=0;i<4;i++){
+   const csh=this.add.ellipse(
+    p2x(Math.random()*100),p2y(Math.random()*100),
+    120+Math.random()*80,60+Math.random()*40,0x000000,0.06+Math.random()*0.04
+   );
+   csh.setDepth(-999);
+   csh.vx=4+Math.random()*3;csh.vy=1+Math.random()*2;
+   this.cloudShadows.push(csh);
+  }
   // Camera
   this.cameras.main.startFollow(this.hero,true,0.08,0.08);
   this.cameras.main.setZoom(1.5);
@@ -3200,6 +3218,23 @@ class OverworldScene extends Phaser.Scene {
   }
   // Depth sort (y-sort for hero + NPCs; buildings sort by their top-of-base edge)
   this.hero.setDepth(this.hero.y);
+  // Shadow follows hero
+  if(this.heroShadow){this.heroShadow.setPosition(this.hero.x,this.hero.y+20);this.heroShadow.setDepth(this.hero.y-1)}
+  // NPC shadows
+  for(const enc of ALL){
+   const npc=this.npcSprites[enc.id],sh=this.npcShadows[enc.id];
+   if(npc&&sh){sh.setPosition(npc.x,npc.y+18);sh.setDepth(npc.y-1);sh.setVisible(npc.visible)}
+  }
+  // Cloud shadows drift
+  if(this.cloudShadows){
+   const cam=this.cameras.main;
+   for(const cs of this.cloudShadows){
+    cs.x+=cs.vx*delta/1000;cs.y+=cs.vy*delta/1000;
+    // Wrap around camera view area
+    if(cs.x>cam.scrollX+cam.width/cam.zoom+200)cs.x=cam.scrollX-200;
+    if(cs.y>cam.scrollY+cam.height/cam.zoom+150)cs.y=cam.scrollY-150;
+   }
+  }
   for(const enc of ALL){
    const npc=this.npcSprites[enc.id];
    if(npc&&npc.visible)npc.setDepth(npc.y);
@@ -3664,7 +3699,7 @@ function App(){
         // Enemy (top right)
         h('div',{style:{position:'absolute',right:16,top:12,textAlign:'center',animation:sE?'shake .3s ease':'none'}},
           ob&&h(React.Fragment,null,
-            h('div',{style:{width:enc.isBoss?56:44,height:enc.isBoss?84:66,margin:'0 auto'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon(ob.p,true):SP.npc(enc.v)}}),
+            h('div',{style:{width:enc.isBoss?88:72,height:enc.isBoss?132:108,margin:'0 auto',filter:'drop-shadow(0 4px 8px rgba(0,0,0,.6))',transition:'transform .15s ease'},dangerouslySetInnerHTML:{__html:enc.isBoss?SP.mon(ob.p,true):SP.npc(enc.v)}}),
             h('div',{className:'fs-xs',style:{color:PC[ob.p],fontWeight:700,marginTop:4}},ob.p),
             h(HpBar,{v:oHp,m:ob.hp,w:90}),
             h('div',{className:'fs-xs',style:{color:C.mu,marginTop:2}},oHp+'/'+ob.hp),
@@ -3672,7 +3707,7 @@ function App(){
           fl&&h('div',{className:'pf',style:{position:'absolute',top:-10,right:8,fontSize:fl.y==='c'?18:14,fontWeight:'bold',color:fl.y==='c'?C.gold:fl.y==='m'?C.no:'#fff',animation:'cpop .7s ease forwards'}},(fl.y==='c'?'💥':'')+fl.v)),
         // Hero (bottom left)
         h('div',{style:{position:'absolute',left:16,bottom:12,textAlign:'center',animation:sH?'shake .3s ease':'none'}},
-          h('div',{style:{width:32,height:48},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
+          h('div',{style:{width:56,height:84,filter:'drop-shadow(0 3px 6px rgba(0,0,0,.5))'},dangerouslySetInnerHTML:{__html:SP.hero(hf)}}),
           h('div',{className:'fs-xs',style:{color:C.gold,fontWeight:600,marginTop:2}},nm),
           h(HpBar,{v:pHp,m:MHP,w:70}),
           combo>0&&h('div',{className:'fs-xs',style:{color:C.ok}},'🔥 '+combo+'x combo')),
