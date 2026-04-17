@@ -774,13 +774,10 @@ PATH_LINKS=(()=>{
 // ═══════════════════════════════════════
 // NOTE: MW * TS must stay ≤ 2048 so the ground canvas uploads cleanly to
 // WebGL on devices with a 2048-texture limit. 120 tiles × 16 px = 1920.
-// Ground is split into a 2D grid of chunks so each texture stays ≤ 2048px
-// for WebGL compatibility. This lets the world exceed 2048 in both axes.
-const MW=512,MH=160,TS=16,MPX=MW*TS,MPY=MH*TS;
-const GROUND_COLS=Math.ceil(MPX/2048);
-const GROUND_ROWS=Math.ceil(MPY/2048);
-const CHUNK_W=Math.ceil(MPX/GROUND_COLS);
-const CHUNK_H=Math.ceil(MPY/GROUND_ROWS);
+// ── Phaser Tilemap architecture: the ground is rendered via a small tileset
+// atlas (~160×32 px) and a 2D array of tile indices. Memory usage stays
+// constant regardless of world size. No WebGL texture-size limit applies.
+const MW=800,MH=250,TS=16,MPX=MW*TS,MPY=MH*TS;
 const p2x=p=>Math.round(p*MPX/100);
 const p2y=p=>Math.round(p*MPY/100);
 const GCOL=['#2a5a1f','#3a7a2f','#4d8a38'];
@@ -921,52 +918,63 @@ function drawWater(x,ox,oy,pal){
  x.fillStyle=p[4];
  x.fillRect(ox+2,oy+3,1,1);x.fillRect(ox+9,oy+6,1,1);x.fillRect(ox+4,oy+10,1,1);
 }
-function genGround(scene){
- const m=genMapData();MAP_DATA=m;
- // Render tiles onto a 2D grid of chunk canvases (each ≤ 2048px in both
- // dimensions) so the world can exceed the WebGL MAX_TEXTURE_SIZE limit.
- const chunks=[];
- for(let ri=0;ri<GROUND_ROWS;ri++){
+// Region key → index for tileset column lookup
+const REG_IDX={EU:0,AM:1,MEA:2,CIS:3,AP:4};
+// ── genTileset: draw all tile variants into a small atlas (10×2 grid = 160×32 px)
+// Layout: cols=region (0-4=named, 5=neutral), rows vary by tile type.
+// Tile indices: grass 0-5, path 6-11, water 12-17, hedge 18, runway 19
+function genTileset(scene){
+ const COLS=10,ROWS=2;
+ const c=document.createElement('canvas');c.width=COLS*TS;c.height=ROWS*TS;
+ const x=c.getContext('2d');
+ const regKeys=['EU','AM','MEA','CIS','AP','_'];
+ // Row 0, cols 0-5: grass per region
+ regKeys.forEach((k,i)=>drawGrass(x,i*TS,0,GRASS_PAL[k]));
+ // Row 0, cols 6-9 + Row 1 col 0-1: path per region (idx 6-11)
+ regKeys.forEach((k,i)=>{const ti=6+i;const col=ti%COLS;const row=Math.floor(ti/COLS);drawPath(x,col*TS,row*TS,PATH_PAL[k])});
+ // Water per region (idx 12-17)
+ regKeys.forEach((k,i)=>{const ti=12+i;const col=ti%COLS;const row=Math.floor(ti/COLS);drawWater(x,col*TS,row*TS,WATER_PAL[k])});
+ // Hedge (idx 18)
+ {const ti=18;drawHedge(x,(ti%COLS)*TS,Math.floor(ti/COLS)*TS)}
+ // Runway tile (idx 19) — dark asphalt with yellow dashes
+ {const ti=19;const ox=(ti%COLS)*TS,oy=Math.floor(ti/COLS)*TS;
+  x.fillStyle='#2a2a30';x.fillRect(ox,oy,TS,TS);
+  x.fillStyle='#e8e020';x.fillRect(ox+2,oy+7,4,2);x.fillRect(ox+10,oy+7,4,2);
+  x.fillStyle='#ffffff';x.fillRect(ox,oy+3,2,1);x.fillRect(ox+14,oy+3,2,1);
+  x.fillRect(ox,oy+12,2,1);x.fillRect(ox+14,oy+12,2,1);
+ }
+ scene.textures.addCanvas('tileset',c);
+}
+// ── genMapTiles: build MAP_DATA with region-aware tile indices
+function genMapTiles(){
+ const m=genMapData(); // base 0/3/4/5 array
+ // Convert to tileset indices using the region at each tile
+ const out=[];
+ for(let iy=0;iy<MH;iy++){
   const row=[];
-  for(let ci=0;ci<GROUND_COLS;ci++){
-   const cw=Math.min(CHUNK_W,MPX-ci*CHUNK_W);
-   const ch=Math.min(CHUNK_H,MPY-ri*CHUNK_H);
-   const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;
-   row.push(cv);
+  for(let ix=0;ix<MW;ix++){
+   const t=m[iy][ix];
+   const px=(ix/MW)*100,py=(iy/MH)*100;
+   const rk=regionAt(px,py);
+   const ri=rk?REG_IDX[rk]:5; // 5 = neutral
+   if(t===3)row.push(6+ri);      // path
+   else if(t===4)row.push(12+ri); // water
+   else if(t===5)row.push(18);    // hedge
+   else row.push(ri);              // grass
   }
-  chunks.push(row);
+  out.push(row);
  }
- for(let iy=0;iy<MH;iy++)for(let ix=0;ix<MW;ix++){
-  const t=m[iy][ix],worldX=ix*TS,worldY=iy*TS;
-  const ci=Math.min(Math.floor(worldX/CHUNK_W),GROUND_COLS-1);
-  const ri=Math.min(Math.floor(worldY/CHUNK_H),GROUND_ROWS-1);
-  const ox=worldX-ci*CHUNK_W,oy=worldY-ri*CHUNK_H;
-  const x=chunks[ri][ci].getContext('2d');
-  const px=(ix/MW)*100,py=(iy/MH)*100;
-  const rk=regionAt(px,py);
-  if(t===3)drawPath(x,ox,oy,rk?PATH_PAL[rk]:PATH_PAL._);
-  else if(t===4)drawWater(x,ox,oy,rk?WATER_PAL[rk]:WATER_PAL._);
-  else if(t===5)drawHedge(x,ox,oy);
-  else drawGrass(x,ox,oy,rk?GRASS_PAL[rk]:GRASS_PAL._);
- }
- // Airport runway pads
+ // Stamp runway tiles near each airport
  Object.keys(REGIONS).forEach(k=>{
   const r=REGIONS[k];
-  const ax=Math.round(r.ax*MW/100)*TS,ay=Math.round(r.ay*MH/100)*TS;
-  const ci=Math.min(Math.floor(ax/CHUNK_W),GROUND_COLS-1);
-  const ri=Math.min(Math.floor(ay/CHUNK_H),GROUND_ROWS-1);
-  const lx=ax-ci*CHUNK_W,ly=ay-ri*CHUNK_H;
-  const x=chunks[ri][ci].getContext('2d');
-  x.fillStyle='#2a2a30';x.fillRect(lx-40,ly+10,80,14);
-  x.fillStyle='#3a3a42';x.fillRect(lx-40,ly+10,80,1);
-  x.fillStyle='#e8e020';
-  for(let i=0;i<9;i++)x.fillRect(lx-36+i*9,ly+16,5,2);
-  x.fillStyle='#ffffff';
-  for(let i=0;i<3;i++){x.fillRect(lx-38,ly+11+i*4,3,2);x.fillRect(lx+35,ly+11+i*4,3,2)}
+  const ax=Math.round(r.ax*MW/100),ay=Math.round(r.ay*MH/100);
+  for(let dx=-3;dx<=3;dx++)for(let dy=0;dy<=1;dy++){
+   const nx=ax+dx,ny=ay+1+dy;
+   if(ny>=0&&ny<MH&&nx>=0&&nx<MW)out[ny][nx]=19;
+  }
  });
- for(let ri=0;ri<GROUND_ROWS;ri++)for(let ci=0;ci<GROUND_COLS;ci++){
-  scene.textures.addCanvas('ground_'+ri+'_'+ci,chunks[ri][ci]);
- }
+ MAP_DATA=m; // keep raw base types for legacy collision check
+ return out;
 }
 // Helper: lighten a #rrggbb hex by mixing toward white by `amt` (0..1)
 function lighten(hex,amt){
@@ -2637,7 +2645,7 @@ class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
  create(){
   try{
-   genGround(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);genPlaneTex(this);
+   genTileset(this);genBldTex(this);genHeroTex(this);genNpcTex(this);genTreeTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genVanTex(this);genPlaneTex(this);
   genBillboardWolfTex(this);genBillboardChampTex(this);
   genDrumTex(this,'drums_wolf','#1a3a6a');genDrumTex(this,'drums_champ','#d02020');
   genBannerTex(this,'banner_wolf','#1a3a6a');genBannerTex(this,'banner_champ','#d02020');
@@ -2654,19 +2662,21 @@ class OverworldScene extends Phaser.Scene {
   const init=Bridge._initState||{};
   this.doneIds=init.done||[];this.playerLv=init.lv||1;this.bossReady=init.bossReady||false;this.vehicle=init.vehicle||null;this.dpadDir={x:0,y:0};this.lastDir='down';
   this.currentRegion=init.currentRegion||'EU';this.planes=[];this.decoObjs=[];this.airportLabels={};
-  for(let ri=0;ri<GROUND_ROWS;ri++)for(let ci=0;ci<GROUND_COLS;ci++){const gx=ci*CHUNK_W+CHUNK_W/2;const gy=ri*CHUNK_H+CHUNK_H/2;const g=this.add.image(gx,gy,'ground_'+ri+'_'+ci);g.setDepth(-1000)}
+  // ── Phaser Tilemap ground (replaces pre-rendered canvas chunks) ──
+  const tileData=genMapTiles();
+  const map=this.make.tilemap({data:tileData,tileWidth:TS,tileHeight:TS});
+  const tileset=map.addTilesetImage('tileset');
+  const groundLayer=map.createLayer(0,tileset,0,0);
+  groundLayer.setDepth(-1000);
+  // Collision on water (12-17) and hedge (18) tiles
+  groundLayer.setCollisionBetween(12,18);
   this.physics.world.setBounds(TS,TS,MPX-TS*2,MPY-TS*2);
-  // Hedge + water collision bodies (from MAP_DATA)
+  // Collision with water/hedge tiles is handled by the tilemap layer via
+  // groundLayer.setCollisionBetween(12,18) — set up above.
+  this.groundLayer=groundLayer;
+  // Legacy hedgeGroup kept as empty group for any code that references it
   this.hedgeGroup=this.physics.add.staticGroup();
-  if(MAP_DATA){
-   for(let iy=0;iy<MH;iy++)for(let ix=0;ix<MW;ix++){
-    const t=MAP_DATA[iy][ix];
-    if(t===5||t===4){
-     const body=this.add.rectangle(ix*TS+TS/2,iy*TS+TS/2,TS,TS);
-     this.physics.add.existing(body,true);
-     this.hedgeGroup.add(body);
-    }
-   }
+  {
   }
   // Trees (canopy + trunk collision)
   this.treeGroup=this.physics.add.staticGroup();
@@ -2882,7 +2892,7 @@ class OverworldScene extends Phaser.Scene {
   // Collisions
   this.physics.add.collider(this.hero,this.bldBodies);
   this.physics.add.collider(this.hero,this.treeGroup);
-  this.physics.add.collider(this.hero,this.hedgeGroup);
+  if(this.groundLayer)this.physics.add.collider(this.hero,this.groundLayer);
   const allNpcs=Object.values(this.npcSprites).filter(Boolean);
   this.physics.add.overlap(this.hero,allNpcs,(h,npc)=>this.onNpcCollide(npc));
   // Airport overlap: opens the fast-travel modal, with a short cooldown so
@@ -2901,6 +2911,15 @@ class OverworldScene extends Phaser.Scene {
   // Input
   this.cursors=this.input.keyboard.createCursorKeys();
   this.wasd=this.input.keyboard.addKeys('W,A,S,D');
+  // ── Zoom controls: scroll wheel + keyboard +/- ──
+  this.zoomLevel=1.5;
+  this.input.on('wheel',(p,gos,dx,dy)=>{
+   this.zoomLevel=Phaser.Math.Clamp(this.zoomLevel-(dy*0.001),0.6,3.0);
+   this.cameras.main.setZoom(this.zoomLevel);
+  });
+  this.zoomKeys=this.input.keyboard.addKeys('PLUS,MINUS,NUMPAD_ADD,NUMPAD_SUBTRACT');
+  // Also track pinch gesture distance for mobile zoom
+  this.pinchDist=0;
   // Exclamation sprite
   this.exclSprite=this.add.image(0,0,'excl').setVisible(false).setDepth(99999);
   // Random overworld events
@@ -3014,6 +3033,18 @@ class OverworldScene extends Phaser.Scene {
   this.posTimer=(this.posTimer||0)+delta;
   if(this.posTimer>=250){this.posTimer=0;Bridge.emit('hero-pos',{xPct:(this.hero.x/MPX)*100,yPct:(this.hero.y/MPY)*100})}
   if(this.airportCooldown>0)this.airportCooldown-=delta;
+  // Keyboard zoom (+/-)
+  if(this.zoomKeys){
+   if(this.zoomKeys.PLUS.isDown||this.zoomKeys.NUMPAD_ADD.isDown){this.zoomLevel=Math.min(3.0,this.zoomLevel+0.02);this.cameras.main.setZoom(this.zoomLevel)}
+   if(this.zoomKeys.MINUS.isDown||this.zoomKeys.NUMPAD_SUBTRACT.isDown){this.zoomLevel=Math.max(0.6,this.zoomLevel-0.02);this.cameras.main.setZoom(this.zoomLevel)}
+  }
+  // Mobile pinch zoom
+  const ptrs=this.input.manager.pointers.filter(p=>p.isDown);
+  if(ptrs.length===2){
+   const d=Phaser.Math.Distance.Between(ptrs[0].x,ptrs[0].y,ptrs[1].x,ptrs[1].y);
+   if(this.pinchDist>0){const scale=d/this.pinchDist;this.zoomLevel=Phaser.Math.Clamp(this.zoomLevel*scale,0.6,3.0);this.cameras.main.setZoom(this.zoomLevel)}
+   this.pinchDist=d;
+  }else{this.pinchDist=0}
   const sp=this.vehicle==='car'?480:this.vehicle==='bike'?280:48;
   let vx=0,vy=0;
   if(this.cursors.left.isDown||this.wasd.A.isDown||this.dpadDir.x<0)vx=-sp;
