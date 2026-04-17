@@ -2222,46 +2222,78 @@ function genCarTex(scene){
  scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
 }
 // Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
-// Pixel-art delivery van (top-down, 22×14, crisp edges, facing NORTH)
+// Side-view pixel-art delivery van (32×20, facing RIGHT)
+// Inspired by classic pixel art: cab left, cargo right, 2 wheels below.
 function genVanTex(scene){
- const FW=22,FH=14;
- const c=document.createElement('canvas');c.width=FW;c.height=FH;
+ const W=32,H=20;
+ const c=document.createElement('canvas');c.width=W;c.height=H;
  const x=c.getContext('2d');
- // -- Outline (dark border around the whole van) --
- x.fillStyle='#0a0a0a';x.fillRect(2,0,FW-4,FH);
- // -- BODY (white base, tintable) --
- x.fillStyle='#ffffff';x.fillRect(3,1,FW-6,FH-2);
- // -- CAB (front section, top of sprite) --
- // Cab roof (slightly darker)
- x.fillStyle='#e0e0e0';x.fillRect(3,1,FW-6,3);
- // Windshield (blue glass)
- x.fillStyle='#5090c0';x.fillRect(4,2,FW-8,2);
- // Windshield glare
- x.fillStyle='#a0d0ff';x.fillRect(4,2,4,1);
- // Cab-cargo divider
- x.fillStyle='#0a0a0a';x.fillRect(3,4,FW-6,1);
- // -- CARGO BOX --
- x.fillStyle='#ffffff';x.fillRect(3,5,FW-6,FH-7);
- // Side panel lines (horizontal stripes for box ribbing)
- x.fillStyle='#d0d0d0';x.fillRect(3,7,FW-6,1);x.fillRect(3,10,FW-6,1);
- // Rear door split
- x.fillStyle='#0a0a0a';x.fillRect(FW/2|0,5,1,FH-7);
- // Rear bumper
- x.fillStyle='#404040';x.fillRect(3,FH-2,FW-6,1);
- // -- TAIL LIGHTS --
- x.fillStyle='#ff0000';x.fillRect(3,FH-3,2,1);x.fillRect(FW-5,FH-3,2,1);
- // -- HEADLIGHTS --
- x.fillStyle='#ffdd00';x.fillRect(3,1,2,1);x.fillRect(FW-5,1,2,1);
- // -- WHEELS (4 black rectangles sticking out) --
- x.fillStyle='#0a0a0a';
- x.fillRect(0,2,2,3);x.fillRect(FW-2,2,2,3);   // front
- x.fillRect(0,FH-5,2,3);x.fillRect(FW-2,FH-5,2,3); // rear
- // Tire tread highlights
+ // === BODY OUTLINE (dark navy, 1px border) ===
+ x.fillStyle='#1a1a2a';
+ // Cab outline (sloped hood)
+ x.fillRect(1,4,11,12);  // cab block
+ x.fillRect(0,6,1,10);   // front bumper edge
+ // Cargo outline
+ x.fillRect(12,2,19,14);
+ // === BODY FILL (white base — tintable) ===
+ x.fillStyle='#ffffff';
+ x.fillRect(2,5,10,10);  // cab body
+ x.fillRect(13,3,17,12); // cargo box
+ // === CAB DETAILS ===
+ // Hood slope (darker at front)
+ x.fillStyle='#d8d8e0';x.fillRect(2,5,4,3);
+ // Windshield (blue glass with glare)
+ x.fillStyle='#4080b8';x.fillRect(4,5,6,5);
+ x.fillStyle='#80c0f0';x.fillRect(4,5,3,2); // glare highlight
+ // Windshield frame
+ x.fillStyle='#1a1a2a';x.fillRect(4,10,6,1); // bottom frame
+ x.fillRect(10,5,1,6); // right frame (cab-cargo border)
+ // Door line
+ x.fillStyle='#c0c0c8';x.fillRect(6,11,1,4);
+ // Door handle
+ x.fillStyle='#4a4a4a';x.fillRect(7,12,2,1);
+ // === CARGO BOX DETAILS ===
+ // Side panel — subtle darker shade for depth
+ x.fillStyle='#f0f0f0';x.fillRect(13,3,17,1); // top edge highlight
+ // Panel seam lines (vertical)
+ x.fillStyle='#c8c8d0';
+ x.fillRect(20,4,1,10); // middle seam
+ x.fillRect(26,4,1,10); // rear seam
+ // Rear door (rightmost section)
+ x.fillStyle='#e8e8e8';x.fillRect(27,4,3,10);
+ x.fillStyle='#1a1a2a';x.fillRect(30,3,1,12); // rear edge
+ // === LOWER BODY / CHASSIS ===
+ x.fillStyle='#1a1a2a';x.fillRect(1,15,30,1); // undercarriage line
+ // Wheel wells (dark cutouts)
+ x.fillRect(3,14,6,2);  // front well
+ x.fillRect(22,14,6,2); // rear well
+ // === WHEELS (circles with hubcaps) ===
+ // Front wheel
+ x.fillStyle='#1a1a1a';
+ x.beginPath();x.arc(6,17,3,0,Math.PI*2);x.fill();
  x.fillStyle='#3a3a3a';
- x.fillRect(0,3,2,1);x.fillRect(FW-2,3,2,1);
- x.fillRect(0,FH-4,2,1);x.fillRect(FW-2,FH-4,2,1);
- // -- SIDE MIRRORS --
- x.fillStyle='#0a0a0a';x.fillRect(1,3,1,1);x.fillRect(FW-2,3,1,1);
+ x.beginPath();x.arc(6,17,2,0,Math.PI*2);x.fill();
+ x.fillStyle='#6a6a6a';
+ x.beginPath();x.arc(6,17,1,0,Math.PI*2);x.fill();
+ // Rear wheel
+ x.fillStyle='#1a1a1a';
+ x.beginPath();x.arc(25,17,3,0,Math.PI*2);x.fill();
+ x.fillStyle='#3a3a3a';
+ x.beginPath();x.arc(25,17,2,0,Math.PI*2);x.fill();
+ x.fillStyle='#6a6a6a';
+ x.beginPath();x.arc(25,17,1,0,Math.PI*2);x.fill();
+ // === FRONT BUMPER ===
+ x.fillStyle='#808088';x.fillRect(0,14,2,2);
+ // Headlight
+ x.fillStyle='#ffdd00';x.fillRect(1,7,1,2);
+ // === REAR ===
+ // Taillight
+ x.fillStyle='#ff2020';x.fillRect(30,10,1,3);
+ // Rear bumper
+ x.fillStyle='#808088';x.fillRect(30,14,1,2);
+ // === GROUND SHADOW ===
+ x.fillStyle='rgba(0,0,0,.2)';
+ x.fillRect(3,19,26,1);
  scene.textures.addCanvas('van',c);
 }
 // Small top-down airliner (white with blue stripe) — facing NORTH, rotated in update().
