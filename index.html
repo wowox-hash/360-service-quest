@@ -89,6 +89,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;op
 @keyframes modalIn{0%{opacity:0;backdrop-filter:blur(0px)}100%{opacity:1;backdrop-filter:blur(8px)}}
 .modal-in{animation:modalIn .25s ease-out both}
 @keyframes goldPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.5),0 0 24px rgba(255,215,0,.3)}50%{box-shadow:0 0 0 8px rgba(255,215,0,0),0 0 40px rgba(255,215,0,.5)}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
 .gold-pulse{animation:goldPulse 2.2s ease-in-out infinite}
 </style>
 </head>
@@ -3378,7 +3379,27 @@ Object.keys(REGIONS).forEach(k=>{
 // ── Shared UI components (hoisted so they don't remount every render) ──
 const HpBar=({v,m,w='100%'})=>h('div',{className:'hpc',style:{width:w,height:12,borderRadius:3,overflow:'hidden'}},h('div',{style:{height:'100%',background:'linear-gradient(180deg,'+(v/m>.5?'#34d399 0%,#10B981 50%,#047857':v/m>.25?'#fcd34d 0%,#FFD700 50%,#b45309':'#f87171 0%,#EF4444 50%,#991b1b')+' 100%)',width:(v/m*100)+'%',transition:'width .3s',boxShadow:'inset 0 1px 0 rgba(255,255,255,.45)'}}));
 const Tier=({t})=>h('span',{style:{fontSize:11,padding:'2px 8px',borderRadius:4,fontWeight:600,background:t==='C'?'rgba(100,116,139,.2)':t==='B'?'rgba(245,158,11,.15)':'rgba(239,68,68,.15)',color:t==='C'?'#94A3B8':t==='B'?C.gold:C.no}},'Seg '+t);
-const LvlUp=({lvUp,lv})=>lvUp?h('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.8)',zIndex:999}},h('div',{style:{textAlign:'center',animation:'lu .5s ease'}},h('div',{className:'fs-pixel-xl',style:{color:C.gold}},'⬆️ LEVEL '+lv+'!'),lv===3&&h('div',{className:'fs-sm',style:{color:C.ok,marginTop:10}},'🔓 Segment B services unlocked!'),lv===6&&h('div',{className:'fs-sm',style:{color:C.no,marginTop:10}},'🔓 Segment A services unlocked!'))):null;
+const LvlUp=({lvUp,lv})=>{
+ if(!lvUp)return null;
+ // Confetti particles (pre-generated for the overlay)
+ const confetti=Array.from({length:24},(_,i)=>({
+  x:10+Math.random()*80,delay:Math.random()*1.5,
+  color:['#FFD700','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444'][i%6],
+  size:4+Math.random()*4,dur:1.8+Math.random()*1.2
+ }));
+ return h('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,.85)',zIndex:999,overflow:'hidden'}},
+  // Confetti
+  ...confetti.map((c,i)=>h('div',{key:'cf'+i,style:{
+   position:'absolute',left:c.x+'%',top:'-5%',width:c.size,height:c.size,
+   background:c.color,borderRadius:c.size>6?'50%':'1px',
+   animation:`confettiFall ${c.dur}s ease-in ${c.delay}s both`,
+   transform:'rotate('+(Math.random()*360)+'deg)'
+  }})),
+  h('div',{style:{textAlign:'center',animation:'lu .5s ease',zIndex:1}},
+   h('div',{className:'pf',style:{fontSize:28,color:C.gold,textShadow:'3px 3px 0 #000, 0 0 20px #FFD700, 0 0 40px #FFD700',letterSpacing:3}},'⬆️ LEVEL '+lv+'!'),
+   lv===3&&h('div',{className:'fs-sm',style:{color:C.ok,marginTop:12}},'🔓 Segment B services unlocked!'),
+   lv===6&&h('div',{className:'fs-sm',style:{color:C.no,marginTop:12}},'🔓 Segment A services unlocked!')));
+};
 const Pad=({children})=>h('div',{className:'panel-in',style:{maxWidth:480,margin:'0 auto',padding:'12px 16px'}},children);
 
 // ═══════════════
@@ -3745,7 +3766,7 @@ function App(){
       stars.length>0&&h('div',{style:{position:'fixed',top:'45%',left:'50%',pointerEvents:'none',zIndex:9999}},
         stars.map(s=>h('div',{key:s.id,style:{position:'absolute',fontSize:22,animation:'starFly 900ms ease-out forwards','--dx':s.dx+'px','--dy':s.dy+'px','--r':s.r+'deg',textShadow:'0 0 8px #FFD700'}},'⭐'))),
       // Big combo callout
-      callout&&h('div',{className:'callout pf',style:{position:'fixed',top:'30%',left:'50%',color:callout.c,fontSize:42,fontWeight:'bold',textShadow:'4px 4px 0 #000, 0 0 20px '+callout.c+', 0 0 40px '+callout.c,zIndex:9999,pointerEvents:'none',whiteSpace:'nowrap',letterSpacing:2}},callout.t),
+      callout&&h('div',{className:'callout pf',style:{position:'fixed',top:'28%',left:'50%',color:callout.c,fontSize:56,fontWeight:'bold',textShadow:'4px 4px 0 #000, 0 0 24px '+callout.c+', 0 0 48px '+callout.c+', 0 0 80px '+callout.c,zIndex:9999,pointerEvents:'none',whiteSpace:'nowrap',letterSpacing:4}},callout.t),
       // Achievement pop-up (also visible during battle)
       achPop&&h('div',{key:achPop.id,className:'ach-pop ff7',style:{position:'fixed',top:14,right:14,padding:'10px 14px',display:'flex',alignItems:'center',gap:10,zIndex:9999,maxWidth:260,borderImage:'linear-gradient(135deg,#fff,#FFD700,#1a2a80,#fff) 1',boxShadow:'0 0 18px rgba(255,215,0,.6)'}},
         h('div',{style:{fontSize:28}},achPop.ic),
@@ -3754,7 +3775,7 @@ function App(){
           h('div',{className:'fs-sm',style:{color:'#fff',fontWeight:700,marginTop:2}},achPop.nm),
           h('div',{className:'fs-xs',style:{color:C.mu,marginTop:1}},achPop.desc))),
       // Arena
-      h('div',{className:'ff7'+(sE?' shake':''),style:{padding:16,position:'relative',minHeight:180,marginTop:8,...(enc.isBoss?{borderImage:'linear-gradient(135deg,#fff 0%,#EF4444 30%,#800 60%,#fff 100%) 1',boxShadow:'0 0 24px rgba(239,68,68,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:{})}},
+      h('div',{className:'ff7'+(sE?' shake':''),style:{padding:16,position:'relative',minHeight:200,marginTop:8,transition:'transform .15s ease',transform:flashCol==='g'?'scale(1.06)':'scale(1)',...(enc.isBoss?{borderImage:'linear-gradient(135deg,#fff 0%,#EF4444 30%,#800 60%,#fff 100%) 1',boxShadow:'0 0 24px rgba(239,68,68,.5),inset 0 1px 0 rgba(255,255,255,.35)'}:{})}},
         // Enemy (top right)
         h('div',{style:{position:'absolute',right:16,top:12,textAlign:'center',animation:sE?'shake .3s ease':'none'}},
           ob&&h(React.Fragment,null,
