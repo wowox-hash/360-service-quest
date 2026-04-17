@@ -212,18 +212,32 @@ const sfx={
   miss:()=>{bs.triggerAttackRelease('C3','8n')},
   hurt:()=>{ns.triggerAttackRelease('16n');bs.triggerAttackRelease('E2','16n')},
   win:()=>{
-    // Rising arpeggio
-    ['C5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*85));
-    // Tonic resolution + held chord
-    setTimeout(()=>sy.triggerAttackRelease('G5','16n'),380);
-    setTimeout(()=>sy.triggerAttackRelease('C6','16n'),470);
-    setTimeout(()=>sy.triggerAttackRelease('E6','4n'),580);
-    // Bass line
+    // FF7-style victory fanfare: iconic opening triplet → sustained → ascending resolution
+    const t=60; // base tempo unit in ms
+    // Opening triplet (the recognizable "dah-dah-DAH!")
+    ['C5','C5','C5'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*t));
+    // Sustained note
+    setTimeout(()=>sy.triggerAttackRelease('C5','4n'),t*3);
+    // Second phrase: descend then climb
+    setTimeout(()=>sy.triggerAttackRelease('Ab4','16n'),t*7);
+    setTimeout(()=>sy.triggerAttackRelease('Bb4','16n'),t*8);
+    setTimeout(()=>sy.triggerAttackRelease('Bb4','16n'),t*9);
+    setTimeout(()=>sy.triggerAttackRelease('C5','4n'),t*10);
+    // Third phrase: triumphant ascending resolution
+    setTimeout(()=>sy.triggerAttackRelease('Ab4','16n'),t*14);
+    setTimeout(()=>sy.triggerAttackRelease('C5','16n'),t*15);
+    setTimeout(()=>sy.triggerAttackRelease('Eb5','16n'),t*16);
+    setTimeout(()=>sy.triggerAttackRelease('C5','8n'),t*17);
+    setTimeout(()=>sy.triggerAttackRelease('Eb5','16n'),t*18);
+    setTimeout(()=>sy.triggerAttackRelease('G5','2n'),t*19); // final high note held
+    // Bass foundation
     setTimeout(()=>bs.triggerAttackRelease('C3','4n'),0);
-    setTimeout(()=>bs.triggerAttackRelease('G2','4n'),280);
-    setTimeout(()=>bs.triggerAttackRelease('C3','2n'),560);
-    // Final cymbal-like noise hit
-    setTimeout(()=>{try{ns.triggerAttackRelease('16n')}catch(e){}},580);
+    setTimeout(()=>bs.triggerAttackRelease('Ab2','4n'),t*7);
+    setTimeout(()=>bs.triggerAttackRelease('C3','4n'),t*14);
+    setTimeout(()=>bs.triggerAttackRelease('C3','2n'),t*18);
+    // Cymbal hits on key moments
+    setTimeout(()=>{try{ns.triggerAttackRelease('16n')}catch(e){}},t*3);
+    setTimeout(()=>{try{ns.triggerAttackRelease('16n')}catch(e){}},t*19);
   },
   lose:()=>{['C4','B3','A3','G3'].forEach((n,i)=>setTimeout(()=>bs.triggerAttackRelease(n,'4n'),i*200))},
   lvl:()=>{['C5','D5','E5','G5','C6'].forEach((n,i)=>setTimeout(()=>sy.triggerAttackRelease(n,'16n'),i*80))},
@@ -244,22 +258,42 @@ const bgmBass=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.02,deca
 const bgmHarm=new Tone.Synth({oscillator:{type:'square'},envelope:{attack:.02,decay:.3,sustain:.1,release:.3},volume:-22}).toDestination();
 let bgmActive=null;const bgmLoops=[];
 const BGM_TRACKS={
- title:{bpm:90,
-  melody:['C5','E5','G5','C6','B5','G5','E5','G5','A5','C6','E6','G6','F6','D6','C6','G5'],melodyDur:'4n',
-  harm:['E4','G4','C5','E5','D5','B4','G4','B4','F4','A4','C5','F5','E5','C5','A4','E5'],harmDur:'4n',
-  bass:['C3','C3','A2','A2','F2','F2','G2','G2'],bassDur:'2n'},
- overworld:{bpm:118,
-  melody:['G4','B4','D5','G5','D5','B4','G4','B4','A4','C5','E5','A5','E5','C5','A4','C5','D5','F5','A5','D6','A5','F5','D5','F5','C5','E5','G5','C6','G5','E5','C5','E5'],melodyDur:'8n',
-  harm:['G3','D4','G3','B3','A3','E4','A3','C4','D4','F4','D4','A3','C4','G4','C4','E4'],harmDur:'4n',
-  bass:['G2','G2','A2','A2','D2','D2','C2','C2'],bassDur:'2n'},
- battle:{bpm:155,
-  melody:['A4','E5','A5','C6','A5','E5','A4','E5','G4','D5','G5','B5','G5','D5','G4','D5','F4','C5','F5','A5','F5','C5','F4','C5','E4','B4','E5','G5','E5','B4','E4','B4'],melodyDur:'8n',
-  harm:['A3','C4','A3','E4','G3','B3','G3','D4','F3','A3','F3','C4','E3','G3','E3','B3'],harmDur:'4n',
-  bass:['A2','A2','A2','E2','G2','G2','G2','D2','F2','F2','F2','C2','E2','E2','E2','B1'],bassDur:'4n'},
- boss:{bpm:108,
-  melody:['E4','G4','B4','E5','D5','C5','B4','G4','A4','C5','E5','A5','G5','F5','E5','C5','D5','F5','A5','D6','C6','A5','G5','F5','E5','G5','B5','E6','D6','B5','A5','E5'],melodyDur:'4n',
-  harm:['E3','G3','B3','E4','D4','C4','B3','E4','A3','C4','E4','A4','G4','F4','E4','C4'],harmDur:'4n',
-  bass:['E2','E2','D2','D2','C2','C2','B2','B2'],bassDur:'2n'},
+ title:{bpm:88,
+  melody:[
+   'C5','D5','E5','G5','E5','D5','C5','B4', 'A4','C5','E5','A5','G5','F5','E5','D5',
+   'F5','A5','C6','A5','G5','E5','D5','C5', 'E5','G5','B5','G5','F5','D5','C5','E5',
+   'C5','E5','G5','C6','B5','A5','G5','E5', 'A5','G5','F5','E5','D5','C5','B4','G4',
+   'F4','A4','C5','F5','E5','D5','C5','A4', 'G4','B4','D5','G5','F5','E5','D5','G4',
+  ],melodyDur:'4n',
+  harm:['E4','G4','A4','C5','F4','A4','C5','E5','D4','F4','A4','D5','G3','B3','D4','G4','E4','G4','C5','E5','A3','C4','E4','A4','F3','A3','C4','F4','G3','B3','D4','G4'],harmDur:'4n',
+  bass:['C3','C3','A2','A2','F2','F2','G2','G2','C3','C3','A2','A2','D2','D2','G2','G2'],bassDur:'2n'},
+ overworld:{bpm:115,
+  melody:[
+   'G4','A4','B4','D5','G5','D5','B4','A4', 'G4','B4','D5','G5','A5','G5','D5','B4',
+   'A4','B4','C5','E5','A5','E5','C5','B4', 'A4','C5','E5','A5','B5','A5','E5','C5',
+   'D5','E5','F5','A5','D6','A5','F5','E5', 'D5','F5','A5','D6','E6','D6','A5','F5',
+   'C5','D5','E5','G5','C6','G5','E5','D5', 'C5','E5','G5','C6','D6','C6','G5','E5',
+  ],melodyDur:'8n',
+  harm:['G3','B3','D4','G4','G3','D4','B3','G3','A3','C4','E4','A4','A3','E4','C4','A3','D4','F4','A4','D5','D4','A4','F4','D4','C4','E4','G4','C5','C4','G4','E4','C4'],harmDur:'4n',
+  bass:['G2','G2','D2','D2','A2','A2','E2','E2','D2','D2','A2','A2','C2','C2','G2','G2'],bassDur:'2n'},
+ battle:{bpm:152,
+  melody:[
+   'A4','C5','E5','A5','C6','A5','E5','C5', 'A4','E5','A5','C6','E6','C6','A5','E5',
+   'G4','B4','D5','G5','B5','G5','D5','B4', 'G4','D5','G5','B5','D6','B5','G5','D5',
+   'F4','A4','C5','F5','A5','F5','C5','A4', 'F4','C5','F5','A5','C6','A5','F5','C5',
+   'E4','G4','B4','E5','G5','E5','B4','G4', 'E4','B4','E5','G5','B5','G5','E5','B4',
+  ],melodyDur:'8n',
+  harm:['A3','E4','A3','C4','E4','A3','C4','E4','G3','D4','G3','B3','D4','G3','B3','D4','F3','C4','F3','A3','C4','F3','A3','C4','E3','B3','E3','G3','B3','E3','G3','B3'],harmDur:'8n',
+  bass:['A2','A2','E2','E2','G2','G2','D2','D2','F2','F2','C2','C2','E2','E2','B1','B1'],bassDur:'2n'},
+ boss:{bpm:105,
+  melody:[
+   'E4','G4','B4','E5','E5','D5','C5','B4', 'G4','A4','B4','C5','E5','D5','C5','A4',
+   'A4','C5','E5','A5','A5','G5','F5','E5', 'C5','D5','E5','F5','A5','G5','F5','D5',
+   'D5','F5','A5','D6','D6','C6','A5','G5', 'F5','E5','D5','C5','A4','G4','F4','E4',
+   'E5','G5','B5','E6','E6','D6','B5','A5', 'G5','F5','E5','D5','B4','A4','G4','E4',
+  ],melodyDur:'4n',
+  harm:['E3','B3','E3','G3','B3','E3','G3','B3','A3','E4','A3','C4','E4','A3','C4','E4','D4','A4','D4','F4','A4','D4','F4','A4','E3','B3','E3','G3','B3','E3','G3','B3'],harmDur:'4n',
+  bass:['E2','E2','B1','B1','A2','A2','E2','E2','D2','D2','A1','A1','E2','E2','B1','B1'],bassDur:'2n'},
 };
 function playBGM(name){
  if(bgmActive===name)return;
