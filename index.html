@@ -2222,54 +2222,46 @@ function genCarTex(scene){
  scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
 }
 // Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
-// Cartoon-style delivery van (top-down, 36×22, smooth curves + outlines)
+// Pixel-art delivery van (top-down, 22×14, crisp edges, facing NORTH)
 function genVanTex(scene){
- const FW=36,FH=22;
+ const FW=22,FH=14;
  const c=document.createElement('canvas');c.width=FW;c.height=FH;
  const x=c.getContext('2d');
- const cx=FW/2;
- x.lineCap='round';x.lineJoin='round';
- // Ground shadow
- x.fillStyle='rgba(0,0,0,.3)';
- x.beginPath();x.ellipse(cx,FH-1,FW/2-3,2.5,0,0,Math.PI*2);x.fill();
- // --- CARGO BOX (back 60%) --- rounded rect, white, tintable
- x.fillStyle='#f8f8f8';x.strokeStyle='#1a1a1a';x.lineWidth=1.5;
- x.beginPath();x.roundRect(3,5,FW-6,FH-8,3);x.fill();x.stroke();
- // --- CAB (front 30%) --- darker shade
- const cabG=x.createLinearGradient(0,1,0,6);cabG.addColorStop(0,'#e8e8e8');cabG.addColorStop(1,'#c0c0c8');
- x.fillStyle=cabG;x.strokeStyle='#1a1a1a';x.lineWidth=1.5;
- x.beginPath();x.roundRect(5,1,FW-10,5,2);x.fill();x.stroke();
- // Windshield (blue glass, rounded)
- const wG=x.createLinearGradient(0,1,0,5);wG.addColorStop(0,'#a0d0f8');wG.addColorStop(1,'#4a88c0');
- x.fillStyle=wG;x.strokeStyle='#2a2a3a';x.lineWidth=1;
- x.beginPath();x.roundRect(7,2,FW-14,3,1.5);x.fill();x.stroke();
+ // -- Outline (dark border around the whole van) --
+ x.fillStyle='#0a0a0a';x.fillRect(2,0,FW-4,FH);
+ // -- BODY (white base, tintable) --
+ x.fillStyle='#ffffff';x.fillRect(3,1,FW-6,FH-2);
+ // -- CAB (front section, top of sprite) --
+ // Cab roof (slightly darker)
+ x.fillStyle='#e0e0e0';x.fillRect(3,1,FW-6,3);
+ // Windshield (blue glass)
+ x.fillStyle='#5090c0';x.fillRect(4,2,FW-8,2);
  // Windshield glare
- x.fillStyle='rgba(255,255,255,.5)';x.fillRect(8,2,5,1);
- // Headlights
- x.fillStyle='#ffe060';x.strokeStyle='#8a6a00';x.lineWidth=0.8;
- x.beginPath();x.arc(6,3,1.5,0,Math.PI*2);x.fill();x.stroke();
- x.beginPath();x.arc(FW-6,3,1.5,0,Math.PI*2);x.fill();x.stroke();
- // Cargo side stripe (brand color — will be tinted by setTint)
- x.fillStyle='#FFD700';x.fillRect(5,12,FW-10,2);
- // Rear door split line
- x.strokeStyle='#8a8a8a';x.lineWidth=0.7;
- x.beginPath();x.moveTo(cx,6);x.lineTo(cx,FH-4);x.stroke();
- // Door handles
- x.fillStyle='#606060';
- x.beginPath();x.arc(cx-3,11,0.8,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(cx+3,11,0.8,0,Math.PI*2);x.fill();
- // Tail lights
- x.fillStyle='#ff2020';x.strokeStyle='#800000';x.lineWidth=0.6;
- x.beginPath();x.roundRect(5,FH-5,3,2,1);x.fill();x.stroke();
- x.beginPath();x.roundRect(FW-8,FH-5,3,2,1);x.fill();x.stroke();
- // --- WHEELS (4 rounded wheels) ---
- x.fillStyle='#1a1a1a';x.strokeStyle='#0a0a0a';x.lineWidth=0.8;
- [[2,3,2.5,3.5],[FW-4,3,2.5,3.5],[2,FH-7,2.5,3.5],[FW-4,FH-7,2.5,3.5]].forEach(([wx,wy,wr,wh])=>{
-  x.beginPath();x.ellipse(wx+wr/2,wy+wh/2,wr,wh/2,0,0,Math.PI*2);x.fill();x.stroke();
-  // Hub cap
-  x.fillStyle='#4a4a4a';x.beginPath();x.arc(wx+wr/2,wy+wh/2,1,0,Math.PI*2);x.fill();
-  x.fillStyle='#1a1a1a';
- });
+ x.fillStyle='#a0d0ff';x.fillRect(4,2,4,1);
+ // Cab-cargo divider
+ x.fillStyle='#0a0a0a';x.fillRect(3,4,FW-6,1);
+ // -- CARGO BOX --
+ x.fillStyle='#ffffff';x.fillRect(3,5,FW-6,FH-7);
+ // Side panel lines (horizontal stripes for box ribbing)
+ x.fillStyle='#d0d0d0';x.fillRect(3,7,FW-6,1);x.fillRect(3,10,FW-6,1);
+ // Rear door split
+ x.fillStyle='#0a0a0a';x.fillRect(FW/2|0,5,1,FH-7);
+ // Rear bumper
+ x.fillStyle='#404040';x.fillRect(3,FH-2,FW-6,1);
+ // -- TAIL LIGHTS --
+ x.fillStyle='#ff0000';x.fillRect(3,FH-3,2,1);x.fillRect(FW-5,FH-3,2,1);
+ // -- HEADLIGHTS --
+ x.fillStyle='#ffdd00';x.fillRect(3,1,2,1);x.fillRect(FW-5,1,2,1);
+ // -- WHEELS (4 black rectangles sticking out) --
+ x.fillStyle='#0a0a0a';
+ x.fillRect(0,2,2,3);x.fillRect(FW-2,2,2,3);   // front
+ x.fillRect(0,FH-5,2,3);x.fillRect(FW-2,FH-5,2,3); // rear
+ // Tire tread highlights
+ x.fillStyle='#3a3a3a';
+ x.fillRect(0,3,2,1);x.fillRect(FW-2,3,2,1);
+ x.fillRect(0,FH-4,2,1);x.fillRect(FW-2,FH-4,2,1);
+ // -- SIDE MIRRORS --
+ x.fillStyle='#0a0a0a';x.fillRect(1,3,1,1);x.fillRect(FW-2,3,1,1);
  scene.textures.addCanvas('van',c);
 }
 // Small top-down airliner (white with blue stripe) — facing NORTH, rotated in update().
@@ -2904,12 +2896,11 @@ class OverworldScene extends Phaser.Scene {
    const VAN_PARK_TINTS=[0x1a3a6a,0xd02020];
    ENC.filter(e=>e.region===rk).forEach(e=>{
     for(let vi=0;vi<2;vi++){
-     const vx=p2x(e.mx)+(vi===0?-34:34)+Math.round(prng()*10-5);
-     const vy=p2y(e.my)+24+Math.round(prng()*10);
+     const vx=p2x(e.mx)+(vi===0?-20:20)+Math.round(prng()*6-3);
+     const vy=p2y(e.my)+16+Math.round(prng()*6);
      const pv=this.add.image(vx,vy,'van');
      pv.setTint(VAN_PARK_TINTS[vi]);
-     pv.setScale(2.5);
-     pv.setRotation(vi===0?-0.2+prng()*0.15:0.2+prng()*0.15);
+     pv.setRotation(vi===0?-0.15+prng()*0.1:0.15+prng()*0.1);
      pv.setOrigin(0.5,0.5);pv.setDepth(vy);
      pv.regionKey=rk;this.decoObjs.push(pv);
     }
