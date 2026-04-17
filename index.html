@@ -3556,7 +3556,10 @@ function App(){
   // ── PHASER: destroy/recreate game on map entry (bulletproof; no canvas-orphan bug) ──
   useEffect(()=>{
    const destroy=()=>{
-    if(phaserRef.current){try{phaserRef.current.destroy(true)}catch(e){}phaserRef.current=null}
+    if(phaserRef.current){
+     // Save hero position before destroying so tab-switching preserves location
+     try{const sc=phaserRef.current.scene.getScene('Overworld');if(sc&&sc.hero)Bridge._lastPos={x:sc.hero.x,y:sc.hero.y}}catch(e){}
+     try{phaserRef.current.destroy(true)}catch(e){}phaserRef.current=null}
     // Clear stale Bridge listeners so they don't accumulate
     delete Bridge._l['return-to-map'];delete Bridge._l['game-state-sync'];delete Bridge._l['dpad'];delete Bridge._l['airport-travel'];
    };
