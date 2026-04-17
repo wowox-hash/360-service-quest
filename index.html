@@ -2808,25 +2808,17 @@ function genNpcTex(scene){
 }
 class BootScene extends Phaser.Scene {
  constructor(){super('Boot')}
+ preload(){
+  // Preload PNG assets from base64 data URIs — Phaser's loader properly
+  // decodes them before create() runs, avoiding the black-map bug.
+  this.load.image('tileset', PNG_TILESET);
+  this.load.image('van', PNG_VAN);
+  this.load.image('tree', PNG_TREE);
+ }
  create(){
   try{
-   // Load PNG assets from base64 data URIs (high-quality Pillow renders)
-   const loadPNG=(key,dataUri,w,h)=>{const img=new window.Image();img.src=dataUri;this.textures.addImage(key,img)};
-   // Tileset loaded from base64 PNG (replaces genTileset)
-   {const img=new window.Image();img.src=PNG_TILESET;this.textures.addCanvas('tileset',(() => {
-    const c=document.createElement('canvas');c.width=img.width||192;c.height=img.height||64;
-    const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return c;
-   })())}
-   // Van loaded from base64 PNG (replaces genVanTex)
-   {const img=new window.Image();img.src=PNG_VAN;this.textures.addCanvas('van',(() => {
-    const c=document.createElement('canvas');c.width=img.width||32;c.height=img.height||22;
-    const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return c;
-   })())}
-   // Tree loaded from base64 PNG (replaces genTreeTex)
-   {const img=new window.Image();img.src=PNG_TREE;this.textures.addCanvas('tree',(() => {
-    const c=document.createElement('canvas');c.width=img.width||44;c.height=img.height||60;
-    const ctx=c.getContext('2d');ctx.drawImage(img,0,0);return c;
-   })())}
+   // PNG tileset/van/tree are already loaded by preload() above.
+   // Generate remaining procedural textures:
    genBldTex(this);genHeroTex(this);genNpcTex(this);genEventTex(this);genCarTex(this);genBikeTex(this);genPlaneTex(this);
   genBillboardWolfTex(this);genBillboardChampTex(this);
   genDrumTex(this,'drums_wolf','#1a3a6a');genDrumTex(this,'drums_champ','#d02020');
