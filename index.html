@@ -2454,9 +2454,12 @@ function genLightTex(scene){
 // (We'll reuse the existing 'car' spritesheet frame 0 for parked cars.)
 
 function genHeroTex(scene){
- const FW=16,FH=24;
- const c=document.createElement('canvas');c.width=FW*3;c.height=FH*4;
+ const S=2; // scale factor: 16×24 → 32×48 per frame
+ const FW=16*S,FH=24*S;
+ const COLS=4; // 4 walk frames: idle, step-L, mid, step-R
+ const c=document.createElement('canvas');c.width=FW*COLS;c.height=FH*4;
  const x=c.getContext('2d');
+ x.scale(S,S); // all existing 16×24 drawing code now renders at 32×48
  const _H=HAIR_OPTS[CHAR.hair],_S=SKIN_OPTS[CHAR.skin],_T=TUNIC_OPTS[CHAR.tunic];
  const HAIR=_H.mid,HAIR_H=_H.hi,HAIR_L=_H.lo;
  const SK=_S.mid,SK_H=_S.hi,SK_L=_S.lo;
@@ -2546,7 +2549,7 @@ function genHeroTex(scene){
   }
  }
  function frame(col,row,foot){
-  const ox=col*FW,oy=row*FH,dir=['down','up','left','right'][row];
+  const ox=col*16,oy=row*24,dir=['down','up','left','right'][row];
   const fL=foot===1?1:0,fR=foot===-1?1:0;
   drawHead(ox,oy,dir);
   if(gender===1){
@@ -2618,41 +2621,63 @@ function genHeroTex(scene){
    x.fillStyle=HILT;x.fillRect(ox+2,oy+11,3,1);
   }
  }
- for(let r=0;r<4;r++){frame(0,r,0);frame(1,r,1);frame(2,r,-1)}
+ // 4 frames per direction: idle, step-L, mid(neutral), step-R
+ for(let r=0;r<4;r++){frame(0,r,0);frame(1,r,1);frame(2,r,0);frame(3,r,-1)}
+ // Add detail pass at physical pixel level (sub-pixel highlights)
+ x.resetTransform();
+ // Soft ground shadow at bottom of each idle frame (col 0)
+ for(let r=0;r<4;r++){
+  x.fillStyle='rgba(0,0,0,.25)';
+  x.beginPath();x.ellipse(FW*0+FW/2,FH*r+FH-2,12,3,0,0,Math.PI*2);x.fill();
+  x.beginPath();x.ellipse(FW*2+FW/2,FH*r+FH-2,12,3,0,0,Math.PI*2);x.fill();
+ }
  scene.textures.addSpriteSheet('hero',c,{frameWidth:FW,frameHeight:FH});
 }
 function genNpcTex(scene){
- const FW=16,FH=24;
+ const S=2; // scale factor: 16×24 → 32×48
+ const FW=16*S,FH=24*S;
  const shirts=['#DC2626','#059669','#7C3AED','#D97706','#0891B2','#BE185D','#4338CA','#0D9488'];
  const hairs=['#1a1a2e','#8B5E3C','#D4956A','#6B7280','#F59E0B','#374151','#92400E','#3B2507'];
  for(let v=0;v<8;v++){
-  const c=document.createElement('canvas');c.width=FW*2;c.height=FH*4;
+  const c=document.createElement('canvas');c.width=FW*3;c.height=FH*4;
   const x=c.getContext('2d');
-  for(let row=0;row<4;row++)for(let col=0;col<2;col++){
-   const ox=col*FW,oy=row*FH,foot=col;
+  x.scale(S,S);
+  for(let row=0;row<4;row++)for(let col=0;col<3;col++){
+   const ox=col*16,oy=row*24,foot=col===1?1:(col===2?-1:0),fL=foot===1?1:0,fR=foot===-1?1:0;
    const dir=['down','up','left','right'][row];
+   // Hair
    x.fillStyle=hairs[v];x.fillRect(ox+4,oy+1,8,4);
+   // Head
    x.fillStyle='#F5C99A';x.fillRect(ox+4,oy+5,8,4);
    if(dir==='down'){
     x.fillStyle='#0a1a4a';x.fillRect(ox+6,oy+6,1,1);x.fillRect(ox+9,oy+6,1,1);
+    // Add brow accent
+    x.fillStyle=hairs[v];x.fillRect(ox+5,oy+5,3,1);x.fillRect(ox+8,oy+5,3,1);
    }else if(dir==='up'){
     x.fillStyle=hairs[v];x.fillRect(ox+4,oy+5,8,2);
    }else{
     x.fillStyle='#0a1a4a';x.fillRect(ox+(dir==='left'?6:9),oy+6,1,1);
    }
    x.fillStyle='#D4956A';x.fillRect(ox+4,oy+8,8,1);
+   // Shirt
    x.fillStyle=shirts[v];x.fillRect(ox+3,oy+9,10,5);
-   x.fillStyle='#fff';x.globalAlpha=0.2;x.fillRect(ox+3,oy+9,10,1);x.globalAlpha=1;
+   x.fillStyle='#fff';x.globalAlpha=0.25;x.fillRect(ox+3,oy+9,10,1);x.globalAlpha=1;
+   // Collar detail
+   x.fillStyle=shirts[v];x.fillRect(ox+6,oy+9,4,1);
+   x.fillStyle='#fff';x.globalAlpha=0.15;x.fillRect(ox+6,oy+9,4,1);x.globalAlpha=1;
+   // Belt
    x.fillStyle='#000';x.fillRect(ox+3,oy+13,10,1);
    x.fillStyle='#c0c0c0';x.fillRect(ox+7,oy+13,2,1);
+   // Legs
    x.fillStyle='#1a1a2e';x.fillRect(ox+3,oy+14,4,5);x.fillRect(ox+9,oy+14,4,5);
-   x.fillStyle='#3a3a4a';x.fillRect(ox+3,oy+19+foot,4,2);x.fillRect(ox+9,oy+19+(1-foot),4,2);
+   x.fillStyle='#3a3a4a';x.fillRect(ox+3,oy+19+fL,4,2);x.fillRect(ox+9,oy+19+fR,4,2);
   }
   scene.textures.addSpriteSheet('npc_'+v,c,{frameWidth:FW,frameHeight:FH});
  }
- // Boss sprite 24x24, 2 frames
- const bc=document.createElement('canvas');bc.width=48;bc.height=24;
+ // Boss sprite 48×48 (scaled 2x from 24×24), 2 frames
+ const bc=document.createElement('canvas');bc.width=96;bc.height=48;
  const bx=bc.getContext('2d');
+ bx.scale(S,S);
  for(let col=0;col<2;col++){
   const ox=col*24;
   bx.fillStyle='rgba(0,0,0,.35)';bx.beginPath();bx.ellipse(ox+12,22,10,2,0,0,Math.PI*2);bx.fill();
@@ -2666,13 +2691,13 @@ function genNpcTex(scene){
   bx.fillStyle='#fff';bx.fillRect(ox+9,12,1,1);bx.fillRect(ox+12,12,1,1);bx.fillRect(ox+15,12,1,1);
   bx.fillStyle='#10B981';bx.fillRect(ox+5,17+col,5,4);bx.fillRect(ox+14,17+(1-col),5,4);
  }
- scene.textures.addSpriteSheet('boss',bc,{frameWidth:24,frameHeight:24});
- // Exclamation mark
- const ec=document.createElement('canvas');ec.width=12;ec.height=16;
+ scene.textures.addSpriteSheet('boss',bc,{frameWidth:48,frameHeight:48});
+ // Exclamation mark (larger for 2x sprites)
+ const ec=document.createElement('canvas');ec.width=20;ec.height=28;
  const ex=ec.getContext('2d');
- ex.fillStyle='#000';ex.fillRect(5,1,4,9);ex.fillRect(5,12,4,3);
- ex.fillStyle='#FFD700';ex.fillRect(5,2,2,8);ex.fillRect(5,12,2,2);
- ex.fillStyle='#fff';ex.fillRect(5,2,1,6);
+ ex.fillStyle='#000';ex.fillRect(7,1,6,16);ex.fillRect(7,20,6,6);
+ ex.fillStyle='#FFD700';ex.fillRect(8,2,4,14);ex.fillRect(8,21,4,4);
+ ex.fillStyle='#fff';ex.fillRect(8,2,2,10);x.fillRect(8,21,1,2);
  scene.textures.addCanvas('excl',ec);
 }
 class BootScene extends Phaser.Scene {
@@ -2890,11 +2915,11 @@ class OverworldScene extends Phaser.Scene {
   const spawnR=REGIONS[this.currentRegion]||REGIONS.EU;const sp=Bridge._lastPos||{x:p2x(spawnR.ax+2),y:p2y(spawnR.ay+2)};
   this.hero=this.physics.add.sprite(sp.x,sp.y,'hero');
   this.hero.setCollideWorldBounds(true);
-  this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);
+  this.hero.body.setSize(20,16);this.hero.body.setOffset(6,30);
   // Hero anims
   ['down','up','left','right'].forEach((dir,i)=>{
-   this.anims.create({key:'hero-walk-'+dir,frames:this.anims.generateFrameNumbers('hero',{start:i*3+1,end:i*3+2}),frameRate:6,repeat:-1});
-   this.anims.create({key:'hero-idle-'+dir,frames:[{key:'hero',frame:i*3}],frameRate:1});
+   this.anims.create({key:'hero-walk-'+dir,frames:this.anims.generateFrameNumbers('hero',{start:i*4+1,end:i*4+3}),frameRate:8,repeat:-1});
+   this.anims.create({key:'hero-idle-'+dir,frames:[{key:'hero',frame:i*4}],frameRate:1});
   });
   // Vehicle anims (car + bike): 2-frame wheel-spin loop, directional rotation set in update()
   ['car','bike'].forEach(v=>{
@@ -2907,11 +2932,11 @@ class OverworldScene extends Phaser.Scene {
    const sx=p2x(enc.mx),sy=p2y(enc.my);
    const npc=this.physics.add.sprite(sx+15,sy+20,'npc_'+enc.v);
    npc.setData('encId',enc.id);
-   npc.body.setSize(10,8);npc.body.setOffset(3,16);
+   npc.body.setSize(20,16);npc.body.setOffset(6,30);
    this.npcSprites[enc.id]=npc;
    ['down','up','left','right'].forEach((dir,i)=>{
     const k='npc'+enc.v+'-walk-'+dir;
-    if(!this.anims.exists(k))this.anims.create({key:k,frames:this.anims.generateFrameNumbers('npc_'+enc.v,{start:i*2,end:i*2+1}),frameRate:2,repeat:-1});
+    if(!this.anims.exists(k))this.anims.create({key:k,frames:this.anims.generateFrameNumbers('npc_'+enc.v,{start:i*3+1,end:i*3+2}),frameRate:5,repeat:-1});
    });
    this.npcState[enc.id]={hx:sx+15,hy:sy+20,ang:Math.random()*Math.PI*2,t:0,iv:2000+Math.random()*1500};
   });
@@ -2919,7 +2944,7 @@ class OverworldScene extends Phaser.Scene {
   const bsx=p2x(BOSS.mx),bsy=p2y(BOSS.my);
   const bn=this.physics.add.sprite(bsx+15,bsy+25,'boss');
   bn.setData('encId',99);
-  bn.body.setSize(18,10);bn.body.setOffset(3,12);
+  bn.body.setSize(28,16);bn.body.setOffset(10,28);
   this.npcSprites[99]=bn;
   this.npcState[99]={hx:bsx+15,hy:bsy+25,ang:Math.random()*Math.PI*2,t:0,iv:2500};
   this.anims.create({key:'boss-walk',frames:this.anims.generateFrameNumbers('boss',{start:0,end:1}),frameRate:3,repeat:-1});
@@ -3091,8 +3116,8 @@ class OverworldScene extends Phaser.Scene {
   const wantTex=this.vehicle||'hero';
   if(this.hero.texture.key!==wantTex){
    this.hero.setTexture(wantTex,0);
-   if(this.vehicle){this.hero.body.setSize(12,10);this.hero.body.setOffset(2,7)}
-   else{this.hero.body.setSize(10,8);this.hero.body.setOffset(3,16);this.hero.setRotation(0)}
+   if(this.vehicle){this.hero.body.setSize(14,12);this.hero.body.setOffset(1,6)}
+   else{this.hero.body.setSize(20,16);this.hero.body.setOffset(6,30);this.hero.setRotation(0)}
   }
   if(this.vehicle){
    // Vehicle mode: rotate to face movement direction, play drive/idle anim
