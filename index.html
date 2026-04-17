@@ -879,18 +879,22 @@ const GRASS_PAL={
 };
 function drawGrass(x,ox,oy,pal){
  const p=pal||GRASS_PAL._;
- x.fillStyle=p[0];x.fillRect(ox,oy,16,16);
- // Blade-tuft pattern at fixed positions for seamless tiling
+ // Gradient base instead of flat color
+ const g=x.createLinearGradient(ox,oy,ox+16,oy+16);
+ g.addColorStop(0,p[0]);g.addColorStop(0.5,p[1]);g.addColorStop(1,p[0]);
+ x.fillStyle=g;x.fillRect(ox,oy,16,16);
+ // Blade-tuft pattern with small strokes
  x.fillStyle=p[1];
- const tufts=[[3,3],[11,2],[2,9],[8,8],[13,12],[6,13]];
- tufts.forEach(([tx,ty])=>{
-  x.fillRect(ox+tx,oy+ty-1,1,1);
+ [[3,3],[11,2],[2,9],[8,8],[13,12],[6,13]].forEach(([tx,ty])=>{
+  x.fillRect(ox+tx,oy+ty-1,1,2);
   x.fillRect(ox+tx-1,oy+ty,3,1);
-  x.fillRect(ox+tx,oy+ty+1,1,1);
  });
- // Bright highlight dots
+ // Highlight dots
  x.fillStyle=p[2];
  x.fillRect(ox+3,oy+3,1,1);x.fillRect(ox+11,oy+2,1,1);x.fillRect(ox+8,oy+8,1,1);x.fillRect(ox+13,oy+12,1,1);
+ // Subtle dark accents for depth
+ x.fillStyle='rgba(0,0,0,.08)';
+ x.fillRect(ox+6,oy+5,2,1);x.fillRect(ox+12,oy+10,2,1);
 }
 // Return the region key that contains (px,py) in percent coords, or null.
 function regionAt(px,py){
@@ -2218,55 +2222,54 @@ function genCarTex(scene){
  scene.textures.addSpriteSheet('car',c,{frameWidth:FW,frameHeight:FH});
 }
 // Red motorcycle — top-down 2-frame spritesheet (16x24 per frame, facing NORTH)
-// Delivery van — 20x14 top-down sprite, single frame (tint applied per building).
-// Drawn facing NORTH so Phaser rotation matches velocity direction.
+// Cartoon-style delivery van (top-down, 36×22, smooth curves + outlines)
 function genVanTex(scene){
- const FW=20,FH=14;
+ const FW=36,FH=22;
  const c=document.createElement('canvas');c.width=FW;c.height=FH;
  const x=c.getContext('2d');
  const cx=FW/2;
- // Drop shadow (anti-aliased via two rects)
- x.fillStyle='rgba(0,0,0,.25)';x.fillRect(2,FH-1,FW-4,1);
- x.fillStyle='rgba(0,0,0,.4)';x.fillRect(3,FH-2,FW-6,1);
- // Outer chassis outline
- x.fillStyle='#0a0a0a';x.fillRect(2,1,FW-4,FH-3);
- // --- CAB (front third) ---
- // Bonnet (white base, tintable)
- x.fillStyle='#ffffff';x.fillRect(3,2,FW-6,3);
- // Grille strip
- x.fillStyle='#2a2a2a';x.fillRect(4,2,FW-8,1);
+ x.lineCap='round';x.lineJoin='round';
+ // Ground shadow
+ x.fillStyle='rgba(0,0,0,.3)';
+ x.beginPath();x.ellipse(cx,FH-1,FW/2-3,2.5,0,0,Math.PI*2);x.fill();
+ // --- CARGO BOX (back 60%) --- rounded rect, white, tintable
+ x.fillStyle='#f8f8f8';x.strokeStyle='#1a1a1a';x.lineWidth=1.5;
+ x.beginPath();x.roundRect(3,5,FW-6,FH-8,3);x.fill();x.stroke();
+ // --- CAB (front 30%) --- darker shade
+ const cabG=x.createLinearGradient(0,1,0,6);cabG.addColorStop(0,'#e8e8e8');cabG.addColorStop(1,'#c0c0c8');
+ x.fillStyle=cabG;x.strokeStyle='#1a1a1a';x.lineWidth=1.5;
+ x.beginPath();x.roundRect(5,1,FW-10,5,2);x.fill();x.stroke();
+ // Windshield (blue glass, rounded)
+ const wG=x.createLinearGradient(0,1,0,5);wG.addColorStop(0,'#a0d0f8');wG.addColorStop(1,'#4a88c0');
+ x.fillStyle=wG;x.strokeStyle='#2a2a3a';x.lineWidth=1;
+ x.beginPath();x.roundRect(7,2,FW-14,3,1.5);x.fill();x.stroke();
+ // Windshield glare
+ x.fillStyle='rgba(255,255,255,.5)';x.fillRect(8,2,5,1);
  // Headlights
- x.fillStyle='#ffe680';x.fillRect(3,2,2,1);x.fillRect(FW-5,2,2,1);
- // Windshield (wide blue strip)
- x.fillStyle='#4a78a8';x.fillRect(3,3,FW-6,2);
- x.fillStyle='#6fa4d4';x.fillRect(3,3,FW-6,1); // sky reflection band
- x.fillStyle='#cfe4f8';x.fillRect(4,3,3,1);    // bright glare
- // Cab roof divider
- x.fillStyle='#0a0a0a';x.fillRect(2,5,FW-4,1);
- // --- CARGO BOX (rear two-thirds) ---
- x.fillStyle='#ffffff';x.fillRect(3,6,FW-6,FH-9);
- // Top panel highlight
- x.fillStyle='#f2f2f2';x.fillRect(3,6,FW-6,1);
- // Left / right chrome rails
- x.fillStyle='#cfcfcf';x.fillRect(3,7,1,FH-11);x.fillRect(FW-4,7,1,FH-11);
- // Rear door split
- x.fillStyle='#0a0a0a';x.fillRect(cx,6,1,FH-9);
- // Rear door handle dots
- x.fillStyle='#4a4a4a';x.fillRect(cx-2,8,1,1);x.fillRect(cx+2,8,1,1);
- // Wolf-Oil side logo: yellow band with a red accent square
- x.fillStyle='#FFD700';x.fillRect(4,9,FW-8,1);
- x.fillStyle='#c02020';x.fillRect(cx-1,9,2,1);
- // Rear bumper + tail lights
- x.fillStyle='#2a2a2a';x.fillRect(3,FH-3,FW-6,1);
- x.fillStyle='#ff3030';x.fillRect(3,FH-4,2,1);x.fillRect(FW-5,FH-4,2,1);
- // --- WHEELS (4 wheels, black sidewalls that stick out slightly) ---
- x.fillStyle='#0a0a0a';
- x.fillRect(1,3,2,3);x.fillRect(FW-3,3,2,3);  // front pair
- x.fillRect(1,FH-6,2,3);x.fillRect(FW-3,FH-6,2,3); // rear pair
- // Tire hub highlights
- x.fillStyle='#4a4a4a';
- x.fillRect(1,4,2,1);x.fillRect(FW-3,4,2,1);
- x.fillRect(1,FH-5,2,1);x.fillRect(FW-3,FH-5,2,1);
+ x.fillStyle='#ffe060';x.strokeStyle='#8a6a00';x.lineWidth=0.8;
+ x.beginPath();x.arc(6,3,1.5,0,Math.PI*2);x.fill();x.stroke();
+ x.beginPath();x.arc(FW-6,3,1.5,0,Math.PI*2);x.fill();x.stroke();
+ // Cargo side stripe (brand color — will be tinted by setTint)
+ x.fillStyle='#FFD700';x.fillRect(5,12,FW-10,2);
+ // Rear door split line
+ x.strokeStyle='#8a8a8a';x.lineWidth=0.7;
+ x.beginPath();x.moveTo(cx,6);x.lineTo(cx,FH-4);x.stroke();
+ // Door handles
+ x.fillStyle='#606060';
+ x.beginPath();x.arc(cx-3,11,0.8,0,Math.PI*2);x.fill();
+ x.beginPath();x.arc(cx+3,11,0.8,0,Math.PI*2);x.fill();
+ // Tail lights
+ x.fillStyle='#ff2020';x.strokeStyle='#800000';x.lineWidth=0.6;
+ x.beginPath();x.roundRect(5,FH-5,3,2,1);x.fill();x.stroke();
+ x.beginPath();x.roundRect(FW-8,FH-5,3,2,1);x.fill();x.stroke();
+ // --- WHEELS (4 rounded wheels) ---
+ x.fillStyle='#1a1a1a';x.strokeStyle='#0a0a0a';x.lineWidth=0.8;
+ [[2,3,2.5,3.5],[FW-4,3,2.5,3.5],[2,FH-7,2.5,3.5],[FW-4,FH-7,2.5,3.5]].forEach(([wx,wy,wr,wh])=>{
+  x.beginPath();x.ellipse(wx+wr/2,wy+wh/2,wr,wh/2,0,0,Math.PI*2);x.fill();x.stroke();
+  // Hub cap
+  x.fillStyle='#4a4a4a';x.beginPath();x.arc(wx+wr/2,wy+wh/2,1,0,Math.PI*2);x.fill();
+  x.fillStyle='#1a1a1a';
+ });
  scene.textures.addCanvas('van',c);
 }
 // Small top-down airliner (white with blue stripe) — facing NORTH, rotated in update().
@@ -2362,143 +2365,167 @@ function genEventTex(scene){
  });
 }
 function genTreeTex(scene){
- const c=document.createElement('canvas');c.width=40;c.height=56;
+ const c=document.createElement('canvas');c.width=44;c.height=60;
  const x=c.getContext('2d');
- // Ground shadow (soft ellipse)
- x.fillStyle='rgba(0,0,0,0.3)';x.beginPath();x.ellipse(20,54,16,4,0,0,Math.PI*2);x.fill();
- // Trunk (tapered, bark texture)
- x.fillStyle='#3a2510';x.fillRect(16,28,8,26);
- x.fillStyle='#5a3a1a';x.fillRect(17,28,3,26);
- x.fillStyle='#2a1a08';x.fillRect(22,30,1,20);// dark bark line
- x.fillStyle='#6a4a2a';x.fillRect(18,30,1,1);x.fillRect(19,36,1,1);x.fillRect(17,42,1,1);// bark texture
- // Root spread
- x.fillStyle='#3a2510';x.fillRect(14,52,3,2);x.fillRect(23,52,3,2);
- // Canopy — multiple layered circles for volume
- x.fillStyle='#184818';x.beginPath();x.arc(20,20,18,0,Math.PI*2);x.fill();
- x.fillStyle='#1a5a1a';x.beginPath();x.arc(14,16,10,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(26,22,9,0,Math.PI*2);x.fill();
- x.fillStyle='#2a6a2a';x.beginPath();x.arc(18,12,8,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(24,18,7,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(14,24,6,0,Math.PI*2);x.fill();
- // Highlights (bright leaf clusters)
- x.fillStyle='#3a8a3a';
- x.beginPath();x.arc(16,10,4,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(22,14,3,0,Math.PI*2);x.fill();
- x.beginPath();x.arc(12,20,3,0,Math.PI*2);x.fill();
- // Specular dots
- x.fillStyle='#5aaa5a';
- x.fillRect(15,9,2,1);x.fillRect(21,13,2,1);x.fillRect(11,19,2,1);
+ x.lineCap='round';x.lineJoin='round';
+ // Ground shadow
+ x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(22,58,17,4,0,0,Math.PI*2);x.fill();
+ // Trunk (tapered, outlined)
+ x.fillStyle='#5a3a1a';x.strokeStyle='#2a1a08';x.lineWidth=1.5;
+ x.beginPath();x.moveTo(17,54);x.lineTo(18,30);x.lineTo(26,30);x.lineTo(27,54);x.closePath();x.fill();x.stroke();
+ // Bark highlights
+ x.fillStyle='#7a5a2a';x.fillRect(19,32,2,16);
+ x.fillStyle='#3a2510';x.fillRect(24,34,1,12);
+ // Roots
+ x.fillStyle='#5a3a1a';x.strokeStyle='#2a1a08';x.lineWidth=1;
+ x.beginPath();x.moveTo(15,54);x.quadraticCurveTo(16,52,18,54);x.fill();x.stroke();
+ x.beginPath();x.moveTo(29,54);x.quadraticCurveTo(28,52,26,54);x.fill();x.stroke();
+ // Canopy — fluffy cartoon clouds with gradient + outline
+ const cg=x.createRadialGradient(22,18,2,22,20,20);
+ cg.addColorStop(0,'#40a040');cg.addColorStop(0.5,'#2a7a2a');cg.addColorStop(1,'#185018');
+ x.fillStyle=cg;x.strokeStyle='#0a3a0a';x.lineWidth=2;
+ // Main canopy blob
+ x.beginPath();
+ x.arc(22,18,18,0,Math.PI*2);x.fill();x.stroke();
+ // Sub-blobs for fluffy shape
+ x.fillStyle='#2a7a2a';x.strokeStyle='#0a3a0a';x.lineWidth=1.5;
+ x.beginPath();x.arc(12,20,10,0,Math.PI*2);x.fill();x.stroke();
+ x.beginPath();x.arc(32,22,9,0,Math.PI*2);x.fill();x.stroke();
+ x.beginPath();x.arc(16,10,9,0,Math.PI*2);x.fill();x.stroke();
+ x.beginPath();x.arc(28,12,8,0,Math.PI*2);x.fill();x.stroke();
+ // Highlights (light blobs on top)
+ x.fillStyle='#4aaa4a';
+ x.beginPath();x.arc(17,9,5,0,Math.PI*2);x.fill();
+ x.beginPath();x.arc(26,11,4,0,Math.PI*2);x.fill();
+ x.fillStyle='#60c060';
+ x.beginPath();x.arc(16,8,2.5,0,Math.PI*2);x.fill();
+ x.beginPath();x.arc(25,10,2,0,Math.PI*2);x.fill();
  scene.textures.addCanvas('tree',c);
 }
 // ── WOLF billboard (24×18 navy sign on a wooden pole) ──
-// ── WOLF billboard (64×56 — navy sign with big WOLF text on wooden frame) ──
+// ── WOLF billboard (80×64 cartoon style — rounded navy sign with outlined text) ──
 function genBillboardWolfTex(scene){
- const c=document.createElement('canvas');c.width=64;c.height=56;
+ const c=document.createElement('canvas');c.width=80;c.height=64;
  const x=c.getContext('2d');
- // Two wooden poles
- x.fillStyle='#5a3a1a';x.fillRect(14,32,3,24);x.fillRect(47,32,3,24);
- x.fillStyle='#7a5a2a';x.fillRect(14,32,1,24);x.fillRect(47,32,1,24);
- x.fillStyle='rgba(0,0,0,.3)';x.fillRect(10,54,44,2);
- // Sign board — gold outer frame, navy fill
- x.fillStyle='#FFD700';x.fillRect(2,2,60,32);
- x.fillStyle='#0a1a3a';x.fillRect(4,4,56,28);
- x.fillStyle='#1a3a6a';x.fillRect(5,5,54,26);
- // "WOLF" in big bold pixel letters (each ~10px wide, 12px tall)
- x.fillStyle='#ffffff';
- const ly=9,lh=12;
- // W
- x.fillRect(7,ly,2,lh);x.fillRect(9,ly+lh-2,2,2);x.fillRect(11,ly+lh-4,2,2);x.fillRect(13,ly+lh-2,2,2);x.fillRect(15,ly,2,lh);
- // O
- x.fillRect(19,ly,2,lh);x.fillRect(27,ly,2,lh);x.fillRect(21,ly,6,2);x.fillRect(21,ly+lh-2,6,2);
- // L
- x.fillRect(31,ly,2,lh);x.fillRect(33,ly+lh-2,8,2);
- // F
- x.fillRect(43,ly,2,lh);x.fillRect(45,ly,8,2);x.fillRect(45,ly+5,6,2);
- // "LUBRICANTS" text below in smaller dots
- x.fillStyle='#8090c0';x.font='5px sans-serif';x.fillText('LUBRICANTS',12,28);
- // Edge highlight
- x.fillStyle='#FFD700';x.fillRect(2,2,60,1);x.fillRect(2,33,60,1);
+ x.lineCap='round';x.lineJoin='round';
+ // Two wooden poles (round tops)
+ x.fillStyle='#6a4a2a';x.strokeStyle='#3a2a10';x.lineWidth=1.5;
+ x.beginPath();x.roundRect(16,36,4,26,2);x.fill();x.stroke();
+ x.beginPath();x.roundRect(60,36,4,26,2);x.fill();x.stroke();
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(40,63,28,2.5,0,0,Math.PI*2);x.fill();
+ // Sign board — rounded rect with gold border
+ x.fillStyle='#FFD700';x.strokeStyle='#b89800';x.lineWidth=2;
+ x.beginPath();x.roundRect(4,2,72,36,6);x.fill();x.stroke();
+ // Inner navy fill
+ const bg=x.createLinearGradient(0,4,0,36);bg.addColorStop(0,'#1a4a8a');bg.addColorStop(1,'#0a1a3a');
+ x.fillStyle=bg;
+ x.beginPath();x.roundRect(7,5,66,30,4);x.fill();
+ // "WOLF" — big bold white text with shadow
+ x.textAlign='center';x.textBaseline='middle';
+ x.font='bold 18px sans-serif';
+ x.fillStyle='#000';x.fillText('WOLF',41,17);
+ x.fillStyle='#ffffff';x.fillText('WOLF',40,16);
+ // "LUBRICANTS" below
+ x.font='bold 7px sans-serif';
+ x.fillStyle='#000';x.fillText('LUBRICANTS',41,29);
+ x.fillStyle='#8ab0e0';x.fillText('LUBRICANTS',40,28);
  scene.textures.addCanvas('billboard_wolf',c);
 }
-// ── CHAMPION billboard (64×56 — red sign with big CHAMPION text) ──
+// ── CHAMPION billboard (80×64 cartoon style — rounded red sign) ──
 function genBillboardChampTex(scene){
- const c=document.createElement('canvas');c.width=64;c.height=56;
+ const c=document.createElement('canvas');c.width=80;c.height=64;
  const x=c.getContext('2d');
+ x.lineCap='round';x.lineJoin='round';
  // Two wooden poles
- x.fillStyle='#5a3a1a';x.fillRect(14,32,3,24);x.fillRect(47,32,3,24);
- x.fillStyle='#7a5a2a';x.fillRect(14,32,1,24);x.fillRect(47,32,1,24);
- x.fillStyle='rgba(0,0,0,.3)';x.fillRect(10,54,44,2);
- // Sign board — white outer frame, red fill
- x.fillStyle='#ffffff';x.fillRect(2,2,60,32);
- x.fillStyle='#b01010';x.fillRect(4,4,56,28);
- x.fillStyle='#d02020';x.fillRect(5,5,54,26);
- // "CHAMPION" using ctx.fillText for readability
- x.fillStyle='#ffffff';x.font='bold 10px sans-serif';x.textAlign='center';
- x.fillText('CHAMPION',32,18);
+ x.fillStyle='#6a4a2a';x.strokeStyle='#3a2a10';x.lineWidth=1.5;
+ x.beginPath();x.roundRect(16,36,4,26,2);x.fill();x.stroke();
+ x.beginPath();x.roundRect(60,36,4,26,2);x.fill();x.stroke();
+ // Shadow
+ x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(40,63,28,2.5,0,0,Math.PI*2);x.fill();
+ // Sign board — white border, rounded
+ x.fillStyle='#ffffff';x.strokeStyle='#c0c0c0';x.lineWidth=2;
+ x.beginPath();x.roundRect(4,2,72,36,6);x.fill();x.stroke();
+ // Inner red fill
+ const bg=x.createLinearGradient(0,4,0,36);bg.addColorStop(0,'#e02020');bg.addColorStop(1,'#a01010');
+ x.fillStyle=bg;
+ x.beginPath();x.roundRect(7,5,66,30,4);x.fill();
+ // "CHAMPION" — big white text with shadow
+ x.textAlign='center';x.textBaseline='middle';
+ x.font='bold 13px sans-serif';
+ x.fillStyle='#000';x.fillText('CHAMPION',41,17);
+ x.fillStyle='#ffffff';x.fillText('CHAMPION',40,16);
  // "LUBRICANTS" below
- x.fillStyle='#ffcccc';x.font='5px sans-serif';
- x.fillText('LUBRICANTS',32,27);
- // Edge highlights
- x.fillStyle='#ffffff';x.fillRect(2,2,60,1);x.fillRect(2,33,60,1);
+ x.font='bold 7px sans-serif';
+ x.fillStyle='#000';x.fillText('LUBRICANTS',41,29);
+ x.fillStyle='#ffcccc';x.fillText('LUBRICANTS',40,28);
  scene.textures.addCanvas('billboard_champ',c);
 }
-// ── Oil drums (16×12 cluster: 3 barrels with brand color stripe) ──
+// ── Oil drums (cartoon style, 28×22 — 3 rounded barrels with brand stripe) ──
 function genDrumTex(scene,key,stripeC){
- const c=document.createElement('canvas');c.width=16;c.height=14;
+ const c=document.createElement('canvas');c.width=28;c.height=22;
  const x=c.getContext('2d');
- // Shadow
- x.fillStyle='rgba(0,0,0,.3)';x.fillRect(1,13,14,1);
- // 3 drum cylinders side by side
- [0,5,10].forEach(ox=>{
-  x.fillStyle='#3a3a3a';x.fillRect(ox+1,3,4,10);
-  x.fillStyle='#5a5a5a';x.fillRect(ox+1,3,4,1); // rim
-  x.fillStyle='#4a4a4a';x.fillRect(ox+1,12,4,1); // bottom
-  x.fillStyle=stripeC;x.fillRect(ox+1,6,4,3); // brand stripe
-  x.fillStyle='#6a6a6a';x.fillRect(ox+2,3,1,1); // highlight
+ x.lineCap='round';
+ x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(14,21,12,2,0,0,Math.PI*2);x.fill();
+ [0,9,18].forEach(ox=>{
+  // Barrel body (rounded rect)
+  x.fillStyle='#4a4a4a';x.strokeStyle='#1a1a1a';x.lineWidth=1;
+  x.beginPath();x.roundRect(ox+1,3,8,16,2);x.fill();x.stroke();
+  // Top rim (ellipse)
+  x.fillStyle='#5a5a5a';x.strokeStyle='#2a2a2a';x.lineWidth=0.8;
+  x.beginPath();x.ellipse(ox+5,4,3.5,1.5,0,0,Math.PI*2);x.fill();x.stroke();
+  // Brand stripe
+  x.fillStyle=stripeC;x.beginPath();x.roundRect(ox+2,8,6,5,1);x.fill();
+  // Highlight
+  x.fillStyle='rgba(255,255,255,.15)';x.fillRect(ox+2,4,2,12);
  });
  scene.textures.addCanvas(key,c);
 }
-// ── Banner pole (8×24 thin pole + triangular pennant) ──
+// ── Banner pole (cartoon style, 18×36 — rounded pole + curved pennant) ──
 function genBannerTex(scene,key,flagC){
- const c=document.createElement('canvas');c.width=12;c.height=28;
+ const c=document.createElement('canvas');c.width=18;c.height=36;
  const x=c.getContext('2d');
- // Pole
- x.fillStyle='#6a6a6a';x.fillRect(5,4,2,24);
- x.fillStyle='#8a8a8a';x.fillRect(5,4,1,24);
- // Ball finial
- x.fillStyle='#FFD700';x.fillRect(4,2,4,3);x.fillRect(5,1,2,1);
- // Triangular pennant (blowing right)
- x.fillStyle=flagC;
- x.fillRect(7,5,4,1);x.fillRect(7,6,3,1);x.fillRect(7,7,2,1);x.fillRect(7,8,1,1);
- // Small logo dot on flag
- x.fillStyle='#ffffff';x.fillRect(8,6,1,1);
+ x.lineCap='round';
  // Shadow
- x.fillStyle='rgba(0,0,0,.25)';x.fillRect(3,27,6,1);
+ x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(7,35,5,1.5,0,0,Math.PI*2);x.fill();
+ // Pole (rounded, outlined)
+ x.fillStyle='#6a6a6a';x.strokeStyle='#2a2a2a';x.lineWidth=1.2;
+ x.beginPath();x.roundRect(5,4,3,30,1.5);x.fill();x.stroke();
+ // Gold ball finial
+ x.fillStyle='#FFD700';x.strokeStyle='#a08a00';x.lineWidth=1;
+ x.beginPath();x.arc(6.5,3,2.5,0,Math.PI*2);x.fill();x.stroke();
+ // Pennant flag (curved triangle, outlined)
+ x.fillStyle=flagC;x.strokeStyle='#1a1a1a';x.lineWidth=1;
+ x.beginPath();x.moveTo(8,6);x.quadraticCurveTo(16,8,16,10);x.quadraticCurveTo(14,11,8,14);x.closePath();x.fill();x.stroke();
+ // White logo mark on flag
+ x.fillStyle='#ffffff';x.beginPath();x.arc(12,9,1.5,0,Math.PI*2);x.fill();
  scene.textures.addCanvas(key,c);
 }
-// ── Streetlight (8×28 lamp post with glow circle) ──
+// ── Streetlight (cartoon style, 24×40, rounded post + warm glow) ──
 function genLightTex(scene){
- const c=document.createElement('canvas');c.width=16;c.height=32;
+ const c=document.createElement('canvas');c.width=24;c.height=44;
  const x=c.getContext('2d');
+ x.lineCap='round';x.lineJoin='round';
  // Shadow
- x.fillStyle='rgba(0,0,0,.25)';x.fillRect(5,30,6,2);
- // Pole
- x.fillStyle='#3a3a3a';x.fillRect(7,8,2,24);
- x.fillStyle='#5a5a5a';x.fillRect(7,8,1,24);
- // Base
- x.fillStyle='#2a2a2a';x.fillRect(5,30,6,2);
- x.fillStyle='#4a4a4a';x.fillRect(5,30,6,1);
- // Lamp housing
- x.fillStyle='#2a2a2a';x.fillRect(4,4,8,5);
- x.fillStyle='#3a3a3a';x.fillRect(4,4,8,1);
+ x.fillStyle='rgba(0,0,0,.2)';x.beginPath();x.ellipse(12,42,8,2.5,0,0,Math.PI*2);x.fill();
+ // Pole (tapered, outlined)
+ x.fillStyle='#4a4a4a';x.strokeStyle='#1a1a1a';x.lineWidth=1.5;
+ x.beginPath();x.moveTo(10,40);x.lineTo(11,12);x.lineTo(13,12);x.lineTo(14,40);x.closePath();x.fill();x.stroke();
+ // Base (rounded)
+ x.fillStyle='#3a3a3a';x.strokeStyle='#1a1a1a';x.lineWidth=1;
+ x.beginPath();x.roundRect(7,39,10,4,2);x.fill();x.stroke();
+ // Lamp arm
+ x.fillStyle='#3a3a3a';x.strokeStyle='#1a1a1a';x.lineWidth=1;
+ x.beginPath();x.moveTo(12,12);x.quadraticCurveTo(16,8,17,6);x.lineTo(7,6);x.quadraticCurveTo(8,8,12,12);x.fill();x.stroke();
+ // Glow halos (warm)
+ x.fillStyle='rgba(255,230,120,.15)';x.beginPath();x.arc(12,7,14,0,Math.PI*2);x.fill();
+ x.fillStyle='rgba(255,230,120,.08)';x.beginPath();x.arc(12,7,18,0,Math.PI*2);x.fill();
+ // Lamp housing (rounded, outlined)
+ x.fillStyle='#2a2a2a';x.strokeStyle='#0a0a0a';x.lineWidth=1;
+ x.beginPath();x.roundRect(6,3,12,6,3);x.fill();x.stroke();
  // Glowing bulb
- x.fillStyle='#ffe880';x.fillRect(5,5,6,3);
- x.fillStyle='#fff8c0';x.fillRect(6,5,4,2);
- // Glow halo (radial soft)
- x.fillStyle='rgba(255,240,160,.2)';x.beginPath();x.arc(8,6,7,0,Math.PI*2);x.fill();
- x.fillStyle='rgba(255,240,160,.1)';x.beginPath();x.arc(8,6,10,0,Math.PI*2);x.fill();
- // Cap
- x.fillStyle='#1a1a1a';x.fillRect(5,3,6,2);
+ const bg=x.createRadialGradient(12,6,0,12,6,5);bg.addColorStop(0,'#fffae0');bg.addColorStop(0.4,'#ffe060');bg.addColorStop(1,'rgba(255,200,60,.2)');
+ x.fillStyle=bg;x.beginPath();x.arc(12,6,4,0,Math.PI*2);x.fill();
  scene.textures.addCanvas('streetlight',c);
 }
 // ── Parked car (reuses car texture but static, no anim) — just register alias ──
